@@ -1,0 +1,257 @@
+<resources>
+    <string name="app_name">tobot</string>
+    <string name="title_activity_base">BaseActivity</string>
+    <string name="title_activity_awaken">AwakenActivity</string>
+
+
+    <!--#########################################   网络 network #################################################################################-->
+
+    <string name="Connection_First">机器人首次使用中,还未连接网络,请下载客户端根据说明帮我连接网络</string>
+    <string name="Connection_Fail">网络连接失败,请重新连接</string>
+
+    <!--mohuaiyuan 20171220 原来的字符串-->
+    <!--<string name="Connection_Succeed">网络连接成功,小图可以陪你聊天了</string>-->
+    <!-- <string name="Connection_Start">您已启动联网模式,请帮我重新联网或长摸头三秒解除联网模式</string>-->
+
+    <string name="Connection_Wait">联网中,请稍等</string>
+    <string name="Connection_Break">糟糕!网络离家出走,快帮我联上吧</string>
+    <!--mohuaiyuan 20171220 原来的字符串-->
+    <!--<string name="Connection_Break_Hint">网络断了,小图在努力恢复中,小主人也可以长摸头帮我换个新网络</string>-->
+
+    <!--mohuaiyuan 20171220 新的字符串-->
+    <string name="Connection_Succeed">speech:联网成功，我们可以愉快的聊天了。#,#action:72#,#expression:excites#,#earLightCircle:1</string><!--表情：15-兴奋-->
+
+    <!--<string name="Connection_Start">speech:联网模式已开启，请打开手机app帮我联网吧#,#action:46#,#expression:calm#,#earLightCircle:6</string>&lt;!&ndash;表情不可用：22-尴尬&ndash;&gt;
+    -->
+    <string name="Connection_Start">speech:联网模式已开启，请打开手机app帮我联网，或摸头3秒退出联网#,#action:46#,#expression:calm#,#earLightCircle:6</string><!--表情不可用：22-尴尬-->
+
+    <!--
+    <string name="Connection_Break_Hint">speech:联网失败，请摸头3秒帮我联网！#,#action:30#,#expression:disappointed#,#earLightCircle:6</string>&lt;!&ndash;表情不可用：23-委屈可怜，已找到表情&ndash;&gt;
+    -->
+    <!--网络连接失败（此时在联网模式，联网失败）--><!--mohuaiyuan 备注：无动作-->
+    <string name="Connection_Break_Hint">speech:网络连接失败，请重新帮我联网或摸头3秒退出联网。#,#expression:disappointed#,#earLightCircle:6</string><!--表情不可用：23-委屈可怜，已找到表情-->
+
+    <string name="connect_to_the_internet">@string/Connection_Break_Hint</string>
+
+    <!--未联网 (开机后联网失败提示)-->
+    <string name="connect_network_failed_after_start_up">speech:未连接网络，请使用手机App帮我联网！#,#action:30#,#expression:disappointed#,#earLightCircle:6</string><!--表情：23-委屈可怜-->
+    <!--超过10秒还未连上网络（使用过程断网）-->
+    <string name="the_network_is_broken">speech:网络断了，请摸头3S重新帮我联网！#,#action:30#,#expression:disappointed#,#earLightCircle:6</string><!--表情：23-委屈可怜-->
+
+
+    <!--mohuaiyuan 20171220 原来的字符串-->
+    <!--<string name="Connection_Close">您已关闭联网模式</string>-->
+    <!-- <string name="Connection_Recover">网络已恢复连接</string>-->
+
+    <!--mohuaiyuan 20171220 新的字符串-->
+    <!--（联网模式，长按三秒退出联网）--><!--mohuaiyuan 备注：无表情-->
+    <string name="Connection_Close">speech:联网模式已解除。#,#action:1#,#earLightCircle:1</string>
+    <string name="Connection_Recover">@string/Connection_Succeed</string>
+
+
+    <!--##########################################################################################################################-->
+
+    <string name="Mend_Error">如果你能改正错误,我们还是好朋友</string>
+
+    <string name="voice0">小子,你再摸下试试</string>
+    <string name="voice1">嘿,小子,你再摸,小心我揍你</string>
+    <string name="voice2">能不能别老摸我</string>
+    <string name="voice3">臭小子,我已经忍你很久了</string>
+    <string name="voice4">可以跟我聊天,不要乱摸头</string>
+    <string name="voice5">小子,你摸爽了没有</string>
+    <string name="voice6">你再摸,我要发飙了</string>
+    <string name="voice7">还摸,看你的意思是想打架喽</string>
+    <string name="voice8">摸人家头是很不礼貌的</string>
+    <string name="voice9">找俺啥事</string>
+
+    <!-- &lt;!&ndash; 声音提示语句   &ndash;&gt;
+     <string name="raiseMusicVolume">好的 ，我声音大点</string>
+     <string name="lowerMusicVolume">嗯，我小声点</string>
+     <string name="minMusicVolume">已经是最小声了哦</string>
+     <string name="maxMusicVolume">已经是最大声了哦</string>-->
+
+    <!-- 音乐场景 提示语句   -->
+    <string name="noExistMusic">抱歉，这首歌我暂时不会唱，要不你换一首吧</string>
+    <string name="beforePlayMusic">即将播放</string>
+
+    <!-- 故事场景 提示语句   -->
+    <string name="noExistStory">抱歉，我暂时不会讲这个故事，要不你换一个吧</string>
+    <string name="beforePlayStory">即将播报故事</string>
+
+    <!-- 舞蹈场景 提示语句   -->
+    <string name="noExistDance">抱歉，我暂时不会这个表演，要不你换一个吧</string>
+    <string name="beforePlayDance">即将表演</string>
+
+
+    <!--#########################################   打断   #################################################################################-->
+    <!--mohuaiyuan 20171220 新的字符串-->
+    <string name="wake_up_the_callback">speech:主人，我在！#,#action:82#,#expression:nervous</string><!--表情不可用:24- 左看右看,已找到表情-->
+
+    <string-array name="onceTouchHead">
+        <item>speech:可以跟我聊天，不要乱摸头#,#action:1#,#expression:naughtys</item><!--表情：6- 调皮-->
+        <item>speech:不要一直摸人家的头，会变笨的#,#action:1#,#expression:calm</item><!--表情不可用:22-尴尬 -->
+        <item>speech:能不能别老摸我#,#action:1#,#expression:thank</item><!--表情不可用:7 含羞,已找到表情-->
+
+    </string-array>
+
+    <string-array name="doubleTouchHead">
+        <item>speech:还摸，看你的意思是想打架喽#,#action:1#,#expression:mad</item><!--表情：18 生气-->
+        <item>speech:嗨，你再摸，小心我揍你哦#,#action:1#,#expression:angry</item><!--表情不可用：12 恼怒，已找到表情-->
+
+    </string-array>
+
+
+    <!--#########################################   开机提示   #################################################################################-->
+
+    <!--mohuaiyuan 20171221 新的字符串-->
+    <string-array name="uprightBoot">
+        speech:主人，%1$s，我已联网，现在可以和我聊天了！#,#action:1#,#expression:happys#,#earLightCircle:4
+    </string-array><!--表情不可用：16-眨眼-->
+    <string-array name="nonUprightBoot">
+        speech:哎呀，终于站起来了。主人，%1$s，我已联网，现在可以和我聊天了！#,#action:21#,#expression:boring#,#earLightCircle:4
+    </string-array><!--表情不可用:29-鬼脸,已找到表情-->
+
+    <string-array name="regardsArray">
+        <item>早上好</item>
+        <item>中午好</item>
+        <item>下午好</item>
+        <item>晚上好</item>
+    </string-array>
+
+    <!--#########################################   休眠 sleep  #################################################################################-->
+    <string-array name="straightToSleep_keyWords_array">
+        <item>闭嘴</item>
+        <item>别说话</item>
+        <item>不想听你说话</item>
+        <item>能不能别说话</item>
+        <item>不要说话</item>
+        <item>安静点</item>
+    </string-array>
+    <!--mohuaiyuan 修改 20180103-->
+    <!--
+    <string name="straightToSleep_Response">speech:好的，想和我说话你可以叫“小图小图”或者摸头叫我#,#action:1#,#expression:doze#,#earLightCircle:1</string>&lt;!&ndash;表情不可用:11-睡觉,已找到表情&ndash;&gt;
+    -->
+    <string name="straightToSleep_Response">speech:我休息会，想和我说话你可以叫“小图小图”或者摸头叫我#,#action:1#,#expression:doze#,#earLightCircle:1</string><!--表情不可用:11-睡觉,已找到表情-->
+    <string name="straightToSleep_awaken">speech:主人，是不是想我了，现在可以和我聊天啦#,#action:82#,#expression:happys#,#earLightCircle:2</string><!--表情：16-开心-->
+
+    <string-array name="sitDownAndSleep_keyWorks_array">
+        <item>坐下休息</item>
+        <item>你去休息吧</item>
+        <item>休息去</item>
+    </string-array>
+    <string name="sitDownAndSleep_Response">speech:那我去休息了，你可以叫“小图小图”或者摸头叫醒我#,#action:8#,#expression:doze#,#earLightCircle:1</string><!--表情不可用：全灭-->
+    <string name="sitDownAndSleep_awaken">speech:是不是想我了，快来和我聊天吧#,#action:9#,#expression:excites#,#earLightCircle:1</string><!--表情：15-兴奋-->
+
+    <string-array name="lieDownAndSleep_keyWorks_array">
+        <item>你去睡觉吧</item>
+        <item>躺下睡觉</item>
+        <item>睡觉去</item>
+    </string-array>
+    <string name="lieDownAndSleep_Response">speech:那我去睡觉了，你可以叫“小图小图”或者摸头叫醒我#,#action:10#,#expression:doze#,#earLightCircle:0</string><!--表情不可用：全灭-->
+    <string name="lieDownAndSleep_awaken">speech:啊！我睡醒了，地板好冷，小图都快感冒了#,#action:11#,#expression:happys#,#earLightCircle:1</string><!--表情不可用：16-眨眼-->
+
+    <!--####################################    拍照 photograph    ###################################################################################-->
+    <string name="photograph_response">speech:好的，请站在我前面，摆好姿势。一二三，茄子！#,#action:39#,#earLightCircle:1</string>
+    <string name="photograph_success_response">speech:拍照成功，你可以到手机App查看照片啦！#,#action:1</string>
+
+
+    <!--####################################     音量控制    ######################################################################-->
+
+    <string-array name="volume_keyWords_array">
+        <item>声音大一点</item>
+        <item>声音小一点</item>
+        <item>声音增大一格</item>
+        <item>声音减小一格</item>
+        <item>音量大一点</item>
+        <item>音量小一点</item>
+        <item>声音大点</item>
+        <item>声音小点</item>
+        <item>音量大点</item>
+        <item>音量小点</item>
+        <item>大点声</item>
+        <item>小点声</item>
+        <item>大声点</item>
+        <item>小声点</item>
+        <item>声音加大</item>
+        <item>声音减小</item>
+        <item>音量加大</item>
+        <item>音量减小</item>
+        <item>太吵了</item>
+        <item>听不见</item>
+
+        <item>声音最大</item>
+        <item>声音最小</item>
+        <item>声音调到最大</item>
+        <item>声音调到最小</item>
+        <item>音量最大</item>
+        <item>音量最小</item>
+        <item>音量调到最大</item>
+        <item>音量调到最小</item>
+
+    </string-array>
+
+    <string-array name="raiseVolume_keyWords_array">
+
+    </string-array>
+    <string-array name="lowerVolume_keyWords_array">
+
+    </string-array>
+
+    <string name="raiseMusicVolume">speech:好的，声音已经增大一格#,#action:57#,#earLightCircle:1</string>
+    <string name="lowerMusicVolume">speech:好的，声音已经减小一格#,#action:58#,#earLightCircle:1</string>
+    <string name="minMusicVolume">speech:已经是最小声了#,#action:89#,#earLightCircle:1</string>
+    <string name="maxMusicVolume">speech:已经是最大声了#,#action:89#,#earLightCircle:1</string>
+    <string name="tuneToTheLoudest">speech:好的，已经调到最大声了</string>
+    <string name="tuneToTheSmalleseVoice">speech:好的，已经调到最小声了</string>
+
+    <!--####################################    遥控模式  ######################################################################-->
+    <string name="beginRemoteControlMode_response">speech:已进入遥控模式#,#earLightCircle:9</string>
+    <string name="endRemoteControlMode_response">speech:已退出遥控模式#,#earLightCircle:1</string>
+
+    <!--#######################################################################################################################################-->
+
+    <!--mohuaiyuan test -->
+    <string-array name="expressionArray">
+        <item>surprise</item>
+        <item>excite</item>
+        <item>happy</item>
+        <item>confident</item>
+
+        <item>relax</item>
+        <item>tired</item>
+        <item>doze</item>
+        <item>dissatisfied</item>
+
+        <!--<item>disgust</item>
+        <item>unhappy</item>
+        <item>angry</item>
+        <item>mad</item>
+
+        <item>curious</item>
+        <item>desire</item>
+        <item>expect</item>
+        <item>alert</item>
+
+        <item>boring</item>
+        <item>anxious</item>
+        <item>disappointed</item>
+        <item>depressed</item>
+
+        <item>fear</item>
+        <item>nervous</item>
+        <item>confused</item>
+        <item>calm</item>
+
+        <item>happys</item>
+        <item>naughtys</item>
+        <item>excites</item>
+        <item>thank</item>
+
+        <item>praise</item>-->
+
+    </string-array>
+
+    <string name="app_key">368b04b9925de143809fe8e0592c9101</string>
+    <string name="app_secret">5986e3dca32b626d8e4c70f73b8ded01</string>
+    <string name="package_id">com.tobot.tobot</string>
+</resources>
