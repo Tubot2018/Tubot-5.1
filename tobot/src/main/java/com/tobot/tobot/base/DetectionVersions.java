@@ -61,9 +61,9 @@ public class DetectionVersions {
                                     new TypeToken<VersionsEntity>() {
                                     }.getType());
 //                            Log.i(TAG,"版本号:"+versionsEntity.getVersionCode());
-                            if (versionsEntity.getVersionCode() > AppTools.getVersionCode(context)){
-                                new UpgradeManger(context,versionsEntity.getApk());
-                            }
+//                            if (versionsEntity.getVersionCode() > AppTools.getVersionCode(context)){
+//                                new UpgradeManger(context,versionsEntity.getApk());
+//                            }
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }

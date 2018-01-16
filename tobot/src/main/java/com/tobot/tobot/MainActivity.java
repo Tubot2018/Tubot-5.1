@@ -126,7 +126,8 @@ public class MainActivity extends BaseActivity implements ISceneV {
     private SocketThreadManager manager;
     private BFrame mBFrame;
 
-    private List<String> expressionList;
+//    private List<String> expressionList;
+    private List<String> earList;
 
 
     @Override
@@ -221,7 +222,12 @@ public class MainActivity extends BaseActivity implements ISceneV {
 //                                    }
 //                                    BFrame.isInterrupt = true;//可打断//20171226注释一直停留在打断
                                     //mohuaiyuan 20180111 原来的代码
-//                                    mBFrame.Ear(EarActionCode.EAR_MOTIONCODE_2);//发声效果
+                                    mBFrame.Ear(EarActionCode.EAR_MOTIONCODE_2);//发声效果
+                                    //mohuaiyuan 20180115 新的代码 20180115
+//                                    BFrame.Ear(6);
+//                                    Log("发声效果  灯圈 2 绿色常亮。。。");
+                                    Log("发声效果  灯圈 。。。");
+
                                     activeTimer.cancel();
                                     activeTimer = new Timer();
                                 }
@@ -240,7 +246,12 @@ public class MainActivity extends BaseActivity implements ISceneV {
 //                                BFrame.isInterrupt = false;//不可打断//20171229考虑到全局tts已自主控制,asr不在暂停
                                 String asrContent = packet.getString("arg2");
                                 //mohuaiyuan 20180111 原来的代码
-//                                mBFrame.Ear(EarActionCode.EAR_MOTIONCODE_3);//录音效果
+                                mBFrame.Ear(EarActionCode.EAR_MOTIONCODE_3);//录音效果
+                                //mohuaiyuan 20180115 新的代码 20180115
+//                                BFrame.Ear(6);
+//                                Log("录音效果  灯圈 6 橙色常亮。。。");
+//                                BFrame.Ear(8);
+                                Log("录音效果  灯圈 。。。");
 
                                 if(packet.getInt("arg1") == 4){
                                     if(asrContent.contains("没有检查到网络")) {
@@ -423,7 +434,7 @@ public class MainActivity extends BaseActivity implements ISceneV {
                                 Log("触摸--连续点击");
                                 Log.d("helloworld", "触摸--连续点击: ");
 								
-                               // onBle();
+//                                onBle();
 																
                                 //mohuaiyuan 20171228 新的代码 新增的代码
                                 exitTime = 0;
@@ -442,7 +453,7 @@ public class MainActivity extends BaseActivity implements ISceneV {
                                 BaseTTSCallback baseTTSCallback=new BaseTTSCallback(){
                                     @Override
                                     public void onCompleted() {
-//                                        TobotUtils.getIPAddress(mContext);//播报ip
+                                        TobotUtils.getIPAddress(mContext);//播报ip
                                     }
                                 };
                                 BFrame.setInterruptTTSCallback(new InterruptTTSCallback(this,baseTTSCallback));
@@ -477,6 +488,23 @@ public class MainActivity extends BaseActivity implements ISceneV {
 
                                 Demand.instance(this).stopDemand();//停止点播
 
+                                //mohuaiyuan  20180115 测试 耳朵灯圈颜色
+                               /* if (earList==null){
+                                    earList=new ArrayList<>();
+                                    String []earArray=mContext.getResources().getStringArray(R.array.earArray);
+                                    for (int i=0;i<earArray.length;i++){
+                                        earList.add(earArray[i]);
+                                    }
+                                }
+                                Random random=new Random();
+                                int index=random.nextInt(earList.size());
+                                Log.d(TAG, "index: "+index);
+                                String currentEar=earList.get(index);
+                                Log.d(TAG, "currentEar: "+currentEar);
+                                BFrame.TTS("当前的灯圈颜色是 ："+currentEar);
+                                BFrame.Ear(Integer.valueOf(currentEar));
+                                earList.remove(index);*/
+
                                 //mohuaiyuan 20180104 测试 获取音量
                                // AudioUtils audioUtils=new AudioUtils(mContext);
                                // int currentVolume=audioUtils.getCurrentVolume();
@@ -488,7 +516,7 @@ public class MainActivity extends BaseActivity implements ISceneV {
                                
 
                                //mohuaiyuan  20171225 测试 表情 序号
-    /*                            if (expressionList==null){
+                               /* if (expressionList==null){
                                     expressionList=new ArrayList<>();
                                     String []expressionArray=mContext.getResources().getStringArray(R.array.expressionArray);
                                     for (int i=0;i<expressionArray.length;i++){

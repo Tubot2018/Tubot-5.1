@@ -581,6 +581,13 @@ public class BFrame implements IFrame {
         motor.doAction(Action.buildEarAction(code, brightness, pleasantness), new SimpleFrameCallback());
     }
 
+    /**
+     * 下发耳部灯圈
+     * @param code
+     * @param brightness
+     * @param pleasantness
+     * @param iMotorCallback
+     */
     public static void EarWithCallback(int code,int brightness,int pleasantness,IMotorCallback iMotorCallback) {
         motor.doAction(Action.buildEarAction(code, brightness, pleasantness), iMotorCallback);
 

@@ -36,12 +36,14 @@ public class VolumeControl implements VolumeControlBehavior {
     public static final int VOLUME_COPIES=10;
 
 
-
-    private static final String REG_RAISE_VOLUME="(?<!最)大|太吵了";
-    private static final String REG_LOWER_VOLUME="(?<!最)小|听不见";
+    //mohuaiyuan 20180116 原来的代码
+//    private static final String REG_RAISE_VOLUME="(?<!最)大|听不见";
+    //mohuaiyuan 20180116 新的代码 20180116
+    private static final String REG_RAISE_VOLUME="((?<!(最|多))大|听不见)";
+    private static final String REG_LOWER_VOLUME="(?<!最)小|太吵了";
     private static final String REG_TUNE_TO_THE_LOUDEST="最大";
     private static final String REG_TUNE_TO_THE_SMALLEST_VOICE="最小";
-    private static final String REG_GET_CURRENT_VOLUME="音量|声音";
+//    private static final String REG_GET_CURRENT_VOLUME="音量|声音";
     private static final String REG_ADJUST_THE_VOLUME="((声音|音量)调到([一二三四五六七八九十]|(10|[1-9]))\\b)";
     //mohuaiyuan 20180112 新的代码 20180112
 //    private static final String REG_ADJUST_THE_VOLUME="((声音|音量)(调|调整|增加|增大|减少|加大|减小)到([一二三四五六七八九十]|(10|[1-9]))\\b)";
@@ -199,7 +201,21 @@ public class VolumeControl implements VolumeControlBehavior {
 
     private void getCurrentVolume() {
         Log.d(TAG, "getCurrentVolume: ");
-        getCurrentVolumeResponse();
+//        getCurrentVolumeResponse();
+        //mohuaiyuan  20180116 测试
+        int currentVolumeLevel=audioUtils.getCurrentVolume();
+        int minVolumeLevel=audioUtils.getMinVolume();
+        double volumeSpace=audioUtils.getVolumeSpace();
+
+        Log.d(TAG, "currentVolumeLevel: "+currentVolumeLevel);
+        Log.d(TAG, "minVolumeLevel: "+minVolumeLevel);
+        Log.d(TAG, "volumeSpace: "+volumeSpace);
+
+        double countOriginal=  (currentVolumeLevel-minVolumeLevel)/volumeSpace;
+        int currentCount= (int) Math.round(countOriginal);
+        currentCount++;
+        getCurrentVolumeResponse(currentCount);
+
     }
 
     private void tuneToMinVolume() {
@@ -451,11 +467,24 @@ public class VolumeControl implements VolumeControlBehavior {
         }
     }
 
+    //mohuaiyuan  20180116 测试
+    private void getCurrentVolumeResponse(int currentVolume ){
+        Log.d(TAG, "getCurrentVolumeResponse: ");
+        String speech=BFrame.getString(R.string.getCurrentVolume,String.valueOf(currentVolume));
+        try {
+            BFrame.response(speech);
+        } catch (Exception e) {
+            Log.e(TAG, "获取 当前音量 反馈 出现Exception e: "+e.getMessage());
+            e.printStackTrace();
+        }
+
+    }
+
     //mohuaiyuan  20180108 测试
     private void getCurrentVolumeResponse(){
         Log.d(TAG, "getCurrentVolumeResponse: ");
         try {
-            BFrame.response("speech:当前的音量为："+audioUtils.getCurrentVolume());
+            BFrame.response("speech:当前音量为："+audioUtils.getCurrentVolume());
         } catch (Exception e) {
             e.printStackTrace();
         }

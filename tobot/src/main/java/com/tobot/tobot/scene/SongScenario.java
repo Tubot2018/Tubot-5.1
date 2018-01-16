@@ -10,6 +10,7 @@ import android.util.Log;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+import com.tobot.tobot.Listener.SimpleFrameCallback;
 import com.tobot.tobot.R;
 import com.tobot.tobot.control.Demand;
 import com.tobot.tobot.control.demand.DemandUtils;
@@ -26,6 +27,7 @@ import com.tobot.tobot.utils.TobotUtils;
 import com.turing123.robotframe.function.tts.ITTSCallback;
 import com.turing123.robotframe.function.tts.TTS;
 import com.turing123.robotframe.multimodal.Behavior;
+import com.turing123.robotframe.multimodal.action.Action;
 import com.turing123.robotframe.scenario.IScenario;
 import com.turing123.robotframe.scenario.ScenarioManager;
 import com.turing123.robotframe.scenario.ScenarioRuntimeConfig;
@@ -958,9 +960,7 @@ public class SongScenario implements IScenario {
                         break;
                     }
                     if (isWithAction) {
-//                        manager.doAction(action, null);
-                        //mohuaiyuan 20180112 新的代码 20180112
-                        BFrame.Ear(6);
+                        manager.doAction(action, null);
                     } else {
                         break;
                     }
