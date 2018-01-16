@@ -75,11 +75,7 @@ public class StraightToSleep  implements IDormant ,DormantBehavior,AwakenBehavio
                 Log.d(TAG, "process var1 : "+var1);
                 //4.1.1. 本示例中，当喊关键词中配置的词时将使机器人进入睡眠状态
                 //注意： 若要唤醒机器人，可调用wakeup,或者使用语言唤醒词唤醒。
-                mISceneV.getDormant(false);
-//                mRobotFrameManager = (RobotFrameManager) mISceneV.setInfluence(); //20171211-previous code
-//                mRobotFrameManager.sleep();
-//                //5.2 命令执行完成后需明确告诉框架，命令处理结束，否则无法继续进行主对话流程。
-//                this.localCommandComplete.onComplete();
+
                 dormant();
                 //设置休眠类型
                 DormantManager.setType(DormantManager.DORMANT_TYPE_STRAIGHT_TO_SLEEP);

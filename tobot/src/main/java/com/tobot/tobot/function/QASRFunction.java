@@ -18,6 +18,7 @@ import com.tobot.tobot.base.Constants;
 import com.tobot.tobot.base.Frequency;
 import com.tobot.tobot.base.TobotApplication;
 import com.tobot.tobot.db.bean.AnswerDBManager;
+import com.tobot.tobot.entity.AngleEntity;
 import com.tobot.tobot.entity.QASREntity;
 import com.tobot.tobot.presenter.BRealize.BFrame;
 import com.tobot.tobot.utils.TobotUtils;
@@ -30,17 +31,21 @@ import com.turing123.robotframe.function.asr.IASRFunction;
 import com.turing123.robotframe.function.tts.TTS;
 import com.turing123.robotframe.internal.function.asr.IFrameASRCallback;
 import com.turing123.robotframe.internal.function.asr.IFrameASRHotWordUploadCallback;
+import com.turing123.robotframe.multimodal.action.Action;
+import com.turing123.robotframe.multimodal.action.BodyActionCode;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.turing123.robotframe.multimodal.action.Action.PRMTYPE_ANGLES;
 
 /**
  * Created by Javen on 2017/10/31.
  */
 
 public class QASRFunction implements IASRFunction {
+	
 //    private static final String TAG = "IDormant";
     private static final String TAG = "Javen QASRFunction";
     private static final String TAG1 = "QASRFunction";
@@ -55,6 +60,7 @@ public class QASRFunction implements IASRFunction {
     private FunctionState state;
     private String ASR;
     private QASREntity mQASREntity;
+    private AngleEntity angleEntity;
     private Gson gson = new Gson();
     private static QEngine asrEngine;
     private MainActivity mainActivity;
@@ -224,6 +230,7 @@ public class QASRFunction implements IASRFunction {
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
+						
                     }else{
                         BFrame.Wakeup();
                     }
@@ -231,6 +238,9 @@ public class QASRFunction implements IASRFunction {
                 case QModule.QVOICE_AEC_DIRECTION:// 唤醒方位角回调
                     String direction = new String(data);
                     Log.d(TAG, "唤醒方位角回调:" + direction + "\n");
+                    angleEntity = gson.fromJson(direction, AngleEntity.class);
+                    Log.d(TAG, "唤醒方位角:" + angleEntity.getTheta());
+                    BFrame.motion(BodyActionCode.ACTION_20,PRMTYPE_ANGLES,angleEntity.getTheta());
                     break;
 //                case QModule.QVOICE_ASR_RESULT://识别结果
 //                    Log.d(TAG, "识别结果:" + new String(data));
@@ -243,7 +253,7 @@ public class QASRFunction implements IASRFunction {
 //                    if (TobotUtils.isNotEmpty(iFrameASRCallback)) {
 //                        iFrameASRCallback.onResults(list);
 //                    }
-//                    Log.d(TAG, "识别结果asr result:" +mQASREntity.getRec().replaceAll("\\s*", ""));
+//                    Log.d(TAG, "识别结果asr result:" +mQASREntity.getRec().replaceAll("\\s*", ""));E
 //                    break;
 
                 default:
@@ -274,18 +284,20 @@ public class QASRFunction implements IASRFunction {
                     discernASR = mQASREntity.getRec().replaceAll("\\s*", "");
                     Log.d(TAG, "discernASR=======>: " + discernASR);
                     if (TobotUtils.isAwaken(discernASR)) {
-                        BFrame.Interrupt();
-                        //mohuaiyuan 20180108 原来的代码
-//                        BFrame.TTS("我在");
-                        //mohuaiyuan 20180108 新的代码 20180108
-                        try {
-                            BFrame.response(R.string.wake_up_the_callback);
-                        } catch (Exception e) {
-                            Log.e(TAG, "tts 主人，我在！反馈 出现 Exception e: "+e.getMessage());
-                            e.printStackTrace();
+						
+                        if (BFrame.robotState) {
+                            BFrame.Interrupt();							
+							//mohuaiyuan 20180108 新的代码 20180108
+							try {
+								BFrame.response(R.string.wake_up_the_callback);
+							} catch (Exception e) {
+								Log.e(TAG, "tts 主人，我在！反馈 出现 Exception e: "+e.getMessage());
+								e.printStackTrace();
+							}
+                        }else{
+                            BFrame.Wakeup();
                         }
-
-                        Log.i(TAG, "prevent and isInterrupt:" + BFrame.prevent+":"+BFrame.isInterrupt);
+                        Log.i(TAG, "prevent and isInterrupt:" + BFrame.prevent + ":" + BFrame.isInterrupt);
                     } else {
                     Log.i(TAG,"BFrame.prevent:"+BFrame.prevent);
                     if (!BFrame.prevent) {
@@ -300,7 +312,7 @@ public class QASRFunction implements IASRFunction {
                         //图灵语意
                         list.add(discernASR);
 //                        if (TobotUtils.isNotEmpty(iFrameASRCallback)) {
-                        iFrameASRCallback.onResults(list);
+                            iFrameASRCallback.onResults(list);
 //                        }
                     }
                 }
@@ -309,6 +321,7 @@ public class QASRFunction implements IASRFunction {
                 default:
                     break;
             }
+			
             //mohuaiyuan 20180108 原来的代码  录音
 //            deleteFile(new File(Constants.QVOICE_MIC));
             super.handleMessage(msg);
@@ -354,7 +367,6 @@ public class QASRFunction implements IASRFunction {
             });
         }
     }
-
 
     public static void close(){
         Log.i(TAG,"关闭引擎");

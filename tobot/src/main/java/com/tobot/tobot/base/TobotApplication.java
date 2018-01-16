@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
 
+import com.qdreamer.qvoice.QModule;
 import com.tobot.tobot.MainActivity;
 import com.tobot.tobot.db.bean.MemoryDBManager;
 import com.tobot.tobot.db.bean.UserDBManager;

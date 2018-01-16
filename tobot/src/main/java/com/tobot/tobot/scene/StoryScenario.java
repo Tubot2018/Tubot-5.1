@@ -15,6 +15,9 @@ import com.tobot.tobot.control.demand.DemandUtils;
 import com.tobot.tobot.entity.DetailsEntity;
 import com.tobot.tobot.entity.SongEntity;
 import com.tobot.tobot.entity.StoryEntity;
+import com.tobot.tobot.presenter.BRealize.BFrame;
+import com.tobot.tobot.presenter.BRealize.BaseTTSCallback;
+import com.tobot.tobot.presenter.BRealize.InterruptTTSCallback;
 import com.tobot.tobot.presenter.BRealize.VolumeControl;
 import com.tobot.tobot.presenter.ICommon.ISceneV;
 import com.tobot.tobot.utils.AudioUtils;
@@ -585,7 +588,16 @@ public class StoryScenario implements IScenario {
             Log.d(TAG, "url: " + url);
             executeSong(url);
         } catch (IOException e) {
-            tts.speak(manager.getString(R.string.noExistStory));
+            //mohuaiyuan 20180111 原来的代码
+//            tts.speak(manager.getString(R.string.noExistStory));
+            //mohuaiyuan 20180111 新的代码 20180111
+            try {
+                BFrame.response(R.string.noExistStory);
+            } catch (Exception e1) {
+                Log.e(TAG, "播放喜马拉雅的资源 出现 Exception e1: "+e1.getMessage() );
+                e1.printStackTrace();
+            }
+
             e.printStackTrace();
         }
     }
@@ -626,7 +638,11 @@ public class StoryScenario implements IScenario {
                 //退出当前场景
                 Log.d(TAG, "退出当前场景4756: ");
                 //mohuaiyuan 20170925 调用onexit方法
-                tts.speak(manager.getString(R.string.noExistStory));
+                //mohuaiyuan 20180111 原来的代码
+//                tts.speak(manager.getString(R.string.noExistStory));
+                //mohuaiyuan 20180111 新的代码 20180111
+                BFrame.response(R.string.noExistStory);
+
                 onExit();
             }
         } catch (Exception e) {
@@ -635,7 +651,16 @@ public class StoryScenario implements IScenario {
             //退出当前场景
             Log.d(TAG, "退出当前场景9395: ");
             //mohuaiyuan 20170925 调用onexit方法
-            tts.speak(manager.getString(R.string.noExistStory));
+            //mohuaiyuan 20180111 原来的代码
+//            tts.speak(manager.getString(R.string.noExistStory));
+            //mohuaiyuan 20180111 新的代码 20180111
+            try {
+                BFrame.response(R.string.noExistStory);
+            } catch (Exception e1) {
+                Log.e(TAG, "noExistStory 出现 Exception e1: "+e1.getMessage() );
+                e1.printStackTrace();
+            }
+
             onExit();
         }
 //        }
@@ -651,47 +676,81 @@ public class StoryScenario implements IScenario {
 
                 //mohuaiyuan 增加语音播报 20171207
                 Log.d(TAG, "storyName: "+storyName);
-                String speech=manager.getString(R.string.beforePlayStory)+":"+storyName;
-                tts.speak(speech, new ITTSCallback() {
-                    @Override
-                    public void onStart(String s) {
-                        Log.d(TAG, "tts onStart: ");
+                //mohuaiyuan 20180111 原来的代码
+//                String speech=manager.getString(R.string.beforePlayStory)+":"+storyName;
+//                tts.speak(speech, new ITTSCallback() {
+//                    @Override
+//                    public void onStart(String s) {
+//                        Log.d(TAG, "tts onStart: ");
+//
+//                    }
+//
+//                    @Override
+//                    public void onPaused() {
+//                        Log.d(TAG, "tts onPaused: ");
+//
+//                    }
+//
+//                    @Override
+//                    public void onResumed() {
+//                        Log.d(TAG, "tts onResumed: ");
+//
+//                    }
+//
+//                    @Override
+//                    public void onCompleted() {
+//                        Log.d(TAG, "tts onCompleted: ");
+//                        //开始播放音频
+//                        try{
+//                            getMediaPlayer().start();
+//                            songDuration = getMediaPlayer().getDuration();
+//                            Log.d(TAG, "duration: " + songDuration);
+//                            if (isWithAction) {
+//                                doAction();
+//                            }
+//                        }catch (NullPointerException e){
+//
+//                        }
+//                    }
+//
+//                    @Override
+//                    public void onError(String s) {
+//                        Log.d(TAG, "tts onError: ");
+//                    }
+//                });
+                //mohuaiyuan 20180111 新的代码 20180111
+                String speech=manager.getString(R.string.beforePlayStory,storyName);
+                Map<String,String> map=null;
+                try {
+                    map= BFrame.getString(speech);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
 
-                    }
-
-                    @Override
-                    public void onPaused() {
-                        Log.d(TAG, "tts onPaused: ");
-
-                    }
-
-                    @Override
-                    public void onResumed() {
-                        Log.d(TAG, "tts onResumed: ");
-
-                    }
-
+                BaseTTSCallback baseTTSCallback=new BaseTTSCallback(){
                     @Override
                     public void onCompleted() {
-                        Log.d(TAG, "tts onCompleted: ");
-                        //开始播放音频
+                        //开始播放故事
                         try{
                             getMediaPlayer().start();
-                            songDuration = getMediaPlayer().getDuration();
-                            Log.d(TAG, "duration: " + songDuration);
-                            if (isWithAction) {
+                            songDuration=getMediaPlayer().getDuration();
+                            Log.d(TAG, "duration: "+songDuration);
+                            if (isWithAction){
                                 doAction();
                             }
-                        }catch (NullPointerException e){
-
+                        }catch (Exception e){
+                            Log.e(TAG, "开始播放故事 出现 Exception e: "+e.getMessage() );
                         }
-                    }
 
-                    @Override
-                    public void onError(String s) {
-                        Log.d(TAG, "tts onError: ");
                     }
-                });
+                };
+                BFrame.setInterruptTTSCallback(new InterruptTTSCallback(BFrame.main,baseTTSCallback));
+
+                try {
+                    BFrame.responseWithCallback(map);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
 
 
             }
@@ -831,7 +890,10 @@ public class StoryScenario implements IScenario {
 
                     int index = random.nextInt(keyLists.size());
                     int action = keyLists.get(index);
-                    sleepTime = musicActionMaps.get(action);
+                    //mohuaiyuan 20180111 原来的代码
+//                    sleepTime = musicActionMaps.get(action);
+                    //mohuaiyuan  20180111 测试
+                    sleepTime = musicActionMaps.get(action)+3*1000;
                     currentTimeSum += sleepTime;
                     Log.d(TAG, "action: " + action);
                     Log.d(TAG, "sleepTime: " + sleepTime);

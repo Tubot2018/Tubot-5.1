@@ -15,6 +15,9 @@ import com.tobot.tobot.control.Demand;
 import com.tobot.tobot.control.demand.DemandUtils;
 import com.tobot.tobot.entity.DetailsEntity;
 import com.tobot.tobot.entity.SongEntity;
+import com.tobot.tobot.presenter.BRealize.BFrame;
+import com.tobot.tobot.presenter.BRealize.BaseTTSCallback;
+import com.tobot.tobot.presenter.BRealize.InterruptTTSCallback;
 import com.tobot.tobot.presenter.BRealize.VolumeControl;
 import com.tobot.tobot.presenter.ICommon.ISceneV;
 import com.tobot.tobot.utils.AudioUtils;
@@ -685,7 +688,11 @@ public class SongScenario implements IScenario {
                     //退出当前场景
                     Log.d(TAG, "退出当前场景4756: ");
                     //mohuaiyuan 20170925 调用onexit方法
-                    tts.speak(manager.getString(R.string.noExistMusic));
+                    //mohuaiyuan 20180111 原来的代码
+//                    tts.speak(manager.getString(R.string.noExistMusic));
+                    //mohuaiyuan 20180111 新的代码 20180111
+                    BFrame.response(R.string.noExistMusic);
+
                     onExit();
                 }
             } catch (Exception e) {
@@ -694,7 +701,16 @@ public class SongScenario implements IScenario {
                 //退出当前场景
                 Log.d(TAG, "退出当前场景9395: ");
                 //mohuaiyuan 20170925 调用onexit方法
-                tts.speak(manager.getString(R.string.noExistMusic));
+                //mohuaiyuan 20180111 原来的代码
+//                tts.speak(manager.getString(R.string.noExistMusic));
+                //mohuaiyuan 20180111 新的代码 20180111
+                try {
+                    BFrame.response(R.string.noExistMusic);
+                } catch (Exception e1) {
+                    Log.e(TAG, "noExistMusic 出现 Exception e1: "+e1.getMessage() );
+                    e1.printStackTrace();
+                }
+
                 onExit();
             }
 //        }
@@ -712,30 +728,63 @@ public class SongScenario implements IScenario {
 
                 //mohuaiyuan 增加语音播报 20171207
                 Log.d(TAG, "songName: "+songName);
-                String speech=manager.getString(R.string.beforePlayMusic)+":"+songName;
-                tts.speak(speech, new ITTSCallback() {
-                    @Override
-                    public void onStart(String s) {
-                        Log.d(TAG, "tts onStart: ");
+                //mohuaiyuan 20180110 原来的代码
+//                String speech=manager.getString(R.string.beforePlayMusic)+":"+songName;
+//                tts.speak(speech, new ITTSCallback() {
+//                    @Override
+//                    public void onStart(String s) {
+//                        Log.d(TAG, "tts onStart: ");
+//
+//                    }
+//
+//                    @Override
+//                    public void onPaused() {
+//                        Log.d(TAG, "tts onPaused: ");
+//
+//                    }
+//
+//                    @Override
+//                    public void onResumed() {
+//                        Log.d(TAG, "tts onResumed: ");
+//
+//                    }
+//
+//                    @Override
+//                    public void onCompleted() {
+//                        Log.d(TAG, "tts onCompleted: ");
+//                        //开始播放音频
+//                        try{
+//                            getMediaPlayer().start();
+//                            songDuration=getMediaPlayer().getDuration();
+//                            Log.d(TAG, "duration: "+songDuration);
+//                            if (isWithAction){
+//                                doAction();
+//                            }
+//                        }catch (NullPointerException e){
+//
+//                        }
+//                    }
+//
+//                    @Override
+//                    public void onError(String s) {
+//                        Log.d(TAG, "tts onError: ");
+//
+//                    }
+//                });
 
-                    }
+                //mohuaiyuan 20180110 新的代码 20180110
+                String speech=manager.getString(R.string.beforePlayMusic,songName);
+                Map<String,String> map=null;
+                try {
+                    map=BFrame.getString(speech);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
 
-                    @Override
-                    public void onPaused() {
-                        Log.d(TAG, "tts onPaused: ");
-
-                    }
-
-                    @Override
-                    public void onResumed() {
-                        Log.d(TAG, "tts onResumed: ");
-
-                    }
-
+                BaseTTSCallback baseTTSCallback=new BaseTTSCallback(){
                     @Override
                     public void onCompleted() {
-                        Log.d(TAG, "tts onCompleted: ");
-                        //开始播放音频
+                        //开始播放音乐
                         try{
                             getMediaPlayer().start();
                             songDuration=getMediaPlayer().getDuration();
@@ -743,17 +792,19 @@ public class SongScenario implements IScenario {
                             if (isWithAction){
                                 doAction();
                             }
-                        }catch (NullPointerException e){
-
+                        }catch (Exception e){
+                            Log.e(TAG, "开始播放音乐 出现 Exception e: "+e.getMessage() );
                         }
-                    }
-
-                    @Override
-                    public void onError(String s) {
-                        Log.d(TAG, "tts onError: ");
 
                     }
-                });
+                };
+                BFrame.setInterruptTTSCallback(new InterruptTTSCallback(BFrame.main,baseTTSCallback));
+
+                try {
+                    BFrame.responseWithCallback(map);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
 
 
             }
@@ -893,7 +944,10 @@ public class SongScenario implements IScenario {
 
                     int index = random.nextInt(keyLists.size());
                     int action = keyLists.get(index);
-                    sleepTime = musicActionMaps.get(action);
+                    //mohuaiyuan 20180111 原来的代码
+//                    sleepTime = musicActionMaps.get(action);
+                    //mohuaiyuan  20180111 测试
+                    sleepTime = musicActionMaps.get(action)+3*1000;
                     currentTimeSum += sleepTime;
                     Log.d(TAG, "action: " + action);
                     Log.d(TAG, "sleepTime: " + sleepTime);
@@ -904,7 +958,9 @@ public class SongScenario implements IScenario {
                         break;
                     }
                     if (isWithAction) {
-                        manager.doAction(action, null);
+//                        manager.doAction(action, null);
+                        //mohuaiyuan 20180112 新的代码 20180112
+                        BFrame.Ear(6);
                     } else {
                         break;
                     }

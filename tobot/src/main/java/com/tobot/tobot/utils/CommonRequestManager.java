@@ -87,9 +87,10 @@ public class CommonRequestManager {
      */
     public void initXimalaya() {
         Log.d(TAG, "initXimalaya: ");
-        mAppSecret = mContext.getResources().getString(R.string.app_secret);
-        init(mContext,mAppSecret);
-        setDefaultPagesize(defaultPageCount);
+        //mohuaiyuan 20180112 原来的代码
+//        mAppSecret = mContext.getResources().getString(R.string.app_secret);
+//        init(mContext,mAppSecret);
+//        setDefaultPagesize(defaultPageCount);
 
     }
 
@@ -785,11 +786,17 @@ public class CommonRequestManager {
         if (motor==null){
             motor = new Motor(mContext, new CustomScenario(mContext));
         }
-        motor.doAction(Action.buildBodyAction(action, Action.PRMTYPE_EXECUTION_TIMES, 1), simpleFrameCallback);
+//        motor.doAction(Action.buildBodyAction(action, Action.PRMTYPE_EXECUTION_TIMES, 1), simpleFrameCallback);
+        BFrame.motion(action);
     }
 
     public String getString(int id){
         String string=mContext.getResources().getString(id);
+        return string;
+    }
+
+    public String getString(int id ,Object... formatAars){
+        String string=mContext.getResources().getString(id,formatAars);
         return string;
     }
 

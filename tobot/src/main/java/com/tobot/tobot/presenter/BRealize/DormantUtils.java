@@ -57,6 +57,7 @@ public class DormantUtils {
         }
         Log.d(TAG, "准备进行唤醒。。。: ");
         Log.d(TAG, "awakenBehavior==null: "+(awakenBehavior==null));
+		
         if (awakenBehavior!=null){
             awakenBehavior.awaken();
         }

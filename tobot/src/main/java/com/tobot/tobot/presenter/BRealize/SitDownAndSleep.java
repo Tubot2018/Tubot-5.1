@@ -62,11 +62,7 @@ public class SitDownAndSleep implements IDormant ,DormantBehavior,AwakenBehavior
             protected void process(String name, String s) {
                 //4.1.1. 本示例中，当喊关键词中配置的词时将使机器人进入睡眠状态
                 //注意： 若要唤醒机器人，可调用wakeup,或者使用语言唤醒词唤醒。
-                mISceneV.getDormant(false);
-//                mRobotFrameManager = (RobotFrameManager) mISceneV.setInfluence(); //20171211-previous code
-//                mRobotFrameManager.sleep();
-//                //5.2 命令执行完成后需明确告诉框架，命令处理结束，否则无法继续进行主对话流程。
-//                this.localCommandComplete.onComplete();
+
                 dormant();
                 //设置休眠类型
                 DormantManager.setType(DormantManager.DORMANT_TYPE_SIT_DOWN_AND_SLEEP);

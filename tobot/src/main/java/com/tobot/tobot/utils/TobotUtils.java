@@ -185,7 +185,8 @@ public class TobotUtils {
         if (discernASR.contains("小猪小猪") || discernASR.contains("小图小图") || discernASR.contains("小偷小偷")
                 || discernASR.contains("晓彤晓彤") || discernASR.contains("小兔小兔") || discernASR.contains("下图下图")
                 || discernASR.contains("海豚海豚") || discernASR.contains("插头插头") || discernASR.contains("呷哺呷哺")
-                || discernASR.contains("下途下途")){
+                || discernASR.contains("下途下途") || discernASR.contains("下毒下毒") || discernASR.contains("小彭小彭")
+                || discernASR.contains("消毒消毒")){
             return true;
         }else{
             return false;
@@ -478,7 +479,6 @@ public class TobotUtils {
                                 } catch (Exception e) {
                                     e.printStackTrace();
                                 }
-
                                 return inetAddress.getHostAddress();
                             }
                         }

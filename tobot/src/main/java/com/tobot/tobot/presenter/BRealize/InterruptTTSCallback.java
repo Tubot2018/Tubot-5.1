@@ -28,49 +28,54 @@ public class InterruptTTSCallback extends BaseTTSCallback {
     public void onStart(String s) {
         Log.i(TAG ,"开始语音播报TTS:"+s);
 
+        BFrame.ittsCallback.onStart(s);
+
         if (mBaseTTSCallback!=null){
             mBaseTTSCallback.onStart(s);
         }
-        BFrame.ittsCallback.onStart(s);
 
     }
 
     @Override
     public void onPaused() {
 
+        BFrame.ittsCallback.onPaused();
+
         if (mBaseTTSCallback!=null){
             mBaseTTSCallback.onPaused();
         }
-        BFrame.ittsCallback.onPaused();
 
     }
 
     @Override
     public void onResumed() {
 
+        BFrame.ittsCallback.onResumed();
+
         if (mBaseTTSCallback!=null){
             mBaseTTSCallback.onResumed();
         }
-        BFrame.ittsCallback.onResumed();
 
     }
 
     @Override
     public void onCompleted() {
 
+        BFrame.ittsCallback.onCompleted();
+
         if (mBaseTTSCallback!=null){
             mBaseTTSCallback.onCompleted();
         }
-        BFrame.ittsCallback.onCompleted();
     }
 
     @Override
     public void onError(String s) {
         Log.i(TAG ,"TTS错误"+s);
 
+        BFrame.ittsCallback.onError(s);
+
         if (mBaseTTSCallback!=null){
             mBaseTTSCallback.onError(s);
         }
-        BFrame.ittsCallback.onError(s);
     }
 }

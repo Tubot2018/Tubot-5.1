@@ -111,7 +111,7 @@
 
     <!--#########################################   打断   #################################################################################-->
     <!--mohuaiyuan 20171220 新的字符串-->
-    <string name="wake_up_the_callback">speech:主人，我在！#,#action:82#,#expression:nervous</string><!--表情不可用:24- 左看右看,已找到表情-->
+    <string name="wake_up_the_callback">speech:主人，我在！#,#expression:nervous</string><!--表情不可用:24- 左看右看,已找到表情-->
 
     <string-array name="onceTouchHead">
         <item>speech:可以跟我聊天，不要乱摸头#,#action:1#,#expression:naughtys</item><!--表情：6- 调皮-->
@@ -221,10 +221,12 @@
         <item>音量最小</item>
         <item>音量调到最大</item>
         <item>音量调到最小</item>
+        <item>声音调到</item>
+        <item>音量调到</item>
 
         //mohuaiyuan  20180108 测试
-        <item>音量</item>
-        <item>声音</item>
+      <!--  <item>音量</item>
+        <item>声音</item>-->
 
     </string-array>
 
@@ -235,12 +237,12 @@
 
     </string-array>
 
-    <string name="raiseMusicVolume">speech:好的，声音已经增大一格#,#action:57#,#earLightCircle:1</string>
-    <string name="lowerMusicVolume">speech:好的，声音已经减小一格#,#action:58#,#earLightCircle:1</string>
-    <string name="minMusicVolume">speech:已经是最小声了#,#action:89#,#earLightCircle:1</string>
-    <string name="maxMusicVolume">speech:已经是最大声了#,#action:89#,#earLightCircle:1</string>
-    <string name="tuneToTheLoudest">speech:好的，已经调到最大声了</string>
-    <string name="tuneToTheSmalleseVoice">speech:好的，已经调到最小声了</string>
+    <string name="raiseMusicVolume">speech:好的，音量已经条到%1$s #,#earLightCircle:1</string>
+    <string name="lowerMusicVolume">speech:好的，音量已经条到%1$s #,#earLightCircle:1</string>
+    <string name="minMusicVolume">speech:已经是最小声了#,#earLightCircle:1</string>
+    <string name="maxMusicVolume">speech:已经是最大声了#,#earLightCircle:1</string>
+    <string name="tuneToTheLoudest">speech:好的，已经条到最大声了</string>
+    <string name="tuneToTheSmalleseVoice">speech:好的，已经条到最小声了</string>
 
     <!--####################################    跟随 模式  ######################################################################-->
     <!--跟随模式 启动 -->

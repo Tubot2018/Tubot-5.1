@@ -132,9 +132,7 @@ public class BFrame implements IFrame {
         this.mISceneV = mISceneV;
         this.mContent = (Context) mISceneV;
         this.main = (MainActivity) mISceneV;
-//        HandlerThread thread = new HandlerThread("frame_thread");
-//        thread.start();
-//        serviceHandler = new ServiceHandler(thread.getLooper());
+        Log.e(TAG,"正常加载 onInitiate()");
         onInitiate(false);
     }
 
@@ -169,13 +167,9 @@ public class BFrame implements IFrame {
             @Override
             public void onPrepared() {
                 // 激活
-//                frameHandle.sendEmptyMessage(Constants.REPLACE_ASR);
-                mRobotFrameManager.start();
-                // 可选的控制场景
-                // mRobotFrameManager.toLostScenario();
-                // 回到默认场景
-                // mRobotFrameManager.backMainScenario();
-                frameHandle.sendEmptyMessage(Constants.START_SUCESS_MSG);
+                frameHandle.sendEmptyMessage(Constants.REPLACE_ASR);
+//                mRobotFrameManager.start();
+//                frameHandle.sendEmptyMessage(Constants.START_SUCESS_MSG);
             }
 
             @Override
@@ -202,6 +196,14 @@ public class BFrame implements IFrame {
                     main.FrameLoadFailure();
                     Log.e(TAG, "start error ⊙﹏⊙b\n" + msg.obj);
                     break;
+					
+                case Constants.REPLACE_ASR:
+                    //替换
+                    replaceFunction();
+                    mRobotFrameManager.start();
+                    frameHandle.sendEmptyMessage(Constants.START_SUCESS_MSG);
+                    break;
+					
                 case Constants.START_SUCESS_MSG:
                     Log.e(TAG, "⊙_⊙  框架加载成功");
                     mBConnect.isLoad(true);
@@ -211,8 +213,8 @@ public class BFrame implements IFrame {
                     onFunction();
                     //调度
                     onAssemble();
-                    //替换
-                    replaceFunction();
+					
+					
                     //进入次场景
                     onMinorscene();
                     //通知
@@ -463,22 +465,60 @@ public class BFrame implements IFrame {
 
     //下发动作
     public static void motion(int code) {
-        motion(code, PRMTYPE_EXECUTION_TIMES, 1, false);
+        motion1(code, PRMTYPE_EXECUTION_TIMES, 1, false);
     }
 
     public static void motion(int code, int type) {
-        motion(code, type, 1, false);
+        motion1(code, type, 1, false);
     }
 
     public static void motion(int code, int type, int value) {
-        motion(code, type, value, false);
+        motion1(code, type, value, false);
     }
 
     public static void motion(int code,boolean scene) {
-        motion(code, PRMTYPE_EXECUTION_TIMES, 1, scene);
+        motion1(code, PRMTYPE_EXECUTION_TIMES, 1, scene);
     }
 
-    private static void motion(int code, int type, int value, boolean scene) {
+//    private static void motion(int code, int type, int value, boolean scene) {
+//        int must = IsContinue();
+//        Log.w(TAG,"连续动做 must:"+must);
+//        if (scene){//场景中
+//            if (must != 0 && !TobotUtils.isReset(code)){//非正常状态
+//                TTS("没看到我现在正"+nowState(must)+"吗?你应该先让我站起来");
+//            }else if (TobotUtils.isReset(code)){
+//                Log.w(TAG,"场景中重置动作 code:"+code);
+//                outAction(resetState(code), type, value);
+//            }else if (must == 0){
+//                Log.w(TAG,"场景中正确动作 code:"+code);
+//                outAction(code, type, value);
+//            }
+//        }else {
+//            if (must != 0) {
+//                if (code != must) {
+//                    Log.w(TAG,"非场景中有记忆复位动作 must:"+must);
+//                    outAction(must, type, value);
+//                    try {
+//                        Thread.sleep(100);
+//                        Log.w(TAG,"非场景中有记忆复位后执行动作 must:"+must);
+//                        outAction(code, type, value);
+//                    } catch (InterruptedException e) {
+//                        e.printStackTrace();
+//                    }
+//                }else {
+//                    Log.w(TAG,"非场景中有记忆正确动作 code:"+code);
+//                    outAction(code, type, value);
+//                }
+//            }else {
+//                Log.w(TAG,"非场景中无记忆平常动作 code:"+code);
+//                outAction(code, type, value);
+//            }
+//        }
+//        Log.w(TAG,"是否保存动作 code:"+code);
+//        IsMemory(code);
+//    }
+
+    private static void motion1(int code, int type, int value, boolean scene) {
         int must = IsContinue();
         Log.w(TAG,"连续动做 must:"+must);
         if (scene){//场景中
@@ -495,17 +535,17 @@ public class BFrame implements IFrame {
             if (must != 0) {
                 if (code != must) {
                     Log.w(TAG,"非场景中有记忆复位动作 must:"+must);
-                    outAction(must, type, value);
+//                    outAction(must, type, value);
                     try {
-                        Thread.sleep(100);
+                        Thread.sleep(10);
                         Log.w(TAG,"非场景中有记忆复位后执行动作 must:"+must);
-                        outAction(code, type, value);
+//                        outAction(code, type, value);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
                 }else {
                     Log.w(TAG,"非场景中有记忆正确动作 code:"+code);
-                    outAction(code, type, value);
+//                    outAction(code, type, value);
                 }
             }else {
                 Log.w(TAG,"非场景中无记忆平常动作 code:"+code);
@@ -1064,6 +1104,11 @@ public class BFrame implements IFrame {
 
         return map;
 
+    }
+
+    public static String getString(int id ,Object... formatAars){
+        String string=mContent.getResources().getString(id,formatAars);
+        return string;
     }
 
     public static InterruptTTSCallback getInterruptTTSCallback() {
