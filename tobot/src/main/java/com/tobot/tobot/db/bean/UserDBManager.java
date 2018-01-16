@@ -7,6 +7,7 @@ import java.util.List;
 
 import com.tobot.tobot.base.Constants;
 import com.tobot.tobot.db.BaseDBManager;
+import com.tobot.tobot.db.model.Memory;
 import com.tobot.tobot.db.model.User;
 import com.tobot.tobot.utils.TobotUtils;
 
@@ -66,16 +67,20 @@ public class UserDBManager extends BaseDBManager<User> {
 //		delete(obj);
 //		mBeanDao.insert(obj);
 		if (TobotUtils.isNotEmpty(mBeanDao.get("tobot"))) {
-			Log.i("Javen","update....数据库....");
+			Log.i("Javen","insertOrUpdate update");
 			mBeanDao.update(obj);
 		} else {
-			Log.i("Javen","insert....数据库....");
+			Log.i("Javen","insertOrUpdate insert");
 			clear();
 			mBeanDao.insert(obj);
 		}
 
 	}
-	
+
+	public User queryById(String keyId) {
+		return mBeanDao.get(keyId);
+	}
+
 	public List<User> queryList() {
 		return mBeanDao.queryList();
 	}

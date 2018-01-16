@@ -20,7 +20,7 @@ public abstract class BaseDBManager<T> {
 
 	public BaseDBManager(Class<?> cls) {
 		_context = TobotApplication.getInstance();
-		Log.e("Javen","BaseDBManager..........."+TableUtils.getTableName(cls));
+		Log.e("Javen","BaseDBManager:"+TableUtils.getTableName(cls));
 		mDatabaseHelper = new DatabaseHelper(_context, getDatabaseName(), cls);
 		mSQLiteDatabase = mDatabaseHelper.getWritableDatabase();		
 		mBeanDao = new BasehibernateDao<T>(cls, mSQLiteDatabase);

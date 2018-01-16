@@ -87,7 +87,7 @@ public class CrashHandler implements Thread.UncaughtExceptionHandler {
             } catch (InterruptedException e) {
                 Log.e(TAG, "error : ", e);
             }
-            restartApp();
+//            restartApp();
             //退出程序--结束进程之前可以把程序的注销或者退出代码放在这段代码之前
             android.os.Process.killProcess(android.os.Process.myPid());
             System.exit(1);
@@ -115,6 +115,8 @@ public class CrashHandler implements Thread.UncaughtExceptionHandler {
         }.start();
         //收集设备参数信息
         collectDeviceInfo(mContext);
+        //删除之前的文件
+        deleteFile(new File("/sdcard/crash/"));
         //保存日志文件
         saveCrashInfo2File(ex);
         return true;
@@ -147,6 +149,22 @@ public class CrashHandler implements Thread.UncaughtExceptionHandler {
                 Log.e(TAG, "an error occured when collect crash info", e);
             }
         }
+    }
+
+    /**
+     * 清除之前的log
+     * @param file
+     */
+    public void deleteFile(File dir) {
+        if (dir.isDirectory()) {
+            for (File f : dir.listFiles()) {
+                if (!f.isDirectory())
+                    f.delete();
+                else
+                    deleteFile(f);
+            }
+        }
+        dir.delete();
     }
 
     /**
@@ -201,12 +219,11 @@ public class CrashHandler implements Thread.UncaughtExceptionHandler {
      */
     private void restartApp() {
         Intent intent = new Intent(mContext, MainActivity.class);
-//        PendingIntent restartIntent = PendingIntent.getActivity(mContext.getApplicationContext(), 0, intent, Intent.FLAG_ACTIVITY_NEW_TASK);
         PendingIntent restartIntent = PendingIntent.getActivity(mContext.getApplicationContext(), 0, intent, Intent.FLAG_ACTIVITY_NEW_TASK);
         //退出程序
         AlarmManager mgr = (AlarmManager)mContext.getSystemService(Context.ALARM_SERVICE);
-        mgr.set(AlarmManager.RTC, System.currentTimeMillis() + 1000, restartIntent); // 1秒钟后重启应用
+        mgr.set(AlarmManager.RTC, System.currentTimeMillis() + 5000, restartIntent); // 5秒钟后重启应用
         //结束进程之前可以把程序的注销或者退出代码放在这段代码之前
-        //android.os.Process.killProcess(android.os.Process.myPid());
+        android.os.Process.killProcess(android.os.Process.myPid());
     }
 }

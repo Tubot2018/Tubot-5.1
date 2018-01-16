@@ -7,9 +7,8 @@ import java.util.TreeMap;
 public class TableInfo {
 
 	private Map<String, String> columns;
-
 	private Map<String, String> columnsType;
-	private	Map<String, String> columnsDefault;
+	private Map<String, String> columnsDefault;
 	private String tableName;
 
 	private String primaryKey;

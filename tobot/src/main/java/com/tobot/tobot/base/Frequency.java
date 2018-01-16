@@ -5,15 +5,19 @@ import android.media.MediaPlayer;
 import android.util.Log;
 
 import com.tobot.tobot.control.Demand;
+import com.tobot.tobot.presenter.BRealize.BFrame;
 import com.tobot.tobot.utils.TobotUtils;
 
 import java.io.IOException;
 
+import static com.tobot.tobot.MainActivity.ACTIVATESIGN;
 /**
  * Created by Javen on 2017/9/4.
  */
 
 public class Frequency {
+	
+    private static String TAG = "Javen Frequency";
     private static Context mContext;
     private static MediaPlayer mediaPlayer;
     private static boolean createState;
@@ -43,8 +47,20 @@ public class Frequency {
         return frequency;
     }
 
+    public static void hint(){
+        try {
+            executeMP3(Constants.HINT);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     public static void start(String url){
         try {
+            if (ACTIVATESIGN){
+                Log.i(TAG,"ACTIVATESIGN:" + ACTIVATESIGN);
+                BFrame.Interrupt();
+            }
             executeMP3(url);
         } catch (IOException e) {
             e.printStackTrace();

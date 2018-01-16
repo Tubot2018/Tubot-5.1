@@ -27,10 +27,17 @@ public class VolumeControl implements VolumeControlBehavior {
     private LocalCommandCenter localCommandCenter;
     private LocalCommand sleepCommand;
 
+    public static final int VOLUME_MAX_VOLUME=13;
+    public static final int VOLUME_MIN_VOLUME=3;
+    public static final int VOLUME_COPIES=5;
+
+
+
     private static final String REG_RAISE_VOLUME="(?<!最)大|太吵了";
     private static final String REG_LOWER_VOLUME="(?<!最)小|听不见";
     private static final String REG_TUNE_TO_THE_LOUDEST="最大";
     private static final String REG_TUNE_TO_THE_SMALLEST_VOICE="最小";
+    private static final String REG_GET_CURRENT_VOLUME="音量|声音";
 
     private int type;
 
@@ -38,6 +45,8 @@ public class VolumeControl implements VolumeControlBehavior {
     private static final int TYPE_LOWER_VOLUME=2;
     private static final int TYPE_TUNE_TO_THE_LOUDEST=4;
     private static final int TYPE_TUNE_TO_THE_SMALLEST_VOICE=8;
+    private static final int TYPE_GET_CURRENT_VOLUME=16;
+
 
     private Pattern pattern;
     private Matcher matcher;
@@ -46,6 +55,11 @@ public class VolumeControl implements VolumeControlBehavior {
     private static List<Integer> typeList;
 
     private AudioUtils audioUtils;
+    private List<String> volumeKeyWords;
+
+    public VolumeControl(){
+
+    }
 
     public VolumeControl(Context context){
         this.mContext=context;
@@ -61,13 +75,11 @@ public class VolumeControl implements VolumeControlBehavior {
         //2. 定义本地命令的名字
         String name = "VolumeControl";
         //3. 定义匹配该本地命令的关键词，包含这些关键词的识别结果将交由该本地命令处理。
-        String[] array=mContext.getResources().getStringArray(R.array.volume_keyWords_array);
-        List<String> keyWords = new ArrayList<String>();
-        for (int i=0;i<array.length;i++){
-            keyWords.add(array[i]);
-        }
+
+        volumeKeyWords = getVolumeKeyWords();
+
         //4. 定义本地命令对象
-        sleepCommand = new LocalCommand(name, keyWords) {
+        sleepCommand = new LocalCommand(name, volumeKeyWords) {
             //4.1. 在process 函数中实现该命令的具体动作。
             @Override
             protected void process(String name, String var1) {
@@ -76,7 +88,8 @@ public class VolumeControl implements VolumeControlBehavior {
                 Log.d(TAG, "process var1 : "+var1);
 
                 dealWithVolume(var1);
-
+                //5. 命令执行完成后需明确告诉框架，命令处理结束，否则无法继续进行主对话流程。
+                this.localCommandComplete.onComplete();
 
             }
 
@@ -99,7 +112,7 @@ public class VolumeControl implements VolumeControlBehavior {
 
     }
 
-    private void dealWithVolume(String var1) {
+    public void dealWithVolume(String var1) {
         Log.d(TAG, "dealWithVolume: ");
         if (var1==null || var1.isEmpty()){
             return;
@@ -124,6 +137,10 @@ public class VolumeControl implements VolumeControlBehavior {
                 tuneToMinVolume();
                 break;
 
+            case TYPE_GET_CURRENT_VOLUME: //mohuaiyuan  20180108 测试
+                getCurrentVolume();
+                break;
+
             default:
 
                 break;
@@ -133,13 +150,18 @@ public class VolumeControl implements VolumeControlBehavior {
 
     }
 
+    private void getCurrentVolume() {
+        Log.d(TAG, "getCurrentVolume: ");
+        getCurrentVolumeResponse();
+    }
+
     private void tuneToMinVolume() {
         Log.d(TAG, "tuneToMinVolume: ");
         int currentVolume=audioUtils.getCurrentVolume();
         if (isMinVolume(currentVolume)){
             minVolumeResponse();
         }else {
-            audioUtils.setMusicVolume(AudioUtils.MUSIC_MIN_VOLUME_LEVEL);
+            audioUtils.setMusicVolume(audioUtils.getMinVolume());
             tuneToTheSmalleseVoiceResponse();
         }
 
@@ -159,12 +181,61 @@ public class VolumeControl implements VolumeControlBehavior {
     }
 
     private void lowerVolume() {
-        Log.d(TAG, "lowerVolume: ");
+        Log.d(TAG, "lowerVolume 减小音量: ");
+        int currentVolumeLevel=audioUtils.getCurrentVolume();
+        int minVolumeLevel=audioUtils.getMinVolume();
+        double volumeSpace=audioUtils.getVolumeSpace();
+
+        Log.d(TAG, "currentVolumeLevel: "+currentVolumeLevel);
+        Log.d(TAG, "minVolumeLevel: "+minVolumeLevel);
+        Log.d(TAG, "volumeSpace: "+volumeSpace);
+
+        if (isMinVolume(currentVolumeLevel)){
+            minVolumeResponse();
+        }else {
+            double countOriginal=  (currentVolumeLevel-minVolumeLevel)/volumeSpace;
+            int currentCount= (int) Math.round(countOriginal);
+            currentCount--;
+            double volume=minVolumeLevel+currentCount*volumeSpace;
+            int volumeLevel= (int) Math.round(volume);
+
+            Log.d(TAG, "countOriginal: "+countOriginal);
+            Log.d(TAG, "currentCount: "+currentCount);
+            Log.d(TAG, "volume: "+volume);
+            Log.d(TAG, "volumeLevel: "+volumeLevel);
+            audioUtils.setMusicVolume(volumeLevel);
+            lowerVolumeResponse();
+        }
 
     }
 
     private void raiseVolume() {
-        Log.d(TAG, "raiseVolume: ");
+        Log.d(TAG, "raiseVolume 增大音量: ");
+        int currentVolumeLevel=audioUtils.getCurrentVolume();
+        int minVolumeLevel=audioUtils.getMinVolume();
+        double volumeSpace=audioUtils.getVolumeSpace();
+
+
+        Log.d(TAG, "currentVolumeLevel: "+currentVolumeLevel);
+        Log.d(TAG, "minVolumeLevel: "+minVolumeLevel);
+        Log.d(TAG, "volumeSpace: "+volumeSpace);
+
+        if (isMaxVolume(currentVolumeLevel)){
+            maxVolumeResponse();
+        }else {
+            double countOriginal=  (currentVolumeLevel-minVolumeLevel)/volumeSpace;
+            int currentCount= (int) Math.round(countOriginal);
+            currentCount++;
+            double volume=minVolumeLevel+currentCount*volumeSpace;
+            int volumeLevel= (int) Math.round(volume);
+
+            Log.d(TAG, "countOriginal: "+countOriginal);
+            Log.d(TAG, "currentCount: "+currentCount);
+            Log.d(TAG, "volume: "+volume);
+            Log.d(TAG, "volumeLevel: "+volumeLevel);
+            audioUtils.setMusicVolume(volumeLevel);
+            raiseVolumeResponse();
+        }
 
     }
 
@@ -179,7 +250,7 @@ public class VolumeControl implements VolumeControlBehavior {
     private boolean isMinVolume(int volume){
         Log.d(TAG, "isMinVolume: ");
         boolean isMinVolume=false;
-        isMinVolume=AudioUtils.MUSIC_MIN_VOLUME_LEVEL==volume;
+        isMinVolume=audioUtils.getMinVolume()==volume;
         
         return isMinVolume;
     }
@@ -189,6 +260,7 @@ public class VolumeControl implements VolumeControlBehavior {
         try {
             BFrame.response(R.string.maxMusicVolume);
         } catch (Exception e) {
+            Log.e(TAG, "音量已经最大 反馈 出现Exception e: "+e.getMessage());
             e.printStackTrace();
         }
     }
@@ -198,6 +270,7 @@ public class VolumeControl implements VolumeControlBehavior {
         try {
             BFrame.response(R.string.minMusicVolume);
         } catch (Exception e) {
+            Log.e(TAG, "音量已经最小 反馈 出现Exception e: "+e.getMessage());
             e.printStackTrace();
         }
     }
@@ -207,6 +280,7 @@ public class VolumeControl implements VolumeControlBehavior {
         try {
             BFrame.response(R.string.raiseMusicVolume);
         } catch (Exception e) {
+            Log.e(TAG, "增大音量 反馈 出现Exception e: "+e.getMessage());
             e.printStackTrace();
         }
     }
@@ -215,6 +289,7 @@ public class VolumeControl implements VolumeControlBehavior {
         try {
             BFrame.response(R.string.lowerMusicVolume);
         } catch (Exception e) {
+            Log.e(TAG, "减小音量 反馈 出现Exception e: "+e.getMessage());
             e.printStackTrace();
         }
     }
@@ -224,6 +299,7 @@ public class VolumeControl implements VolumeControlBehavior {
         try {
             BFrame.response(R.string.tuneToTheLoudest);
         } catch (Exception e) {
+            Log.e(TAG, "调到最大声 反馈 出现Exception e: "+e.getMessage());
             e.printStackTrace();
         }
     }
@@ -233,10 +309,21 @@ public class VolumeControl implements VolumeControlBehavior {
         try {
             BFrame.response(R.string.tuneToTheSmalleseVoice);
         } catch (Exception e) {
+            Log.e(TAG, "调到最小声 反馈 出现Exception e: "+e.getMessage());
             e.printStackTrace();
         }
     }
 
+    //mohuaiyuan  20180108 测试
+    private void getCurrentVolumeResponse(){
+        Log.d(TAG, "getCurrentVolumeResponse: ");
+        try {
+            BFrame.response("speech:当前的音量为："+audioUtils.getCurrentVolume());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+    }
 
     private void initVolumeType(String var1){
         Log.d(TAG, "initVolumeType: ");
@@ -263,6 +350,25 @@ public class VolumeControl implements VolumeControlBehavior {
         if (audioUtils==null){
             audioUtils=new AudioUtils(mContext);
         }
+        audioUtils.setMaxVolumeListener(new AudioUtils.MaxVolumeListener() {
+            @Override
+            public int getMaxVolume() {
+                return VOLUME_MAX_VOLUME;
+            }
+        });
+        audioUtils.setMinVolumeListener(new AudioUtils.MinVolumeListener() {
+            @Override
+            public int getMinVolume() {
+                return VOLUME_MIN_VOLUME;
+            }
+        });
+        audioUtils.setVolumeCopyListener(new AudioUtils.VolumeCopyListener() {
+            @Override
+            public int getVolumeCopies() {
+                return VOLUME_COPIES;
+            }
+        });
+
 
         if (regList==null){
             regList=new ArrayList<>();
@@ -272,6 +378,8 @@ public class VolumeControl implements VolumeControlBehavior {
             regList.add(REG_LOWER_VOLUME);
             regList.add(REG_TUNE_TO_THE_LOUDEST);
             regList.add(REG_TUNE_TO_THE_SMALLEST_VOICE);
+            //mohuaiyuan  20180108 测试
+            regList.add(REG_GET_CURRENT_VOLUME);
         }
 
         if (typeList==null ){
@@ -282,8 +390,28 @@ public class VolumeControl implements VolumeControlBehavior {
             typeList.add(TYPE_LOWER_VOLUME);
             typeList.add(TYPE_TUNE_TO_THE_LOUDEST);
             typeList.add(TYPE_TUNE_TO_THE_SMALLEST_VOICE);
+            //mohuaiyuan  20180108 测试
+            typeList.add(TYPE_GET_CURRENT_VOLUME);
         }
 
     }
 
+    public List<String> getVolumeKeyWords(){
+        Log.d(TAG, "getVolumeKeyWords: ");
+        List<String> keyWords=new ArrayList<>();
+        String[] array=mContext.getResources().getStringArray(R.array.volume_keyWords_array);
+        for (int i=0;i<array.length;i++){
+            keyWords.add(array[i]);
+        }
+        return keyWords;
+
+    }
+
+    public static Context getmContext() {
+        return mContext;
+    }
+
+    public static void setmContext(Context mContext) {
+        VolumeControl.mContext = mContext;
+    }
 }

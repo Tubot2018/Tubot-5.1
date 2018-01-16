@@ -15,6 +15,7 @@ import com.tobot.tobot.control.demand.DemandUtils;
 import com.tobot.tobot.entity.DetailsEntity;
 import com.tobot.tobot.entity.SongEntity;
 import com.tobot.tobot.entity.StoryEntity;
+import com.tobot.tobot.presenter.BRealize.VolumeControl;
 import com.tobot.tobot.presenter.ICommon.ISceneV;
 import com.tobot.tobot.utils.AudioUtils;
 import com.tobot.tobot.utils.CommonRequestManager;
@@ -79,6 +80,10 @@ public class StoryScenario implements IScenario {
     private boolean isWithAction = true;//唱歌 是否有 动作
     private int songDuration;
 
+
+    private List<String> volumeKeyWords;
+    private VolumeControl volumeControl;
+
 //    public StoryScenario(Context context){
 //        Log.d(TAG, "StoryScenario: ");
 //        this.mContext=context;
@@ -113,6 +118,7 @@ public class StoryScenario implements IScenario {
 
     private void initData() {
         currentTimeSum = 0;
+        initVoluemKeyWord();
     }
 
     private void initListener() {
@@ -445,53 +451,72 @@ public class StoryScenario implements IScenario {
 //                    }
 //                }
                     //mohuaiyuan 20180104 原来的代码
-                    if (interrupt.contains("大声点")
-                            || interrupt.contains("大点声")
-                            || interrupt.contains("声音大一点")
-                            || interrupt.contains("音量大一点")) {
-
-                        int currentVolumeLevel = audioUtils.getCurrentVolume();
-                        Log.d(TAG, "currentVolumeLevel: " + currentVolumeLevel);
-                        int result = audioUtils.adjustRaiseMusicVolume();
-                        if (result < 0) {
-                            switch (result) {
-                                case AudioUtils.CURRENT_LEVEL_IS_MAX_VOLUME_LEVEL:
-                                    tts.speak(manager.getString(R.string.maxMusicVolume), null);
-                                    break;
-
-                                default:
-                                    break;
-
-                            }
-                        } else {
-                            tts.speak(manager.getString(R.string.raiseMusicVolume), null);
-                        }
-                        currentVolumeLevel = audioUtils.getCurrentVolume();
-                        Log.d(TAG, "currentVolumeLevel: " + currentVolumeLevel);
-                    }
+//                    if (interrupt.contains("大声点")
+//                            || interrupt.contains("大点声")
+//                            || interrupt.contains("声音大一点")
+//                            || interrupt.contains("音量大一点")) {
+//
+//                        int currentVolumeLevel = audioUtils.getCurrentVolume();
+//                        Log.d(TAG, "currentVolumeLevel: " + currentVolumeLevel);
+//                        int result = audioUtils.adjustRaiseMusicVolume();
+//                        if (result < 0) {
+//                            switch (result) {
+//                                case AudioUtils.CURRENT_LEVEL_IS_MAX_VOLUME_LEVEL:
+//                                    tts.speak(manager.getString(R.string.maxMusicVolume), null);
+//                                    break;
+//
+//                                default:
+//                                    break;
+//
+//                            }
+//                        } else {
+//                            tts.speak(manager.getString(R.string.raiseMusicVolume), null);
+//                        }
+//                        currentVolumeLevel = audioUtils.getCurrentVolume();
+//                        Log.d(TAG, "currentVolumeLevel: " + currentVolumeLevel);
+//                    }
                     //mohuaiyuan 20180104 原来的代码
-                    if (interrupt.contains("小声点")
-                            || interrupt.contains("小点声")
-                            || interrupt.contains("声音小一点")
-                            || interrupt.contains("音量小一点")) {
-                        int currentVolumeLevel = audioUtils.getCurrentVolume();
-                        Log.d(TAG, "currentVolumeLevel: " + currentVolumeLevel);
-                        int result = audioUtils.adjustLowerMusicVolume();
-                        if (result < 0) {
-                            switch (result) {
-                                case AudioUtils.CURRENT_LEVEL_IS_MIN_VOLUME_LEVEL:
-                                    tts.speak(manager.getString(R.string.minMusicVolume), null);
-                                    break;
+//                    if (interrupt.contains("小声点")
+//                            || interrupt.contains("小点声")
+//                            || interrupt.contains("声音小一点")
+//                            || interrupt.contains("音量小一点")) {
+//                        int currentVolumeLevel = audioUtils.getCurrentVolume();
+//                        Log.d(TAG, "currentVolumeLevel: " + currentVolumeLevel);
+//                        int result = audioUtils.adjustLowerMusicVolume();
+//                        if (result < 0) {
+//                            switch (result) {
+//                                case AudioUtils.CURRENT_LEVEL_IS_MIN_VOLUME_LEVEL:
+//                                    tts.speak(manager.getString(R.string.minMusicVolume), null);
+//                                    break;
+//
+//                                default:
+//                                    break;
+//                            }
+//                        } else {
+//                            tts.speak(manager.getString(R.string.lowerMusicVolume), null);
+//                        }
+//                        currentVolumeLevel = audioUtils.getCurrentVolume();
+//                        Log.d(TAG, "currentVolumeLevel: " + currentVolumeLevel);
+//                    }
 
-                                default:
-                                    break;
-                            }
-                        } else {
-                            tts.speak(manager.getString(R.string.lowerMusicVolume), null);
+                    //mohuaiyuan 20180109 新的代码 20180109
+                    //音量控制
+                    boolean isContaintsVolumeKeyWord=false;
+                    Log.d(TAG, "interrupt:"+interrupt);
+                    for (int size=0;size<volumeKeyWords.size();size++){
+                        String keywork=volumeKeyWords.get(size);
+                        boolean isContains=interrupt.contains(keywork);
+                        Log.d(TAG, "onUserInterrupted: ");
+                        if (isContains){
+                            isContaintsVolumeKeyWord=true;
+                            break;
                         }
-                        currentVolumeLevel = audioUtils.getCurrentVolume();
-                        Log.d(TAG, "currentVolumeLevel: " + currentVolumeLevel);
                     }
+                    Log.d(TAG, "isContaintsVolumeKeyWord: "+isContaintsVolumeKeyWord);
+                    if (isContaintsVolumeKeyWord){
+                        volumeControl.dealWithVolume(interrupt);
+                    }
+
 
                 } catch (IllegalStateException e) {
 
@@ -519,28 +544,35 @@ public class StoryScenario implements IScenario {
         scenarioRuntimeConfig.allowDefaultChat = false;
         scenarioRuntimeConfig.interruptMatchMode = scenarioRuntimeConfig.INTERRUPT_CMD_MATCH_MODE_FUZZY;
         //为场景添加打断语，asr 识别到打断语时将产生打断事件，回调到场景的onUserInterrupted() 方法。
-        scenarioRuntimeConfig.addInterruptCmd("暂停");
-        scenarioRuntimeConfig.addInterruptCmd("继续");
-        scenarioRuntimeConfig.addInterruptCmd("不想听了");
-        scenarioRuntimeConfig.addInterruptCmd("好了");
-        scenarioRuntimeConfig.addInterruptCmd("可以了");
-//        scenarioRuntimeConfig.addInterruptCmd("快进");
-//        scenarioRuntimeConfig.addInterruptCmd("前进");
-        scenarioRuntimeConfig.addInterruptCmd("你好小图");
-        scenarioRuntimeConfig.addInterruptCmd("退出");
-        scenarioRuntimeConfig.addInterruptCmd("推出");
-        //mohuaiyuan 20180104 原来的代码
-        scenarioRuntimeConfig.addInterruptCmd("大声点");
-        scenarioRuntimeConfig.addInterruptCmd("小声点");
-        scenarioRuntimeConfig.addInterruptCmd("大点声");
-        scenarioRuntimeConfig.addInterruptCmd("小点声");
-        scenarioRuntimeConfig.addInterruptCmd("声音大一点");
-        scenarioRuntimeConfig.addInterruptCmd("声音小一点");
-        scenarioRuntimeConfig.addInterruptCmd("音量大一点");
-        scenarioRuntimeConfig.addInterruptCmd("音量小一点");
+
+        //mohuaiyuan 20180108 原来的代码
+//        scenarioRuntimeConfig.addInterruptCmd("大声点");
+//        scenarioRuntimeConfig.addInterruptCmd("小声点");
+//        scenarioRuntimeConfig.addInterruptCmd("大点声");
+//        scenarioRuntimeConfig.addInterruptCmd("小点声");
+//        scenarioRuntimeConfig.addInterruptCmd("声音大一点");
+//        scenarioRuntimeConfig.addInterruptCmd("声音小一点");
+//        scenarioRuntimeConfig.addInterruptCmd("音量大一点");
+//        scenarioRuntimeConfig.addInterruptCmd("音量小一点");
+        //mohuaiyuan 20180109 新的代码 20180109
+        //音量控制
+        for (int i=0;i<volumeKeyWords.size();i++){
+            scenarioRuntimeConfig.addInterruptCmd(volumeKeyWords.get(i));
+        }
+
         return scenarioRuntimeConfig;
     }
 
+    private void initVoluemKeyWord(){
+        Log.d(TAG, "initVoluemKeyWord: ");
+        if (volumeControl==null){
+            volumeControl=new VolumeControl();
+            volumeControl.setmContext(mContext);
+        }
+        if (volumeKeyWords==null || volumeKeyWords.isEmpty()){
+            volumeKeyWords=volumeControl.getVolumeKeyWords();
+        }
+    }
 
     /**
      * 播放喜马拉雅的资源
@@ -643,14 +675,16 @@ public class StoryScenario implements IScenario {
                     public void onCompleted() {
                         Log.d(TAG, "tts onCompleted: ");
                         //开始播放音频
-                        getMediaPlayer().start();
-                        songDuration = getMediaPlayer().getDuration();
-                        Log.d(TAG, "duration: " + songDuration);
-                        if (isWithAction) {
-                            doAction();
+                        try{
+                            getMediaPlayer().start();
+                            songDuration = getMediaPlayer().getDuration();
+                            Log.d(TAG, "duration: " + songDuration);
+                            if (isWithAction) {
+                                doAction();
+                            }
+                        }catch (NullPointerException e){
+
                         }
-
-
                     }
 
                     @Override

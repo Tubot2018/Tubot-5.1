@@ -2,7 +2,10 @@ package com.tobot.tobot.presenter.BRealize;
 
 import android.content.Context;
 import android.content.res.Resources;
+import android.os.AsyncTask;
 import android.os.Handler;
+import android.os.HandlerThread;
+import android.os.Looper;
 import android.os.Message;
 import android.util.Log;
 
@@ -14,6 +17,8 @@ import com.tobot.tobot.MainActivity;
 import com.tobot.tobot.R;
 import com.tobot.tobot.base.Constants;
 import com.tobot.tobot.base.Frequency;
+import com.tobot.tobot.db.bean.MemoryDBManager;
+import com.tobot.tobot.db.model.Memory;
 import com.tobot.tobot.function.AssembleFunction;
 import com.tobot.tobot.function.QASRFunction;
 import com.tobot.tobot.presenter.ICommon.ISceneV;
@@ -49,7 +54,6 @@ import com.turing123.robotframe.scenario.ScenarioManager;
 
 import java.util.HashMap;
 import java.util.Map;
-
 import static com.turing123.robotframe.function.keyin.KeyInputEvent.KEYCODE_HEAD;
 import static com.turing123.robotframe.multimodal.action.Action.PRMTYPE_EXECUTION_TIMES;
 
@@ -59,8 +63,7 @@ import static com.turing123.robotframe.multimodal.action.Action.PRMTYPE_EXECUTIO
  */
 
 public class BFrame implements IFrame {
-    private static final String TAG = "BFrame";
-
+    private static final String TAG = "Javen BFrame";
     private static BFrame mBFarme;
     private static Context mContent;
     private ISceneV mISceneV;
@@ -78,6 +81,7 @@ public class BFrame implements IFrame {
     private BScenario mBScenario;
     private BConnect mBConnect;
     private BMonitor mBMonitor;
+    private BDormant mBDormant;
     //mohuaiyuan  //mohuaiyuan 20171226 原来的代码
 //    private BDormant mBDormant;
     //mohuaiyuan 20171226 新的代码 20171226
@@ -94,12 +98,23 @@ public class BFrame implements IFrame {
      */
     private LieDownAndSleep mLieDownAndSleep;
 
+    /**
+     * 音量控制
+     */
+    private VolumeControl volumeControl;
+
     private static BLocal mBLocal;
     private static BBattery mBBattery;
     private static BArmtouch mBArmtouch;
     private BProtect mBProtect;
     private BSensor mBSensor;
+//    private static MotionFunction mMotionFunction;
     public static boolean replace;
+    public static boolean prevent;//是否允许asr打断true/允许;false/阻止
+    public static boolean isInterrupt;
+    private static Memory memory;
+//    private ServiceHandler serviceHandler;
+    public static boolean robotState = true;
 
     private static InterruptTTSCallback interruptTTSCallback;
     private static SimpleFrameCallback actionSimpleFrameCallback;
@@ -117,6 +132,9 @@ public class BFrame implements IFrame {
         this.mISceneV = mISceneV;
         this.mContent = (Context) mISceneV;
         this.main = (MainActivity) mISceneV;
+//        HandlerThread thread = new HandlerThread("frame_thread");
+//        thread.start();
+//        serviceHandler = new ServiceHandler(thread.getLooper());
         onInitiate(false);
     }
 
@@ -151,7 +169,7 @@ public class BFrame implements IFrame {
             @Override
             public void onPrepared() {
                 // 激活
-                frameHandle.sendEmptyMessage(Constants.REPLACE_ASR);
+//                frameHandle.sendEmptyMessage(Constants.REPLACE_ASR);
                 mRobotFrameManager.start();
                 // 可选的控制场景
                 // mRobotFrameManager.toLostScenario();
@@ -184,10 +202,6 @@ public class BFrame implements IFrame {
                     main.FrameLoadFailure();
                     Log.e(TAG, "start error ⊙﹏⊙b\n" + msg.obj);
                     break;
-                case Constants.REPLACE_ASR:
-                    //mohuaiyuan  暂时先注释  20171226
-//                    replaceFunction();
-                    break;
                 case Constants.START_SUCESS_MSG:
                     Log.e(TAG, "⊙_⊙  框架加载成功");
                     mBConnect.isLoad(true);
@@ -197,13 +211,14 @@ public class BFrame implements IFrame {
                     onFunction();
                     //调度
                     onAssemble();
+                    //替换
+                    replaceFunction();
                     //进入次场景
                     onMinorscene();
                     //通知
                     onNotification();
                     //手臂触摸
                     onBArmtouch();
-
                     //mohuaiyuan 20171226 原来的代码
                   /*  //休眠
                     onDormant();*/
@@ -214,11 +229,8 @@ public class BFrame implements IFrame {
                     onSitDownAndSleep();
                     //躺下休息（休眠）
                     onLieDownAndSleep();
-
                     //音量控制
                     onAdjustVolume();
-
-
                     //唤醒
                     onRouse();
                     //本地命令
@@ -258,6 +270,7 @@ public class BFrame implements IFrame {
         mFacialExpression.executeMode = Action.MODE_COVER;
         mFacialExpression.eyeParams.put(PRMTYPE_EXECUTION_TIMES, 1);
         mExpression = new Expression(main, new BaseScene(main, "os.sys.chat"));
+        memory = new Memory();
     }
 
     private void onAssemble(){
@@ -274,8 +287,14 @@ public class BFrame implements IFrame {
             }
 
             @Override
-            public void onError(String s) {
+            public void onError(String s) { }
+        });
 
+        assembleFunction.setAssembleFunction(new AssembleFunction.IAssembleFunction() {
+            @Override
+            public void Permit(Object interrupt) {
+                prevent = (boolean) interrupt;
+                Log.i(TAG,"prevent:" + prevent);
             }
         });
     }
@@ -293,13 +312,13 @@ public class BFrame implements IFrame {
                 FunctionManager functionManager = new FunctionManager(main);
                 //3.2 调用replaceFunction 替换系统中type相同的默认function（本示例替换asr）.
                 boolean replaced = functionManager.replaceFunction(mQASRFunction);
-                Log.i(TAG,"替换成功:" + replaced);
                 replace = replaced;
+                Log.i(TAG,"替换成功:" + replaced);
             }
 
             @Override
             public void onError(String errorMessage) {
-                Log.i(TAG,"替换失败:"+errorMessage);
+                Log.i(TAG,"替换失败:" + errorMessage);
             }
         });
     }
@@ -313,7 +332,6 @@ public class BFrame implements IFrame {
     private void onNotification() {
         mBMonitor = new BMonitor(main);
     }
-
     //mohuaiyuan 20171226 原来的代码
     /*// 休眠
     private void onDormant() {
@@ -347,10 +365,10 @@ public class BFrame implements IFrame {
      * 音量控制
      */
     private void onAdjustVolume(){
+        volumeControl=new VolumeControl(mContent);
 
     }
-
-
+	
     // 本地命令
     private void onLocal() { mBLocal = BLocal.instance(main); }
 
@@ -377,14 +395,14 @@ public class BFrame implements IFrame {
     // 唤醒功能
     private void onRouse() {
         VoiceWakeUp mVoiceWakeUp = new VoiceWakeUp(main, customScenario);
-        mVoiceWakeUp.configWakeUp("/sdcard/.TuringResource/system/WakeUp.bin");
+        mVoiceWakeUp.configWakeUp(Constants.WAKEUP);
 //            mVoiceWakeUp.configWakeUp("assets/WakeUp.bin");
     }
 
     // ASR提醒音
     public static void hint() {
         if (replace){
-            Frequency.start("/sdcard/.TuringResource/audio/asr_prompt_tone.mp3");
+            Frequency.hint();
         }else if(scenarioManager == null){
             //1. 获取ScenarioManager.
             scenarioManager = new ScenarioManager(main);
@@ -396,7 +414,7 @@ public class BFrame implements IFrame {
     }
 
 
-
+//------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 
     public static RobotFrameManager getRobotFrameManager() {
@@ -431,29 +449,75 @@ public class BFrame implements IFrame {
         }
     }
 
+
+//--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
     //选择asr
-    public void choiceFunctionProcessor(int type){
-        functionManager.choiceFunctionProcessor(AppEvent.FUNC_TYPE_ASR,type);
+    public void choiceFunctionProcessor(int type) {
+        functionManager.choiceFunctionProcessor(AppEvent.FUNC_TYPE_ASR, type);
     }
 
-    public void resetFunction(){
+    public void resetFunction() {
         functionManager.resetFunction(AppEvent.FUNC_TYPE_ASR);
     }
 
-    /**
-     * 下发动作
-     * @param code
-     */
-    public static void outAction(int code){
-        motor.doAction(Action.buildBodyAction(code,PRMTYPE_EXECUTION_TIMES,1),new SimpleFrameCallback());
+    //下发动作
+    public static void motion(int code) {
+        motion(code, PRMTYPE_EXECUTION_TIMES, 1, false);
     }
 
-    public static void outAction(int code,int type){
-        motor.doAction(Action.buildBodyAction(code,type,1),new SimpleFrameCallback());
+    public static void motion(int code, int type) {
+        motion(code, type, 1, false);
     }
 
-    public static void outAction(int code,int type,int value){
-        motor.doAction(Action.buildBodyAction(code,type,value),new SimpleFrameCallback());
+    public static void motion(int code, int type, int value) {
+        motion(code, type, value, false);
+    }
+
+    public static void motion(int code,boolean scene) {
+        motion(code, PRMTYPE_EXECUTION_TIMES, 1, scene);
+    }
+
+    private static void motion(int code, int type, int value, boolean scene) {
+        int must = IsContinue();
+        Log.w(TAG,"连续动做 must:"+must);
+        if (scene){//场景中
+            if (must != 0 && !TobotUtils.isReset(code)){//非正常状态
+                TTS("没看到我现在正"+nowState(must)+"吗?你应该先让我站起来");
+            }else if (TobotUtils.isReset(code)){
+                Log.w(TAG,"场景中重置动作 code:"+code);
+                outAction(resetState(code), type, value);
+            }else if (must == 0){
+                Log.w(TAG,"场景中正确动作 code:"+code);
+                outAction(code, type, value);
+            }
+        }else {
+            if (must != 0) {
+                if (code != must) {
+                    Log.w(TAG,"非场景中有记忆复位动作 must:"+must);
+                    outAction(must, type, value);
+                    try {
+                        Thread.sleep(100);
+                        Log.w(TAG,"非场景中有记忆复位后执行动作 must:"+must);
+                        outAction(code, type, value);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }else {
+                    Log.w(TAG,"非场景中有记忆正确动作 code:"+code);
+                    outAction(code, type, value);
+                }
+            }else {
+                Log.w(TAG,"非场景中无记忆平常动作 code:"+code);
+                outAction(code, type, value);
+            }
+        }
+        Log.w(TAG,"是否保存动作 code:"+code);
+        IsMemory(code);
+    }
+
+    private static void outAction(int code, int type, int value) {
+        motor.doAction(Action.buildBodyAction(code, type, value), new SimpleFrameCallback());
     }
 
     /**
@@ -464,32 +528,24 @@ public class BFrame implements IFrame {
         motor.doAction(Action.buildBodyAction(code,type,value),iMotorCallback);
     }
 
-
-    /**
-     * 下发耳部灯圈
-     * @param code
-     */
-    public static void Ear(int code){
-        motor.doAction(Action.buildEarAction(code,80,1),new SimpleFrameCallback());
+    //下发耳部灯圈
+    public static void Ear(int code) {
+        motor.doAction(Action.buildEarAction(code, 80, 1), new SimpleFrameCallback());
     }
 
-    public static void Ear(int code,int pleasantness){
-        motor.doAction(Action.buildEarAction(code,80,pleasantness),new SimpleFrameCallback());
+    public static void Ear(int code, int pleasantness) {
+        motor.doAction(Action.buildEarAction(code, 80, pleasantness), new SimpleFrameCallback());
     }
 
-    public static void Ear(int code,int brightness,int pleasantness){
-        motor.doAction(Action.buildEarAction(code,brightness,pleasantness),new SimpleFrameCallback());
+    public static void Ear(int code, int brightness, int pleasantness) {
+        motor.doAction(Action.buildEarAction(code, brightness, pleasantness), new SimpleFrameCallback());
     }
-
 
     public static void EarWithCallback(int code,int brightness,int pleasantness,IMotorCallback iMotorCallback) {
         motor.doAction(Action.buildEarAction(code, brightness, pleasantness), iMotorCallback);
 
     }
-
-    /**
-     * 脱离主场景
-     */
+    //脱离主场景
     public static void shutChat(){
         mRobotFrameManager.toLostScenario();
     }
@@ -500,6 +556,7 @@ public class BFrame implements IFrame {
     public static void disparkChat(){
         mRobotFrameManager.backMainScenario();
     }
+
 
     /**
      *  下发表情
@@ -528,12 +585,13 @@ public class BFrame implements IFrame {
         tts.speak(voice,ittsCallback);
     }
 
+
     /**
      * 执行tts
      * @param voice
      * @param mIttsCallback
      */
-    public static void ttsWithCallback(String voice,ITTSCallback mIttsCallback){
+    public static synchronized void ttsWithCallback(String voice,ITTSCallback mIttsCallback){
         Log.d(TAG, "ttsWithCallback: ");
         if (mIttsCallback==null){
             mIttsCallback=ittsCallback;
@@ -547,17 +605,17 @@ public class BFrame implements IFrame {
         @Override
         public void onStart(String s) {
             Log.i(TAG ,"开始语音播报TTS:"+s);
-            main.Interrupt(true);
+            isInterrupt = true;
         }
 
         @Override
         public void onPaused() {
-            main.Interrupt(false);
+            isInterrupt = false;
         }
 
         @Override
         public void onResumed() {
-            main.Interrupt(true);
+            isInterrupt = true;
         }
 
         @Override
@@ -583,7 +641,8 @@ public class BFrame implements IFrame {
 //            } catch (NullPointerException e) {
 //                e.printStackTrace();
 //            }
-            main.Interrupt(false);
+            hint();//提示音
+            isInterrupt = false;
         }
 
         @Override
@@ -597,7 +656,8 @@ public class BFrame implements IFrame {
      */
     public static void FallAsleep(){
         if (TobotUtils.isNotEmpty(mRobotFrameManager)){
-            Ear(EarActionCode.EAR_MOTIONCODE_1);//待机效果
+            //mohuaiyuan 20180106 原来的代码
+//            Ear(EarActionCode.EAR_MOTIONCODE_1);//待机效果
             mRobotFrameManager.sleep();
             //5.2 命令执行完成后需明确告诉框架，命令处理结束，否则无法继续进行主对话流程。
             new LocalCommandGather().onComplete();
@@ -606,10 +666,12 @@ public class BFrame implements IFrame {
 
     public static void Wakeup(){
         if (TobotUtils.isNotEmpty(mRobotFrameManager)) {
-            Ear(EarActionCode.EAR_MOTIONCODE_4);//启动效果
+            //mohuaiyuan 20180106 原来的代码
+//            Ear(EarActionCode.EAR_MOTIONCODE_4);//启动效果
             mRobotFrameManager.wakeup();
         }
     }
+
 
     public static void Wakeup(int type){
         if (TobotUtils.isNotEmpty(mRobotFrameManager)) {
@@ -625,16 +687,39 @@ public class BFrame implements IFrame {
         mRobotFrameManager.setChatMode(mode);
     }
 
-    /**
-     * 打断
-     */
+    //打断
     public static void Interrupt(){
         mRobotFrameManager.interrupt(SystemConfig.INTERRUPT_TYPE_TOUCH, null);
+        if (prevent){
+            //统一下发tts打断处理
+            Log.i(TAG,"统一下发tts打断处理");
+            mFrameThing.setAssemble(false);
+        }
+        if (isInterrupt){
+            //框架tts打断处理
+            Log.i(TAG,"框架tts打断处理");
+            tts.speak(" ");
+        }
+        prevent = false;
+        isInterrupt = false;
     }
 
-    /**
-     * 通知关机
-     */
+    //触摸打断
+    public static void InterruptTouch(){
+        mRobotFrameManager.interrupt(SystemConfig.INTERRUPT_TYPE_TOUCH, null);
+        if (prevent){
+            //统一下发tts打断处理
+            Log.i(TAG,"统一下发tts打断处理");
+            mFrameThing.setAssemble(true);
+        }
+        if (isInterrupt){
+            //框架tts打断处理
+            Log.i(TAG,"框架tts打断处理");
+            tts.speak(" ",ittsCallback);
+        }
+    }
+
+    //通知关机
     public static void shutDown(){
         mRobotFrameManager.shutDown(new RobotFrameShutdownListener() {
 
@@ -649,6 +734,146 @@ public class BFrame implements IFrame {
             }
         });
     }
+
+    private static IFrameThing mFrameThing;
+
+    public static IFrameThing getFrameThing() {
+        return mFrameThing;
+    }
+
+    public static void setFrameThing(IFrameThing frameThing) {
+        mFrameThing = frameThing;
+    }
+
+    public interface IFrameThing { void setAssemble(Object dispose); }
+
+
+
+
+//-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+    //检索连贯动作
+    public static int IsContinue(){
+        int must = 0;
+        try{
+            memory = MemoryDBManager.getManager().queryById("memory");
+            Log.w("Javen","Global:" + memory.getGlobal());
+            if(memory.getGlobal().equals("1111")){
+                switch (Integer.parseInt(memory.getMotion())){
+                    case Constants.squat:
+                        must = Constants.squat_stand;
+                        break;
+                    case Constants.sitDown:
+                        must = Constants.sitDown_stand;
+                        break;
+                    case Constants.lieDown:
+                        must = Constants.lieDown_stand;
+                        break;
+                    case Constants.goProne:
+                        must = Constants.goProne_stand;
+                        break;
+                    case Constants.SitBack:
+                        must = Constants.SitBack_stand;
+                        break;
+                    case Constants.SideDown:
+                        must = Constants.SideDown_stand;
+                        break;
+                }
+            }
+        }catch (NullPointerException e){
+            return must;
+        }
+        Log.i("Javen","检索连贯动作接下来应该做 must:"+must);
+        return must;
+    }
+
+    //检索当前状态
+    public static String nowState(int action) {
+        String state = "";
+        switch (action) {
+            case Constants.squat_stand:
+                state = "蹲着";
+                break;
+            case Constants.sitDown_stand:
+                state = "坐在地上";
+                break;
+            case Constants.lieDown_stand:
+                state = "躺在地上";
+                break;
+            case Constants.goProne_stand:
+                state = "趴在地上";
+                break;
+            case Constants.SitBack_stand:
+                state = "坐着";
+                break;
+            case Constants.SideDown_stand:
+                state = "倒在地上";
+                break;
+        }
+        return state;
+    }
+
+    //重置状态
+    public static int resetState(int action){
+        int reset = 0;
+        try{
+            if (TobotUtils.isReset(action)) {
+                reset = IsContinue();
+            }
+        }catch (Exception e){
+            return reset;
+        }
+        return reset;
+    }
+
+    //检索是否记忆
+    public static void IsMemory(int action) {
+        try{
+            if (TobotUtils.isEmpty(memory)){
+                memory = new Memory();
+            }
+            Log.w("Javen","动作 action:" + action);
+            if (TobotUtils.isMemory(action)) {
+                memory.setMotion(action+"");
+                memory.setGlobal("1111");
+                Log.w("Javen","要记忆动作 action:" + action);
+                MemoryDBManager.getManager().insertOrUpdate(memory);
+            }else if (memory.getGlobal().equals("0000")){
+                memory.setMotion("0");
+                memory.setGlobal("0000");
+                Log.w("Javen","平常动作不记忆 action:" + action);
+                MemoryDBManager.getManager().insertOrUpdate(memory);
+            }else if (memory.getGlobal().equals("1111")){
+                if (TobotUtils.isReset(action)){
+                    memory.setMotion("0");
+                    memory.setGlobal("0000");
+                    Log.w("Javen","连续动作不记忆 action:" + action);
+                    MemoryDBManager.getManager().insertOrUpdate(memory);
+                }else if (!TobotUtils.isMemory(action)){
+                    memory.setMotion("0");
+                    memory.setGlobal("0000");
+                    Log.w("Javen","重置后平常动作不记忆 action:" + action);
+                    MemoryDBManager.getManager().insertOrUpdate(memory);
+                }
+            }
+        }catch (Exception e){
+
+        }
+    }
+
+
+
+
+
+
+
+
+
+
+
+
 
     public static final String RESPONSE_SPEECH="speech";
     public static final String RESPONSE_ACTION="action";
@@ -694,7 +919,7 @@ public class BFrame implements IFrame {
         //讲话
         String speech = dataMap.get(RESPONSE_SPEECH);
         if (speech != null && speech.length() > 0) {
-            TTS(speech);
+            ttsWithCallback(speech,null);
         }
         //动作
         String action = dataMap.get(RESPONSE_ACTION);
@@ -705,7 +930,7 @@ public class BFrame implements IFrame {
             } catch (NumberFormatException e) {
                 throw new Exception("umberFormatException e:" + e.getMessage());
             }
-            outAction(actionCode);
+            motion(actionCode);
         }
         //表情
         String expression = dataMap.get(RESPONSE_EXPRESSION);
@@ -872,4 +1097,6 @@ public class BFrame implements IFrame {
     public static void setEarLightCircleCallback(SimpleFrameCallback earLightCircleCallback) {
         BFrame.earLightCircleCallback = earLightCircleCallback;
     }
+	
+	
 }

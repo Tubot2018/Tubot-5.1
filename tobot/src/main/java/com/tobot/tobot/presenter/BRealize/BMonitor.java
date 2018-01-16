@@ -48,7 +48,7 @@ public class BMonitor implements IMonitor{
                     Message message = Message.obtain();
                     message.what = Constants.NOTIFICATION_MSG;
 //                    message.obj = notification;
-//                    Log.i("Javen",notification.toString());
+                    Log.i("BMonitor",notification.toString());
                     Bundle bundle = new Bundle();
                     bundle.putInt("arg1", notification.arg1);
                     bundle.putString("action", notification.action);

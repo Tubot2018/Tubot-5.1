@@ -6,8 +6,10 @@ import android.media.AudioManager;
 import com.tobot.tobot.presenter.ICommon.ISceneV;
 import com.tobot.tobot.scene.CustomActionScenario;
 import com.tobot.tobot.scene.DanceScenario;
+import com.tobot.tobot.scene.MusicClassify;
 import com.tobot.tobot.scene.SongScenario;
 import com.tobot.tobot.scene.StoryScenario;
+import com.tobot.tobot.scene.TaleClassify;
 import com.tobot.tobot.scene.VolumeScenario;
 import com.tobot.tobot.presenter.IPort.IScene;
 import com.turing123.robotframe.scenario.ScenarioManager;
@@ -46,12 +48,12 @@ public class BScenario implements IScene {
         scenarioManager.addScenario(SongScenario.instance(mISceneV));
         scenarioManager.addScenario(new StoryScenario(mISceneV));
         scenarioManager.addScenario(new DanceScenario(mISceneV));
-        //mohuaiyuan 20180104 原来的代码
-        scenarioManager.addScenario(new VolumeScenario(mContent,mAudioManager));
+        //mohuaiyuan 20180108 原来的代码
+//        scenarioManager.addScenario(new VolumeScenario(mContent,mAudioManager));
         scenarioManager.addScenario(new CustomActionScenario(mContent,"胳膊控制"));
         scenarioManager.addScenario(new CustomActionScenario(mContent,"连贯动作"));
-        scenarioManager.addScenario(new CustomActionScenario(mContent,"原地动作"));
+        scenarioManager.addScenario(new MusicClassify(mContent,"原地动作"));
         scenarioManager.addScenario(new CustomActionScenario(mContent,"动作控制"));
-        scenarioManager.addScenario(new CustomActionScenario(mContent,"走动作"));
+        scenarioManager.addScenario(new TaleClassify(mContent,"走动作"));
     }
 }

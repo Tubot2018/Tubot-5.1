@@ -75,4 +75,15 @@ public class AppTools {
 
 	}
 
+	/**
+	 *
+	 * 获取手机IMEI
+	 *
+	 */
+	public static String getIMEI(Context context) {
+		return ((TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE))
+				.getDeviceId();
+
+	}
+
 }

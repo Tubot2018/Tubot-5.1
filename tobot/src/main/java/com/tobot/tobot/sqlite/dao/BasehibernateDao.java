@@ -46,7 +46,7 @@ public class BasehibernateDao<T> {
 	public long insert(T entity) {
 		String sql;
 		sql = new Insert(entity).toStatementString();
-		Log.e("Javen","sql.............."+sql);
+		Log.e("Javen","sql insert: "+sql);
 		SQLiteStatement stmt = null;
 		try {
 			stmt = db.compileStatement(sql);
@@ -65,7 +65,6 @@ public class BasehibernateDao<T> {
 		SQLiteStatement stmt = null;
 		stmt = db.compileStatement(sql);
 		stmt.executeUpdateDelete();
-
 	}
 	
 	@SuppressWarnings("rawtypes")
@@ -99,14 +98,44 @@ public class BasehibernateDao<T> {
 
 	public T get(Object id) {
 		String sql = new Select(clazz, id, null).toStatementString();
-		Log.e("Javen","get...sql..................."+sql);
+		Log.e("Javen","get() sql: " + sql);
 		Cursor cursor = db.rawQuery(sql, null);
 		EntityBuilder<T> builder = new EntityBuilder<T>(clazz, cursor);
 		List<T> queryList = builder.buildQueryList();
 		cursor.close();
 		if (queryList != null && !queryList.isEmpty()) {
-			Log.e("Javen","get...queryList.get(0)..................."+queryList.get(0));
+			Log.e("Javen","get queryList.get(0): " + queryList.get(0));
 			return queryList.get(0);		
+		}
+		return null;
+	}
+
+	//根据元素查询
+	public T queryByElement(Object element) throws Exception {
+		String sql = new Select(clazz, element).toStatementString();
+		Log.e("Javen","queryByElement() sql: " + sql);
+		Cursor cursor = db.rawQuery(sql, null);
+		EntityBuilder<T> builder = new EntityBuilder<T>(clazz, cursor);
+		List<T> queryList = builder.buildQueryList();
+		cursor.close();
+		if (queryList != null && !queryList.isEmpty()) {
+			Log.e("Javen","queryByElement queryList.size(): " + queryList.size());
+			return queryList.get(0);
+		}
+		return null;
+	}
+
+	//根据元素和id查询
+	public T queryByElement(Object id,Object element) throws Exception {
+		String sql = new Select(clazz, id, element).toStatementString();
+		Log.e("Javen","queryByElement() sql: " + sql);
+		Cursor cursor = db.rawQuery(sql, null);
+		EntityBuilder<T> builder = new EntityBuilder<T>(clazz, cursor);
+		List<T> queryList = builder.buildQueryList();
+		cursor.close();
+		if (queryList != null && !queryList.isEmpty()) {
+			Log.e("Javen","queryByElement queryList.size(): " + queryList.size());
+			return queryList.get(0);
 		}
 		return null;
 	}
@@ -201,6 +230,7 @@ public class BasehibernateDao<T> {
 
 	public void truncate() {
 		String sql = EMPTY_SQL + TableUtils.getTableName(clazz);
+		Log.w("Javen","truncate sql: " + sql);
 		SQLiteStatement stmt = null;
 		try {
 			stmt = db.compileStatement(sql);

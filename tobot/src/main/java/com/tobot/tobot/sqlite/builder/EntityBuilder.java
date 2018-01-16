@@ -45,33 +45,33 @@ public class EntityBuilder<T> {
 									continue;
 									// Ignore
 								}
-								if (field.getType().getSimpleName().equals("Long")||field.getType().getSimpleName().equals("long")) {
+								if (field.getType().getSimpleName().equals("Long") || field.getType().getSimpleName().equals("long")) {
 									field.set(t,
 											cursor.getLong(cursor
 													.getColumnIndexOrThrow((columnName != null && !columnName
 															.equals("")) ? columnName : field.getName())));
-								} else if (field.getType().getSimpleName().equals("Integer")||field.getType().getSimpleName().equals("int")) {
+															
+								} else if (field.getType().getSimpleName().equals("Integer") || field.getType().getSimpleName().equals("int")) {
 									field.set(t,
 											cursor.getInt(cursor
 													.getColumnIndexOrThrow((columnName != null && !columnName
 															.equals("")) ? columnName : field.getName())));
-								} else if (field.getType().getSimpleName().equals("Double")||field.getType().getSimpleName().equals("double")) {
+								} else if (field.getType().getSimpleName().equals("Double") || field.getType().getSimpleName().equals("double")) {
 									field.set(t,
 											cursor.getDouble(cursor
 													.getColumnIndexOrThrow((columnName != null && !columnName
 															.equals("")) ? columnName : field.getName())));
-								}else if (field.getType().getSimpleName().equals("boolean")||field.getType().getSimpleName().equals("Boolean")) {
-										int b = cursor.getInt(cursor
-												.getColumnIndexOrThrow((columnName != null && !columnName
-												.equals("")) ? columnName : field.getName()));
-									field.set(t,b==1);
+								} else if (field.getType().getSimpleName().equals("boolean") || field.getType().getSimpleName().equals("Boolean")) {
+									int b = cursor.getInt(cursor
+											.getColumnIndexOrThrow((columnName != null && !columnName
+													.equals("")) ? columnName : field.getName()));
+									field.set(t, b == 1);
 								} else if (field.getType().getSimpleName().equals("String")) {
 									field.set(t,
 											cursor.getString(cursor
 													.getColumnIndexOrThrow((columnName != null && !columnName
 															.equals("")) ? columnName : field.getName())));
 								}
-
 							}
 						}
 					}
@@ -81,7 +81,6 @@ public class EntityBuilder<T> {
 				} catch (IllegalAccessException e) {
 					e.printStackTrace();
 				}
-
 			}
 		}
 		return queryList;

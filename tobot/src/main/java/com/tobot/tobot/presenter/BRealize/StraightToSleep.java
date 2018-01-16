@@ -158,6 +158,7 @@ public class StraightToSleep  implements IDormant ,DormantBehavior,AwakenBehavio
         try {
             BFrame.response(R.string.straightToSleep_awaken);
         } catch (Exception e) {
+            Log.e(TAG, "直立休眠---唤醒 出现Exception e : "+e.getMessage() );
             e.printStackTrace();
         }
 

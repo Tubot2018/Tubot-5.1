@@ -4,13 +4,14 @@ import android.content.Context;
 import android.media.AudioManager;
 
 /**
+
  * Created by mohuaiyuan  on 2017/11/29.
  */
 
 public class AudioUtils {
     private static final String TAG = "AudioUtils";
 
-    public static final int MUSIC_MIN_VOLUME_LEVEL=1;
+    public static final int MUSIC_MIN_VOLUME_LEVEL=0;
     public static final int MUSIC_MAX_VOLUME_LEVEL=15;
     public static final int VOLUME_COPIES =15;
 
@@ -18,6 +19,7 @@ public class AudioUtils {
     public static final int SET_MUSIC_VOLUME_FAILED=-1;
     public static final int CURRENT_LEVEL_IS_MIN_VOLUME_LEVEL=-2;
     public static final int CURRENT_LEVEL_IS_MAX_VOLUME_LEVEL=-3;
+    public static final int PARAMETER_ERROR= -4;
 
     private AudioManager manager;
 
@@ -29,7 +31,7 @@ public class AudioUtils {
     private static MinVolumeListener minVolumeListener;
     private static VolumeLegalListener volumeLegalListener;
     private static VolumeCopyListener volumeCopyListener;
-
+	
     public AudioUtils(Context context){
         this.mContext=context;
         getManager();
@@ -112,6 +114,7 @@ public class AudioUtils {
 
     public int setMinVolume(){
         //设置音量：当前音量已经是最小的了
+
         if (getMinVolume() == getCurrentVolume()){
             errorCode=CURRENT_LEVEL_IS_MIN_VOLUME_LEVEL;
             return errorCode;
@@ -121,16 +124,25 @@ public class AudioUtils {
     }
 
     public int adjustRaiseMusicVolume(){
+
+        return adjustRaiseMusicVolume(1);
+
+    }
+
+    public int adjustRaiseMusicVolume(int space){
+        if (space<1){
+            return PARAMETER_ERROR;
+        }
         int currentVolumeLevel=getCurrentVolume();
         if (!isLegal(currentVolumeLevel)){
             return errorCode;
         }
         //设置音量：当前音量已经是最大的了
-        if (getMaxVolume() ==getCurrentVolume()){
+        if (getMaxVolume()==currentVolumeLevel){
             errorCode=CURRENT_LEVEL_IS_MAX_VOLUME_LEVEL;
             return errorCode;
         }
-        return setMusicVolume(getCurrentVolume()+1);
+        return setMusicVolume(currentVolumeLevel+space);
 
     }
 
@@ -139,15 +151,29 @@ public class AudioUtils {
 //    }
 
     public int adjustLowerMusicVolume(){
-        if (!isLegal(getCurrentVolume())){
+       return adjustLowerMusicVolume(1);
+    }
+
+    public int adjustLowerMusicVolume(int space){
+        if (space<1){
+            return PARAMETER_ERROR;
+        }
+        int currentVolumeLevel=getCurrentVolume();
+        if (!isLegal(currentVolumeLevel)){
             return errorCode;
         }
-        //设置音量：当前音量已经是最小的了
-        if (getMinVolume() ==getCurrentVolume()){
+        //设置音量：当前音量已经是最大的了
+        if (getMinVolume()==currentVolumeLevel){
             errorCode=CURRENT_LEVEL_IS_MIN_VOLUME_LEVEL;
             return errorCode;
         }
-        return setMusicVolume(getCurrentVolume()-1);
+        return setMusicVolume(currentVolumeLevel-space);
+
+    }
+
+    public double getVolumeSpace(){
+        double space=(double) (getMaxVolume()-getMinVolume())/getVolumeCopies();
+        return space;
     }
 
     /**
@@ -156,6 +182,7 @@ public class AudioUtils {
      * @return :
      */
     public boolean isLegal(int volumeLevel){
+
         if (volumeLegalListener!=null){
             return volumeLegalListener.isLegal(volumeLevel);
         }else {
@@ -205,18 +232,18 @@ public class AudioUtils {
         AudioUtils.volumeCopyListener = volumeCopyListener;
     }
 
-    interface MaxVolumeListener{
+    public interface MaxVolumeListener{
         int getMaxVolume();
     }
-    interface MinVolumeListener{
+    public interface MinVolumeListener{
         int getMinVolume();
     }
 
-    interface VolumeLegalListener{
+    public interface VolumeLegalListener{
         boolean isLegal(int volumeLevel);
     }
 
-    interface VolumeCopyListener{
+    public interface VolumeCopyListener{
         int getVolumeCopies();
     }
 

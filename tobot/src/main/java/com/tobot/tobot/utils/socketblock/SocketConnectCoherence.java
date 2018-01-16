@@ -7,6 +7,7 @@ import android.util.Log;
 
 import com.tobot.tobot.MainActivity;
 import com.tobot.tobot.base.Constants;
+import com.tobot.tobot.base.UpdateAnswer;
 import com.tobot.tobot.control.Demand;
 import com.tobot.tobot.control.demand.DemandModel;
 import com.tobot.tobot.db.bean.UserDBManager;
@@ -35,7 +36,7 @@ public class SocketConnectCoherence {
     private WeakReference<Socket> mSocket;
     private ReadThread mReadThread;
     private long sendTime = 0L;
-    private static final long HEART_BEAT_RATE = 3 * 1000;
+    private static final long HEART_BEAT_RATE = 60 * 1000;
     public static final String HOST = "39.108.134.20";
     public static final int PORT = 81;
     private static DemandListener mdemandListener;
@@ -202,11 +203,16 @@ public class SocketConnectCoherence {
                                 Msg.what = 8;
                                 Msg.obj = message;
                                 handler.sendMessage(Msg);
-                            }
-                            else if (message.substring(2,3).equals("9")) {//点播停止
+                            } else if (message.substring(2,3).equals("9")) {//点播停止
                                 sendMsg(Joint.setDemandResponse(message));
                                 Message Msg = Message.obtain();
                                 Msg.what = 9;
+                                Msg.obj = message;
+                                handler.sendMessage(Msg);
+                            } else if (message.substring(2,3).equals("A")) {//点播停止
+                                sendMsg(Joint.setDemandResponse(message));
+                                Message Msg = Message.obtain();
+                                Msg.what = 10;
                                 Msg.obj = message;
                                 handler.sendMessage(Msg);
                             }
@@ -269,6 +275,9 @@ public class SocketConnectCoherence {
                     break;
                 case 9:
                     mdemandListener.stopDemand();
+                    break;
+                case 10:
+                    new UpdateAnswer();
                     break;
             }
         }

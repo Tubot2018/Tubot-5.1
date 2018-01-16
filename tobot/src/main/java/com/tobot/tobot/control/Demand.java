@@ -43,6 +43,7 @@ public class Demand {
                     //功能实现
                     DemandFactory demandFactory = DemandFactory.getInstance(context);
                     try {
+                        Log.i(TAG,"进入点播关闭聊天");
                         BFrame.shutChat();
                         demandFactory.demands(demand);
                     } catch (Exception e) {

@@ -69,7 +69,6 @@ public class BLocal implements ILocal,CameraInterface.CamOpenOverCallback {
 //        Thread openThread = new Thread(){//开启预览
 //            @Override
 //            public void run() {
-//                // TODO Auto-generated method stub
 //                renderScreen();
 //            }
 //        };

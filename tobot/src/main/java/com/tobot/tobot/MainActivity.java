@@ -8,6 +8,7 @@ import android.content.IntentFilter;
 import android.os.Handler;
 import android.os.Message;
 import android.os.Bundle;
+import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.widget.Button;
@@ -78,6 +79,7 @@ import static com.turing123.robotframe.multimodal.action.Action.PRMTYPE_EXECUTIO
 import static java.lang.Thread.sleep;
 
 public class MainActivity extends BaseActivity implements ISceneV {
+	
     private static final String TAG = "MainActivity";
     @BindView(R.id.ed_account)
     EditText account;
@@ -120,7 +122,7 @@ public class MainActivity extends BaseActivity implements ISceneV {
     private boolean isSquagging = true;//自锁
 //    private boolean anewConnect;//进入重新联网
     private boolean isInitiativeOff;//判断是否主动断网
-    private boolean ACTIVATESIGN;//框架启动标志
+    public static boolean ACTIVATESIGN;//框架启动标志
     private Bundle packet;
     private long exitTime; // 短时间内是否连续点击返回键
     private boolean whence;
@@ -151,12 +153,13 @@ public class MainActivity extends BaseActivity implements ISceneV {
 
 //        if (!AppTools.netWorkAvailable(MainActivity.this)) {
 //            //启动框架
-            mBFrame = BFrame.instance(this);
-            mBFrame.setConnectState(mBConnect);
+                mBFrame = BFrame.instance(MainActivity.this);
+                mBFrame.setConnectState(mBConnect);
 //        }
-
 //        regBroadcast();
-        StartOtherApplications();
+
+        TelephonyManager tm = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
+        Log("设备id"+tm.getDeviceId());
 
     }
 
@@ -198,7 +201,6 @@ public class MainActivity extends BaseActivity implements ISceneV {
            } catch (Exception e) {
                e.printStackTrace();
            }
-
        }
    }
 
@@ -219,16 +221,13 @@ public class MainActivity extends BaseActivity implements ISceneV {
                         switch (packet.getString("action")) {
                             case "tts.status":
                                 if (packet.getInt("arg1",0) == 0){
-                                    isInterrupt = true;
+//                                    if (TobotUtils.isNotEmpty(mInterrupted)){
+//                                        mInterrupted.Voice(true);//可打断
+//                                    }
+//                                    BFrame.isInterrupt = true;//可打断//20171226注释一直停留在打断
                                     mBFrame.Ear(EarActionCode.EAR_MOTIONCODE_2);//发声效果
-                                    try {
-                                        activeTimer.cancel();
-                                        activeTimer = new Timer();
-                                        sleep(1000);
-                                    } catch (InterruptedException e) {
-                                        e.printStackTrace();
-                                    }
-                                mBFrame.hint();
+                                    activeTimer.cancel();
+                                    activeTimer = new Timer();
                                 }
                                 break;
                             case "connection.status":
@@ -238,14 +237,18 @@ public class MainActivity extends BaseActivity implements ISceneV {
                                 }
                                 break;
                             case "asr.status":
-                                isInterrupt = false;
-                                mBFrame.Ear(EarActionCode.EAR_MOTIONCODE_3);//录音效果
+//                                if (TobotUtils.isNotEmpty(mInterrupted)) {
+//                                    mInterrupted.Voice(false);//不可打断
+//                                }
+//                                BFrame.prevent = false;
+//                                BFrame.isInterrupt = false;//不可打断//20171229考虑到全局tts已自主控制,asr不在暂停
                                 String asrContent = packet.getString("arg2");
+                                mBFrame.Ear(EarActionCode.EAR_MOTIONCODE_3);//录音效果
                                 if(packet.getInt("arg1") == 4){
                                     if(asrContent.contains("没有检查到网络")) {
                                         if (!hintConnect) {
                                             Log("ASR没有检查到网络");
-                                            detectionTime.schedule(new DetectionTimerTask(),5000,10000);//10秒钟
+                                            detectionTime.schedule(new DetectionTimerTask(),10*1000,10*1000);//10秒钟
                                         }
                                     }
                                 }else if(packet.getInt("arg1") == 3 && asrContent != null){// packet.getString("arg2") != null  //收到对话
@@ -280,20 +283,24 @@ public class MainActivity extends BaseActivity implements ISceneV {
                                     }
                                 }
                                 break;
-                            case "robot.state"://状态机
+								
+                            case "robot.state":
                                 if(packet.getInt("arg1") == 5){
-
+                                    BFrame.robotState = false;
                                 }else if(packet.getInt("arg1") == 4){
 
                                 }else if(packet.getInt("arg1") == 3){
                                     isOFF_HINT = false;
-                                    //mohuaiyuan 20171226 原来的代码
-//                                    mBFrame.outAction(BodyActionCode.ACTION_9);
-
+                                    BFrame.robotState = true;
                                     //mohuaiyuan 20171226 新的代码 20171226
                                     //TODO 唤醒的地方
                                     Log.d("IDormant", "摸头唤醒 之后 回调: ");
-                                    dealAwakenBehavior();
+                                    try {
+                                        dealAwakenBehavior();
+                                    } catch (Exception e) {
+                                        Log.e("IDormant", "摸头唤醒 之后 回调，出现Exception e : "+e.getMessage());
+                                        e.printStackTrace();
+                                    }
 
                                 }
                                 break;
@@ -370,7 +377,6 @@ public class MainActivity extends BaseActivity implements ISceneV {
 
     }
 
-
 //------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 
@@ -387,49 +393,81 @@ public class MainActivity extends BaseActivity implements ISceneV {
                         isDormant = true;
                         isWakeup = false;
                         mBFrame.Wakeup();
-                    } else if (isInterrupt || TobotUtils.isInScenario(mScenario)) {
-                        Log("触摸--打断"+mScenario);
-                        switch (mScenario) {
-                            case "os.sys.song":
-//                                SongScenario.instance(this).Backspacing();
-                            break;
-                            case "os.sys.story":
-
-                                break;
-                            case "os.sys.dance":
-
-                                break;
-                        }
+                    } else if (BFrame.isInterrupt || BFrame.prevent || TobotUtils.isInScenario(mScenario)) {
+                        Log("触摸--打断:" + mScenario + "  BFrame.isInterrupt:" + BFrame.isInterrupt + "  BFrame.prevent:" + BFrame.prevent);
+//                        switch (mScenario) {
+//                            case "os.sys.song":
+////                                SongScenario.instance(this).Backspacing();
+//                            break;
+//                            case "os.sys.story":
+//
+//                                break;
+//                            case "os.sys.dance":
+//
+//                                break;
+//                        }
                         KeyInputEvent mKeyInputEvent = new KeyInputEvent(keyCode, KEYCODE_HEAD);
-                        mBFrame.Interrupt();
-                        isInterrupt = false;
+                        mBFrame.InterruptTouch();
+//                        if (TobotUtils.isNotEmpty(mInterrupted)){
+//                            mInterrupted.Voice(false);//不可打断
+//                        }
+//                        BFrame.isInterrupt = false;//不可打断
+//                        BFrame.prevent = false;
                     } else {
                         Log("触摸--调侃聊天");
+                        Log.d("helloworld", "触摸--调侃聊天: ");
                         try {
                             long l = (System.currentTimeMillis() - exitTime);
                             if (l < 4000) {//连续点击
                                 Log("触摸--连续点击");
-                                onBle();
+                                Log.d("helloworld", "触摸--连续点击: ");
 
+                               // onBle();
+                                //mohuaiyuan 20180106 原来的代码
+//                                TobotUtils.getIPAddress(MainActivity.this);//播报ip
+								
                                 //mohuaiyuan 20171228 新的代码 新增的代码
                                 exitTime = 0;
 
                                 //mohuaiyuan 20171220 新的代码 新增的代码
                                 MyTouchResponse myTouchResponse=new MyTouchResponse(mContext);
-                                mBFrame.response(myTouchResponse.doubleTouchHeadResponse());
+                                BFrame.response(myTouchResponse.doubleTouchHeadResponse());
+
+                                /*Map<String,String> map=null;
+                                try {
+                                    map=BFrame.getString(myTouchResponse.doubleTouchHeadResponse());
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                }
+
+                                BaseTTSCallback baseTTSCallback=new BaseTTSCallback(){
+                                    @Override
+                                    public void onCompleted() {
+                                        TobotUtils.getIPAddress(mContext);//播报ip
+                                    }
+                                };
+                                BFrame.setInterruptTTSCallback(new InterruptTTSCallback(this,baseTTSCallback));
+
+                                try {
+                                    BFrame.responseWithCallback(map);
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                }*/
+
 
                                 //mohuaiyuan 20180104 测试 获取音量
-                                AudioUtils audioUtils=new AudioUtils(mContext);
-                                int currentVolume=audioUtils.getCurrentVolume();
-                                int maxVolume=audioUtils.getMaxVolume();
-                                Log.d("IDormant", "currentVolume: "+currentVolume);
-                                Log.d("IDormant", "maxVolume: "+maxVolume);
-                                int code = audioUtils.adjustLowerMusicVolume();
-                                Log.d("IDormant", "code: "+code);
+                                //AudioUtils audioUtils=new AudioUtils(mContext);
+                                //int currentVolume=audioUtils.getCurrentVolume();
+                                //int maxVolume=audioUtils.getMaxVolume();
+                                //Log.d("IDormant", "currentVolume: "+currentVolume);
+                                //Log.d("IDormant", "maxVolume: "+maxVolume);
+                                //int code = audioUtils.adjustLowerMusicVolume();
+                                //Log.d("IDormant", "code: "+code);
 
 
                             } else {
                                 Log("触摸--单击");
+                                Log.d("helloworld", "触摸--单击: ");
                                 exitTime = System.currentTimeMillis();
 
                                 //mohuaiyuan 20171220 原来的代码
@@ -438,17 +476,17 @@ public class MainActivity extends BaseActivity implements ISceneV {
                                 MyTouchResponse myTouchResponse=new MyTouchResponse(mContext);
                                 mBFrame.response(myTouchResponse.onceTouchHeadResponse());
 
-                                Demand.instance(this).stopDemand();
+                                Demand.instance(this).stopDemand();//停止点播
 
                                 //mohuaiyuan 20180104 测试 获取音量
-                                AudioUtils audioUtils=new AudioUtils(mContext);
-                                int currentVolume=audioUtils.getCurrentVolume();
-                                int maxVolume=audioUtils.getMaxVolume();
-                                Log.d("IDormant", "currentVolume: "+currentVolume);
-                                Log.d("IDormant", "maxVolume: "+maxVolume);
-                                int code = audioUtils.adjustRaiseMusicVolume();
-                                Log.d("IDormant", "code: "+code);
-
+                               // AudioUtils audioUtils=new AudioUtils(mContext);
+                               // int currentVolume=audioUtils.getCurrentVolume();
+                               // int maxVolume=audioUtils.getMaxVolume();
+                               // Log.d("IDormant", "currentVolume: "+currentVolume);
+                               // Log.d("IDormant", "maxVolume: "+maxVolume);
+                               // int code = audioUtils.adjustRaiseMusicVolume();
+                               // Log.d("IDormant", "code: "+code);
+                               
 
                                //mohuaiyuan  20171225 测试 表情 序号
     /*                            if (expressionList==null){
@@ -467,7 +505,7 @@ public class MainActivity extends BaseActivity implements ISceneV {
                                 BFrame.Facial(currentExpression);
 
                                 expressionList.remove(index);*/
-
+								
                             }
                         } catch (Exception e) {
                             e.printStackTrace();
@@ -540,11 +578,12 @@ public class MainActivity extends BaseActivity implements ISceneV {
         isFeelHead = feel;
     }
 
+	//mohuaiyuan  20180105 所有情况下的网络断了
     @Override
     public void getConnectFailure(boolean failure) {
         if (failure){
             mBFrame.Facial(EmojNames.DEPRESSED);
-            mBFrame.outAction(BodyActionCode.ACTION_45);
+            mBFrame.motion(BodyActionCode.ACTION_45);
         }
     }
 
@@ -554,8 +593,6 @@ public class MainActivity extends BaseActivity implements ISceneV {
         isDormant = dormant;//自动休眠
         isWakeup = true;//允许唤醒
         isOFF_HINT = true;
-        //mohuaiyuan 20171226 原来的代码
-//        mBFrame.outAction(BodyActionCode.ACTION_8);
     }
 
     private String mScenario = "stop";
@@ -563,13 +600,13 @@ public class MainActivity extends BaseActivity implements ISceneV {
     public void getScenario(String scenario) {
         mScenario = scenario;
         mBFrame.getBArmtouch().getScenario(scenario);
-        //理论上不需要,因为asr检测很频繁(断网后asr会切换成离线)
-//        if (!TobotUtils.isInScenario(mScenario) && isDormant){
-//            //等待睡眠
-//            dormantTimer.cancel();
-//            dormantTimer = new Timer();
-//            dormantTimer.schedule(new DormantTimerTask(),300000000);//等待5分钟进入休眠
-//        }
+        //理论上不需要,因为asr检测很频繁(断网后asr会切换成离线)//5.1更换asr后有百年
+        if (!TobotUtils.isInScenario(mScenario) && isDormant){
+            //等待睡眠
+            dormantTimer.cancel();
+            dormantTimer = new Timer();
+            dormantTimer.schedule(new DormantTimerTask(),3000000);//等待5分钟进入休眠
+        }
     }
 
     @Override
@@ -590,11 +627,6 @@ public class MainActivity extends BaseActivity implements ISceneV {
 
     }
 
-    @Override
-    public void Interrupt(boolean isInterrupt) {
-        this.isInterrupt = isInterrupt;
-    }
-
 
 //-------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -611,8 +643,8 @@ public class MainActivity extends BaseActivity implements ISceneV {
         mBConnect.shut();
     }
 
-    @OnClick(R.id.btn_shutdown)
-    public void shutdown(){
+    @OnClick(R.id.btn_shutdown1)
+    public void shutdown1(){
        //下发动作
 //        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 //        Log("动作下发时间..1...:"+dateFormat.format(new Date()));
@@ -622,9 +654,37 @@ public class MainActivity extends BaseActivity implements ISceneV {
 //        manager.sendMsg(Transform.HexString2Bytes(Joint.setRegister()));
 //        manager.demandDance();
 
-        bindRobot();
+//        bindRobot();
 
 //        StartOtherApplications();
+//        try {
+//               Log(UserDBManager.getManager().queryById("tobot").getMotion()+"");
+//              }catch (NullPointerException e){
+//                e.printStackTrace();
+//        }
+
+//        BFrame.getmBLocal().carryThrough("");
+
+        mBFrame.FallAsleep();
+
+    }
+
+    @OnClick(R.id.btn_shutdown2)
+    public void shutdown2() {
+//        try {
+//            String answer = AnswerDBManager.getManager().queryByElement(editText.getText().toString().replaceAll("[\\p{P}‘’“”]", "")).getAnswer();
+//            Log("问答数据保存:" + answer != null ? answer : "answer 无数据");
+//        } catch (Exception e) {
+//
+//        }cd
+        try{
+            mInterrupted.Music(editText.getText().toString());
+        }catch (NullPointerException e){
+
+        }
+//        User memory = new User();
+//        memory.setMotion(15);
+//        UserDBManager.getManager().insert(memory);
     }
 
 
@@ -654,7 +714,7 @@ public class MainActivity extends BaseActivity implements ISceneV {
                 hintConnect = false;
                 mBConnect.onAgain();//检测是否需要绑定
                 SocketThreadManager.sharedInstance().sendMsg(Transform.HexString2Bytes(Joint.setRegister()));//发起tcp注册
-
+				
                 //mohuaiyuan 20171220 原来的代码
 //                mBFrame.Facial(EmojNames.TIRED);
 //                mBFrame.outAction(BodyActionCode.ACTION_45);
@@ -677,7 +737,7 @@ public class MainActivity extends BaseActivity implements ISceneV {
                         TobotUtils.getIPAddress(mContext);
                     }
                 };
-                BFrame.setInterruptTTSCallback(new InterruptTTSCallback(BFrame.main,baseTTSCallback));
+                BFrame.setInterruptTTSCallback(new InterruptTTSCallback(MainActivity.this,baseTTSCallback));
 
                 try {
                     BFrame.responseWithCallback(map);
@@ -694,6 +754,7 @@ public class MainActivity extends BaseActivity implements ISceneV {
 
     private class TimeMachineTimerTask extends TimerTask {
         public void run() {
+			
             if (hintConnect && !isOFF_HINT){
                 //mohuaiyuan 20171220 原来的代码
 //                mBFrame.TTS(getResources().getString(R.string.Connection_Break_Hint));
@@ -704,6 +765,7 @@ public class MainActivity extends BaseActivity implements ISceneV {
                     //mohuaiyuan 20180103 新的代码 20180103
                     mBFrame.response(R.string.the_network_is_broken);
                 } catch (Exception e) {
+                    Log.e(TAG, " 网络断了 ，重复性提示 出现 Exception e : "+e.getMessage());
                     e.printStackTrace();
                 }
             }
@@ -719,8 +781,7 @@ public class MainActivity extends BaseActivity implements ISceneV {
         }
     }
 
-
-
+	
     private class AwakenTimerTask extends TimerTask {
         public void run() {
             Message message = new Message();
@@ -745,11 +806,17 @@ public class MainActivity extends BaseActivity implements ISceneV {
     protected void onStart() {
         super.onStart();
         eliminate();
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                StartOtherApplications();
+            }
+        }).start();
     }
 
     private void eliminate() {
         try {
-                new UpdateAnswer();
+			
                 String time1 = UserDBManager.getManager().getCurrentUser().getRequestTime();
                 String time2 = TobotUtils.getCurrentlyDate();
                 long date = TobotUtils.DateMinusTime(time1, time2);
@@ -784,10 +851,10 @@ public class MainActivity extends BaseActivity implements ISceneV {
 //        Log("系统版本号"+android.os.Build.VERSION.RELEASE);
 
 
-//----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+//asr----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 
-    private VoiceInterrupted mInterrupted;
+    public VoiceInterrupted mInterrupted;
 
     public VoiceInterrupted ConductInterrupt() {
         return mInterrupted;
@@ -798,10 +865,34 @@ public class MainActivity extends BaseActivity implements ISceneV {
     }
 
     public interface VoiceInterrupted{
-        void Voice(Object interrupt);
+		
+//        void Voice(Object interrupt);
+        void Music(String music);
     };
 
+
 //TEST------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+    private  void StartOtherApplications(){
+        Intent intent = getPackageManager().getLaunchIntentForPackage("com.robot.bridge");
+        if (intent != null) {
+//            intent.setAction("com.adb.start");
+//            intent.addCategory("android.intent.category.DEFAULT");
+            Log.i("Javen","已启动应用");
+            startActivity(intent);
+        } else {
+            // 没有安装要跳转的app应用，提醒一下
+            Log.i("Javen","没有要启动的应用");
+        }
+
+//        Intent intent = new Intent(Intent.ACTION_MAIN);
+//        intent.addCategory(Intent.CATEGORY_DEFAULT);
+//        ComponentName cn = new ComponentName("com.robot.bridge", "BridgeService");
+//        intent.setComponent(cn);
+//        startService(intent);
+    }
+
 
 
     public void regBroadcast() {
@@ -861,17 +952,32 @@ public class MainActivity extends BaseActivity implements ISceneV {
     }
 
 
-    private  void StartOtherApplications(){
-        Intent intent = getPackageManager().getLaunchIntentForPackage("com.robot.bridge");
-        if (intent != null) {
-            Log.i("Javen","已启动应用");
-            startActivity(intent);
-        } else {
-            // 没有安装要跳转的app应用，提醒一下
-            Log.i("Javen","没有要启动的应用");
-        }
-    }
+
 
 }
 
+ /* * ━━━━━━感觉萌萌哒━━━━━━
+ * 　　　　　　　　┏┓　　　┏┓
+ * 　　　　　　　┏┛┻━━━┛┻┓
+ * 　　　　　　　┃　　　　　　　┃ 　
+ * 　　　　　　　┃　　　━　　　┃
+ * 　　　　　　　┃　＞　　　＜　┃
+ * 　　　　　　　┃　　　　　　　┃
+ * 　　　　　　　┃...　⌒　...　┃
+ * 　　　　　　　┃　　　　　　　┃
+ * 　　　　　　　┗━┓　　　┏━┛
+ * 　　　　　　　　　┃　　　┃　Code is far away from bug with the animal protecting　　　　　　　　　　
+ * 　　　　　　　　　┃　　　┃       神兽保佑,代码无bug
+ * 　　　　　　　　　┃　　　┃　　　　　　　　　　　
+ * 　　　　　　　　　┃　　　┃ 　　　　　　
+ * 　　　　　　　　　┃　　　┃
+ * 　　　　　　　　　┃　　　┃　　　　　　　　　　　
+ * 　　　　　　　　　┃　　　┗━━━┓
+ * 　　　　　　　　　┃　　　　　　　┣┓
+ * 　　　　　　　　　┃　　　　　　　┏┛
+ * 　　　　　　　　　┗┓┓┏━┳┓┏┛
+ * 　　　　　　　　　　┃┫┫　┃┫┫
+ * 　　　　　　　　　　┗┻┛　┗┻┛
+ *
+ */
 

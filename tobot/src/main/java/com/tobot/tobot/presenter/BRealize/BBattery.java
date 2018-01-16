@@ -85,10 +85,10 @@ public class BBattery implements IBattery{
     @Override
     public void balance() {
         if (mBodyState.getBatteryLevel() >= 70) {
-            BFrame.outAction(BodyActionCode.ACTION_120);
+            BFrame.motion(BodyActionCode.ACTION_120);
             tts.speak("还有百分之" + mBodyState.getBatteryLevel() + "体力充足,小子放马过来吧.");
         } else if (mBodyState.getBatteryLevel() >= 40){
-            BFrame.outAction(BodyActionCode.ACTION_31);
+            BFrame.motion(BodyActionCode.ACTION_31);
             tts.speak("还剩百分之" + mBodyState.getBatteryLevel() + "的电量,继续嗨没问题啦.");
         } else if (mBodyState.getBatteryLevel() >= 20){
             tts.speak("仅剩百分之" + mBodyState.getBatteryLevel() + "的电量了,感觉自己有点晕,巴拉巴拉巴拉.");

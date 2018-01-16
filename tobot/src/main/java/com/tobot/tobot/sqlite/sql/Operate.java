@@ -9,14 +9,18 @@ import java.util.Map;
 import com.tobot.tobot.sqlite.annotation.Column;
 import com.tobot.tobot.sqlite.annotation.Id;
 import com.tobot.tobot.sqlite.annotation.OneToMany;
+import com.tobot.tobot.sqlite.table.TableInfo;
 import com.tobot.tobot.sqlite.table.TableUtils;
 import com.tobot.tobot.utils.TobotUtils;
 
 
 
 public class Operate {
+	
+	Class clazz;
 
 	public Operate(Class clazz) {
+		this.clazz = clazz;
 		tableName = TableUtils.getTableName(clazz);
 		primaryKey = TableUtils.getIdName(clazz);
 	}
@@ -34,7 +38,8 @@ public class Operate {
 	 * Pattern.compile("[0-9]*"); Matcher isNum = pattern.matcher(str); if
 	 * (!isNum.matches()) { return false; } return false; }
 	 */
-
+	 
+	 
 	public String buildSelectSql(String tableName, Map<String, String> where) {
 		StringBuilder sb = new StringBuilder(256);
 		sb.append("SELECT * FROM ");
@@ -59,6 +64,50 @@ public class Operate {
 		sb.append("SELECT * FROM ");
 		sb.append(tableName);
 		sb.append(" WHERE ").append(primaryKey).append("=").append("'" + id + "'");
+
+		return sb.toString();
+	}
+
+	//新增加模糊查询
+	public String  buildSelectSqlLike(String tableName, Object element) {
+		Map<String,String> fields = new TableInfo(clazz).getColumns();
+		StringBuilder sb = new StringBuilder(256);
+		sb.append("SELECT * FROM ");
+		sb.append(tableName);
+		Iterator iter = null;
+		if (fields != null) {
+			sb.append(" WHERE ");
+			iter = fields.entrySet().iterator();
+			while (iter.hasNext()) {
+				Map.Entry e = (Map.Entry) iter.next();
+				sb.append(e.getKey()).append(" LIKE ").append("'" + element + "'");// % _ [] [^]
+				if (iter.hasNext()) {
+					sb.append(" OR ");
+				}
+			}
+		}
+
+		return sb.toString();
+	}
+
+	//新增加AND模糊查询
+	public String  buildSelectSqlLike(String tableName, Object id, Object element) {
+		Map<String,String> fields = new TableInfo(clazz).getColumns();
+		StringBuilder sb = new StringBuilder(256);
+		sb.append("SELECT * FROM ");
+		sb.append(tableName);
+		Iterator iter = null;
+		if (fields != null) {
+			sb.append(" WHERE ").append(primaryKey).append("=").append("'" + id + "'").append(" AND ");
+			iter = fields.entrySet().iterator();
+			while (iter.hasNext()) {
+				Map.Entry e = (Map.Entry) iter.next();
+				sb.append(e.getKey()).append(" LIKE ").append("'" + element + "'");// % _ [] [^]
+				if (iter.hasNext()) {
+					sb.append(" OR ");
+				}
+			}
+		}
 
 		return sb.toString();
 	}

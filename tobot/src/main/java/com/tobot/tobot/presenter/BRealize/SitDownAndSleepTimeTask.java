@@ -22,7 +22,7 @@ public class SitDownAndSleepTimeTask extends TimerTask {
     
     public void execute(){
         Log.d(TAG, "execute: ");
-        BFrame.TTS("已经唤醒了，开始执行任务！");
+        Log.d(TAG, "已经唤醒了，开始执行任务！");
         //发送动作、表情等等
         //休眠
         SitDownAndSleep sitDownAndSleep = new SitDownAndSleep();

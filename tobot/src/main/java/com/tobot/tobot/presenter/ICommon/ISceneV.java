@@ -18,5 +18,5 @@ public interface ISceneV {
 //    void getImgpath(Uri path);//废弃
     void FrameLoadSuccess(boolean whence);//框架加载成功
     void FrameLoadFailure();//框架加载失败
-    void Interrupt(boolean isInterrupt);
+//    void Interrupt(boolean isInterrupt);//废弃
 }

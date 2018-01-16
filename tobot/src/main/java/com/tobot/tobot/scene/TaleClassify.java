@@ -15,32 +15,30 @@ import com.turing123.robotframe.scenario.ScenarioRuntimeConfig;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static com.turing123.robotframe.multimodal.action.Action.PRMTYPE_EXECUTION_TIMES;
-
 /**
- * Created by Jvaen on 2017/8/8.
+ * Created by Javen on 2017/12/27.
  */
 
-public class CustomActionScenario implements IScenario {
-    private String TAG = "Javen CustomActionScenario";
+public class TaleClassify implements IScenario {
+    private String TAG = "Javen TaleClassify";
     private String APPKEY;
     private Context mContext;
-    private TTS tts;
 
 
-    public CustomActionScenario(Context context,String appkey){
+    public TaleClassify(Context context, String appkey) {
         this.mContext = context;
         this.APPKEY = appkey;
-        tts = new TTS(mContext, new BaseScene(mContext,"os.sys.chat"));
     }
 
     @Override
     public void onScenarioLoad() {
+
     }
 
     //removerscenario()
     @Override
     public void onScenarioUnload() {
+
     }
 
     @Override
@@ -55,14 +53,12 @@ public class CustomActionScenario implements IScenario {
 
     @Override
     public boolean onTransmitData(Behavior behavior) {
-        tts.speak("好的");
-        if (TobotUtils.isNotEmpty(behavior)){
+        if (TobotUtils.isNotEmpty(behavior)) {
             Pattern p = Pattern.compile("[^0-9]");
             Matcher matcher = p.matcher(behavior.getIntent().getIntentName());
-            Log.i("TAG","运动代号:"+ matcher.replaceAll("").trim());
-            BFrame.motion(Integer.parseInt(matcher.replaceAll("").trim()),true);
+            Log.i("TAG", "故事分类代号:" + matcher.replaceAll("").trim());
         }
-        Log.i("TAG","onTransmitData behavior:" + behavior.toString());
+        Log.i("TAG", "onTransmitData behavior:" + behavior.toString());
         return true;
     }
 
@@ -82,5 +78,5 @@ public class CustomActionScenario implements IScenario {
         //为场景添加打断语，asr 识别到打断语时将产生打断事件，回调到场景的onUserInterrupted() 方法。
         return scenarioRuntimeConfig;
     }
-	
+
 }

@@ -2,60 +2,45 @@ package com.tobot.tobot.function;
 
 import android.content.Context;
 import android.os.Bundle;
-import android.text.TextUtils;
 import android.util.Log;
 
 import com.tobot.tobot.Listener.ExpressionCallback;
-import com.tobot.tobot.Listener.MainScenarioCallback;
 import com.tobot.tobot.Listener.SimpleFrameCallback;
-import com.tobot.tobot.MainActivity;
-import com.tobot.tobot.base.Frequency;
-import com.tobot.tobot.presenter.ICommon.ISceneV;
+import com.tobot.tobot.presenter.BRealize.BFrame;
 import com.tobot.tobot.scene.BaseScene;
 import com.tobot.tobot.scene.CustomScenario;
-import com.tobot.tobot.scene.DanceScenario;
 import com.tobot.tobot.utils.TobotUtils;
 import com.turing123.robotframe.event.AppEvent;
 import com.turing123.robotframe.function.FunctionState;
 import com.turing123.robotframe.function.IFunctionStateObserver;
 import com.turing123.robotframe.function.IInitialCallback;
 import com.turing123.robotframe.function.assemble.IAssembleOutputFunction;
-import com.turing123.robotframe.function.cloud.Cloud;
 import com.turing123.robotframe.function.expression.Expression;
-import com.turing123.robotframe.function.motor.Motor;
 import com.turing123.robotframe.function.tts.ITTSCallback;
 import com.turing123.robotframe.function.tts.TTS;
 import com.turing123.robotframe.internal.function.assemble.IFrameAssembleOutputCallback;
 import com.turing123.robotframe.multimodal.AssembleData;
 import com.turing123.robotframe.multimodal.Behavior;
 import com.turing123.robotframe.multimodal.action.Action;
-import com.turing123.robotframe.multimodal.action.ActionCategoryCode;
-import com.turing123.robotframe.multimodal.action.BodyActionCode;
-import com.turing123.robotframe.multimodal.action.EarActionCode;
-import com.turing123.robotframe.multimodal.expression.EmojNames;
+
 import com.turing123.robotframe.multimodal.expression.FacialExpression;
 import com.turing123.robotframe.multimodal.voice.Voice;
 import com.turing123.robotframe.scenario.IScenario;
 import com.turing123.robotframe.scenario.ScenarioRuntimeConfig;
 
-import java.io.IOException;
 import java.util.List;
 
 import static com.turing123.robotframe.multimodal.action.Action.PRMTYPE_EXECUTION_TIMES;
-import static java.lang.Thread.sleep;
 
 /**
  * Created by Javen on 2017/9/22.
  * 创建AssembleFunction类，用来处理各种表现。
  */
 public class AssembleFunction implements IAssembleOutputFunction {
-    private static final String TAG = "Javen";
+    private static final String TAG = "Javen AssembleFunction";
 
     private Context mContext;
     private TTS tts;
-    private Motor motor;
-    private Expression mExpression;
-    private FacialExpression mFacialExpression;
     private IFrameAssembleOutputCallback iFrameAssembleOutputCallback;
     private int index;
     private int size;
@@ -63,7 +48,7 @@ public class AssembleFunction implements IAssembleOutputFunction {
     private FunctionState state = FunctionState.UNREADY;
     private Voice voice;
     private Action action;
-    private FacialExpression  facialExpression;
+    private FacialExpression facialExpression;
 
 
     public AssembleFunction(Context mContext) {
@@ -73,27 +58,22 @@ public class AssembleFunction implements IAssembleOutputFunction {
     @Override
     public void init(IInitialCallback iInitialCallback) {
         tts = new TTS(mContext, tempScenario);
-        motor = new Motor(mContext, new CustomScenario(mContext));
-        mFacialExpression = new FacialExpression();
-        mFacialExpression.displayMode = FacialExpression.DISPLAY_MODE_PROTOCOL_PREDEFINED;
-        mFacialExpression.executeMode = Action.MODE_COVER;
-        mFacialExpression.eyeParams.put(PRMTYPE_EXECUTION_TIMES, 1);
-        mExpression= new Expression(mContext,new BaseScene(mContext,"os.sys.chat"));
         // 初始化成功需要回调onSuccess.
         iInitialCallback.onSuccess();
         state = FunctionState.IDLE;
+        Interrupt();
     }
 
     /**
      * 实现此方法用来处理输出
      *
-     * @param list                         AssembleData 中包含了一轮对话返回的语言、表情和动作，以及当前机器人心情值。
+     * @param list
      * @param iFrameAssembleOutputCallback 当start处理开始和完成需要回调其onStart 和 onStop 方法。
      *                                     特别注意：处理过程有可能是异步的，例如tts的输出，需在异步执行完成后调用onStop.
      */
     @Override
     public void start(List<AssembleData> list, IFrameAssembleOutputCallback iFrameAssembleOutputCallback, boolean last) {
-        Log.d(TAG, "[ASSEMBLE] start with list:" + list + ", last:" + last);
+//        Log.d(TAG, "[ASSEMBLE] start with list:" + list + ", last:" + last);
         index = 0;
         //1、先保存好传来的回调
         this.iFrameAssembleOutputCallback = iFrameAssembleOutputCallback;
@@ -104,11 +84,15 @@ public class AssembleFunction implements IAssembleOutputFunction {
         if (size > 0) {
             state = FunctionState.RUNNING;
             currentDatas = list;
-            UnifiedIssued(index);
+            try {
+                UnifiedIssued(index);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
     }
 
-    private void UnifiedIssued(int index) {
+    private void UnifiedIssued(int index) throws Exception{
         AssembleData data = currentDatas.get(index);
         Log.d(TAG, "start: " + data);
         voice = data.voice;
@@ -119,11 +103,10 @@ public class AssembleFunction implements IAssembleOutputFunction {
 
             try{
                 if(action != null && TobotUtils.isNotEmpty(action.actionInfoList.get(0).actionCode)){
-                    motor.doAction(Action.buildBodyAction(action.actionInfoList.get(0).actionCode,PRMTYPE_EXECUTION_TIMES,1),new SimpleFrameCallback());
+                    BFrame.motion(action.actionInfoList.get(0).actionCode);
                 }
                 if(facialExpression != null && TobotUtils.isNotEmpty(facialExpression.emoj)){
-                    mFacialExpression.emoj = facialExpression.emoj;
-                    mExpression.showExpression(mFacialExpression, new ExpressionCallback());
+                    BFrame.Facial(facialExpression.emoj);
                 }
                 if (voice != null && TobotUtils.isNotEmpty(voice.text)) {
                     tts.speak(voice.text, ittsCallback);
@@ -147,14 +130,10 @@ public class AssembleFunction implements IAssembleOutputFunction {
     }
 
     @Override
-    public void onFunctionLoad() {
-
-    }
+    public void onFunctionLoad() { }
 
     @Override
-    public void onFunctionUnload() {
-
-    }
+    public void onFunctionUnload() { }
 
     @Override
     public void onFunctionInterrupted() {
@@ -172,39 +151,34 @@ public class AssembleFunction implements IAssembleOutputFunction {
     }
 
     @Override
-    public void setStateObserver(IFunctionStateObserver iFunctionStateObserver) {
-
-    }
+    public void setStateObserver(IFunctionStateObserver iFunctionStateObserver) { }
 
     @Override
-    public void choiceProcessor(int i) {
-
-    }
+    public void choiceProcessor(int i) { }
 
     @Override
-    public void resetFunction() {
-
-    }
+    public void resetFunction() { }
 
     private ITTSCallback ittsCallback = new ITTSCallback() {
 
         @Override
         public void onStart(String s) {
-
+            mAssemble.Permit(true);
         }
 
         @Override
         public void onPaused() {
-
+            mAssemble.Permit(false);
         }
 
         @Override
         public void onResumed() {
-
+            mAssemble.Permit(true);
         }
 
         @Override
         public void onCompleted() {
+            mAssemble.Permit(false);
             if (index == size - 1) {
                 // 一组输出全部处理完成，这时需要回调 onStop, 表示做完了。
                 if (iFrameAssembleOutputCallback != null) {
@@ -215,12 +189,18 @@ public class AssembleFunction implements IAssembleOutputFunction {
             } else {
                 index++;
                 //输出一组中的下一个assemble数据。
-                UnifiedIssued(index);
+                try {
+                    UnifiedIssued(index);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
+           BFrame.hint();
         }
 
         @Override
         public void onError(String s) {
+            mAssemble.Permit(false);
             if (index == size - 1) {
                 // 一组输出全部处理完成，这时需要回调 onStop, 表示做完了。
                 if (iFrameAssembleOutputCallback != null) {
@@ -231,21 +211,21 @@ public class AssembleFunction implements IAssembleOutputFunction {
             } else {
                 index++;
                 //输出一组中的下一个assemble数据。
-                UnifiedIssued(index);
+                try {
+                    UnifiedIssued(index);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
         }
     };
 
     private IScenario tempScenario = new IScenario() {
         @Override
-        public void onScenarioLoad() {
-
-        }
+        public void onScenarioLoad() { }
 
         @Override
-        public void onScenarioUnload() {
-
-        }
+        public void onScenarioUnload() { }
 
         @Override
         public boolean onStart() {
@@ -279,6 +259,34 @@ public class AssembleFunction implements IAssembleOutputFunction {
     };
 
 
+    private IAssembleFunction mAssemble;
+
+    public IAssembleFunction getAssembleFunction() {
+        return mAssemble;
+    }
+
+    public void setAssembleFunction(IAssembleFunction mAssemble) {
+        this.mAssemble = mAssemble;
+    }
+
+    public interface IAssembleFunction {
+//        void Assemble(Object dispose);
+        void Permit(Object interrupt);
+    };
+
+    private void Interrupt(){
+        BFrame.setFrameThing(new BFrame.IFrameThing() {
+
+            @Override
+            public void setAssemble(Object dispose) {
+                if ((boolean) dispose) {
+                    tts.speak(" ", ittsCallback);
+                }else {
+                    tts.speak(" ");
+                }
+            }
+        });
+    }
 
 
 }

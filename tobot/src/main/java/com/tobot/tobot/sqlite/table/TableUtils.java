@@ -10,6 +10,7 @@ import java.util.TreeMap;
 
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.util.Log;
 
 import com.tobot.tobot.db.model.User;
 import com.tobot.tobot.sqlite.annotation.Column;
@@ -187,6 +188,7 @@ public class TableUtils {
 			if (fieldAnnotations.length != 0) {
 				for (Annotation annotation : fieldAnnotations) {
 					if (annotation instanceof Id) {
+						Log.w("Javen","getIdName: " + ((Id) annotation).name());
 						return ((Id) annotation).name();
 					}
 				}
@@ -225,7 +227,6 @@ public class TableUtils {
 								!TobotUtils.isBlank(columnName) ? columnName : field
 										.getName());
 					}
-
 				}
 			}
 		}

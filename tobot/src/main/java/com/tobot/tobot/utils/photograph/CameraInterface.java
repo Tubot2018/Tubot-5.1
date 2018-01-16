@@ -129,7 +129,9 @@ public class CameraInterface {
      */
     public void doTakePicture(){
         Log.i(TAG, "Perform to doTakePicture===>isPreviewing:"+isPreviewing);
-        if(isPreviewing && (mCamera != null)){
+
+        if(mCamera != null){
+            Log.i(TAG, "Perform to doTakePicture");
             mCamera.takePicture(mShutterCallback, null, mJpegPictureCallback);
         }
     }

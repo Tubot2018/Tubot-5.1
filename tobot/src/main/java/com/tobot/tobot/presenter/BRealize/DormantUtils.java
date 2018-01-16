@@ -25,18 +25,22 @@ public class DormantUtils {
         switch (type){
 
             case DormantManager.DORMANT_TYPE_STRAIGHT_TO_SLEEP:
+                Log.d(TAG, "直立休眠类型: ");
                 awakenBehavior=new StraightToSleep();
 
                 DormantManager dormantManager = new DormantManager();
                 //mohuaiyuan  取消任务
+                Log.d(TAG, "mohuaiyuan  取消任务: ");
                 dormantManager.cancelSitDownAndSleepTrigger();
                 break;
 
             case DormantManager.DORMANT_TYPE_SIT_DOWN_AND_SLEEP:
+                Log.d(TAG, "坐下休眠类型: ");
                 awakenBehavior=new SitDownAndSleep();
                 break;
 
             case DormantManager.DORMANT_TYPE_LIE_DOWN_AND_SLEEP:
+                Log.d(TAG, "躺下休眠类型: ");
                 awakenBehavior=new LieDownAndSleep();
                 break;
 
@@ -51,6 +55,8 @@ public class DormantUtils {
 
 
         }
+        Log.d(TAG, "准备进行唤醒。。。: ");
+        Log.d(TAG, "awakenBehavior==null: "+(awakenBehavior==null));
         if (awakenBehavior!=null){
             awakenBehavior.awaken();
         }

@@ -4,7 +4,6 @@ import android.content.Context;
 import android.media.AudioManager;
 import android.util.Log;
 
-import com.tobot.tobot.base.MyTouchResponse;
 import com.tobot.tobot.presenter.ICommon.ISceneV;
 import com.tobot.tobot.presenter.IPort.IArmtouch;
 import com.tobot.tobot.scene.BaseScene;
@@ -107,15 +106,7 @@ public class BArmtouch implements IArmtouch{
 
             default:
                 Log.i("Javen","未进入场景进入调侃");
-                //mohuaiyuan 20171220 原来的代码
-//                tts.speak(TouchResponse.getResponse(mContent));
-                //mohuaiyuan 20171220 新的代码 20171220
-                MyTouchResponse myTouchResponse=new MyTouchResponse(mContent);
-                try {
-                    BFrame.response(myTouchResponse.onceTouchHeadResponse());
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
+                tts.speak(TouchResponse.getResponse(mContent));
                 break;
         }
     }

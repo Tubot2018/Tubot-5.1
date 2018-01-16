@@ -22,7 +22,7 @@ public class ShutdownReceiver extends BroadcastReceiver {
         Log.i("Javen","关机广播");
 //        if (intent.getAction().equals(Intent.ACTION_SHUTDOWN)){
             //关机
-            BFrame.Ear(EarActionCode.EAR_MOTIONCODE_5);
+//            BFrame.Ear(EarActionCode.EAR_MOTIONCODE_5);//关机时间太短了
             BFrame.shutDown();
 //        }
     }

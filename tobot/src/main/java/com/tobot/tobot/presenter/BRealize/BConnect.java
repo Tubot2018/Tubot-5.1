@@ -8,6 +8,7 @@ import android.util.Log;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
+import com.iflytek.cloud.thirdparty.E;
 import com.tobot.tobot.MainActivity;
 import com.tobot.tobot.base.Constants;
 import com.tobot.tobot.base.Frequency;
@@ -187,8 +188,11 @@ public class BConnect implements IConnect{
                         user.setUltrAP("1");
                         mainActivity.tvConnResult.setText("已连接到网络");
                     } else if (connect == ConnectionStatus.AP_START_SERVER) {
-//                        mainActivity.motor.doAction(Action.buildEarAction(EarActionCode.EAR_MOTIONCODE_6,80,10));//断网-灯圈  //20171211-previous code
-                        BFrame.Ear(EarActionCode.EAR_MOTIONCODE_6);//断网-灯圈
+                        try{
+                            BFrame.Ear(EarActionCode.EAR_MOTIONCODE_6);//断网-灯圈
+                        }catch (Exception e){
+
+                        }
                         mainActivity.tvConnResult.setText("启动ap server, 并准备好ap连接网");
 //                    } else if(connect == ConnectionStatus.WIFI_CONNECTED_FAIL){
 //                        user.setUltrAP("2");

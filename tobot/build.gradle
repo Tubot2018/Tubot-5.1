@@ -8,8 +8,8 @@ android {
         applicationId "com.tobot.tobot"
         minSdkVersion 17
         targetSdkVersion 22
-        versionCode 1
-        versionName "1.0"
+        versionCode 2
+        versionName "1.0.2"
 
 //        multiDexEnabled true
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
@@ -50,15 +50,15 @@ dependencies {
     compile 'com.android.support:support-v4:26.0.0-alpha1'
     compile 'com.jakewharton:butterknife:8.6.0'
     apt 'com.jakewharton:butterknife-compiler:8.6.0'
-    compile 'com.github.bumptech.glide:glide:4.0.0'
-    compile 'org.greenrobot:greendao:3.2.2'
-    compile files('libs/okio-1.8.0.jar')
-    compile files('libs/TingPhoneOpenSDK_5.5.1.jar')
-    compile files('libs/XmDownload_1.6.jar')
-    compile files('libs/XmlyOAuth2SDK_V1.0.9.jar')
-    compile files('libs/xutil3.3.6.jar')
-    compile files('libs/trackDTO.jar')
-    compile 'org.greenrobot:greendao:3.2.2'
+	
+    //    compile 'com.github.bumptech.glide:glide:4.0.0'
+    //    compile 'org.greenrobot:greendao:3.2.2'
+    //    compile files('libs/okio-1.8.0.jar')
+    //    compile files('libs/TingPhoneOpenSDK_5.5.1.jar')
+    //    compile files('libs/XmDownload_1.6.jar')
+    //    compile files('libs/XmlyOAuth2SDK_V1.0.9.jar')
+    //    compile files('libs/xutil3.3.6.jar')
+    //    compile files('libs/trackDTO.jar')
     compile 'com.android.support:recyclerview-v7:26.0.0-alpha1'
     compile project(':RobotFrame')
     compile files('libs/qdreamer.jar')
@@ -66,10 +66,11 @@ dependencies {
 android {
     signingConfigs {
         release {
-            keyAlias 'tuling123'
-            keyPassword 'guangnian2016'
-            storeFile file('tuling123.keystore')
-            storePassword 'guangnian2016'
+		
+//            keyAlias 'tuling123'
+//            keyPassword 'guangnian2016'
+//            storeFile file('tuling123.keystore')
+//            storePassword 'guangnian2016'
         }
     }
     buildTypes {

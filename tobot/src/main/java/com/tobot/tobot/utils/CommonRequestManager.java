@@ -10,11 +10,9 @@ import android.os.Message;
 import android.util.Log;
 
 import com.tobot.tobot.Listener.SimpleFrameCallback;
-import com.tobot.tobot.MainActivity;
 import com.tobot.tobot.R;
 import com.tobot.tobot.presenter.BRealize.BFrame;
 import com.tobot.tobot.scene.CustomScenario;
-import com.turing123.robotframe.config.SystemConfig;
 import com.turing123.robotframe.function.motor.Motor;
 import com.turing123.robotframe.multimodal.action.Action;
 import com.ximalaya.ting.android.opensdk.constants.DTransferConstants;
@@ -28,7 +26,7 @@ import com.ximalaya.ting.android.opensdk.model.track.TrackList;
 
 import java.io.File;
 import java.io.IOException;
-import java.security.PublicKey;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -41,6 +39,7 @@ import java.util.Random;
  */
 
 public class CommonRequestManager {
+
 
     private static  String TAG = "CommonRequestManager";
 
@@ -320,11 +319,9 @@ public class CommonRequestManager {
 //                            if (albumListIDataCallBack!=null){
 //                                albumListIDataCallBack.onError(code,message);
 //                            }
-//
 //                        }
 //                    });
 //                }
-
             }
 
             @Override
@@ -411,10 +408,7 @@ public class CommonRequestManager {
                         if (trackListIDataCallBack!=null){
                             trackListIDataCallBack.onSuccess(tracks);
                         }
-
-
                     }
-
                 }
 
                 @Override
@@ -423,10 +417,8 @@ public class CommonRequestManager {
                     if (trackListIDataCallBack!=null){
                         trackListIDataCallBack.onError(code,message);
                     }
-
                 }
             });
-
         }
 
     }
@@ -474,9 +466,7 @@ public class CommonRequestManager {
                                 if (searchTrackListIDataCallBack!=null){
                                     searchTrackListIDataCallBack.onSuccess(tracks);
                                 }
-
                             }
-
                         }
 
                         @Override
@@ -497,13 +487,10 @@ public class CommonRequestManager {
                 if (searchTrackListIDataCallBack!=null){
                     searchTrackListIDataCallBack.onError(code,message);
                 }
-
             }
         });
 
     }
-
-
 
     public interface  AlbumListIDataCallBack{
         void onSuccess(List<Album> albums);
@@ -511,6 +498,7 @@ public class CommonRequestManager {
         void onError(int code, String message);
 
     }
+	
     public interface  TrackListIDataCallBack{
         void onSuccess(List<Track> tracks);
         void onSuccess(TrackList trackList);
@@ -524,8 +512,6 @@ public class CommonRequestManager {
         void onError(int code, String message);
 
     }
-
-
 
 //    private static final int TO_EXECUTE_SONG=23;
     private static final int TO_GET_TRICK=343;
@@ -639,16 +625,6 @@ public class CommonRequestManager {
     }
 
     /**
-     * 回到 聊天场景（主场景）
-     * @return
-     */
-    public void backMainScenario(){
-        Log.d(TAG, "backMainScenario: ");
-        BFrame.shutChat();
-    }
-
-
-    /**
      * 初始化音乐播放器
      * @param track:音乐信息类，详见喜马拉雅文档model
      * @throws Exception:track 为空 ，或者track 中的播放地址 playUrl都为空
@@ -715,7 +691,8 @@ public class CommonRequestManager {
                 if (onCompletionListener!=null){
                     onCompletionListener.onCompletion(mp);
                 }
-                backMainScenario();
+                Log.i(TAG,"释放资源 回到主场景");
+                BFrame.disparkChat();
             }
         });
 
@@ -737,7 +714,8 @@ public class CommonRequestManager {
                 if (onErrorListener!=null){
                     onErrorListener.onError(mp,what,extra);
                 }
-                backMainScenario();
+                Log.i(TAG,"播放错误 回到主场景");
+                BFrame.disparkChat();
                 return false;
             }
         });
@@ -751,8 +729,11 @@ public class CommonRequestManager {
         if (mediaPlayer!=null){
             if (mediaPlayer.isPlaying()){
                 mediaPlayer.pause();
-                backMainScenario();
+                Log.i(TAG,"暂停/播放 回到主场景");
+                BFrame.disparkChat();
             }else {
+                Log.i(TAG,"暂停/播放 脱离主场景");
+                BFrame.shutChat();
                 mediaPlayer.start();
             }
         }
@@ -765,7 +746,8 @@ public class CommonRequestManager {
     public void pausePlayMusic()throws Exception{
         if (mediaPlayer!=null ){
             mediaPlayer.pause();
-            backMainScenario();
+            Log.i(TAG,"暂停 回到主场景");
+            BFrame.disparkChat();
         }
     }
 
@@ -775,6 +757,8 @@ public class CommonRequestManager {
     public void startPlayMusic(){
         if (mediaPlayer!=null){
             mediaPlayer.start();
+            Log.i(TAG,"开始播放 脱离主场景");
+            BFrame.shutChat();
         }
     }
 
@@ -786,7 +770,8 @@ public class CommonRequestManager {
         if (mediaPlayer!=null && mediaPlayer.isPlaying()){
             mediaPlayer.stop();
             mediaPlayer=null;
-            backMainScenario();
+            Log.i(TAG,"停止播放 回到主场景");
+            BFrame.disparkChat();
         }
     }
 
