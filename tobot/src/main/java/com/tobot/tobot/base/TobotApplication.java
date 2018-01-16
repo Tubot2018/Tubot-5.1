@@ -7,10 +7,12 @@ import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
 
+import com.qdreamer.qvoice.QModule;
 import com.tobot.tobot.MainActivity;
 import com.tobot.tobot.db.bean.MemoryDBManager;
 import com.tobot.tobot.db.bean.UserDBManager;
 import com.tobot.tobot.db.model.User;
+import com.tobot.tobot.function.QASRFunction;
 
 /**
  * Created by Javen on 2017/7/10.
@@ -33,6 +35,7 @@ public class TobotApplication extends Application {
 //        Thread.setDefaultUncaughtExceptionHandler(handler);//直接重启
 //        StartOtherApplications();
         MemoryDBManager.getManager().clear();
+        QASRFunction.close();
     }
 
     public synchronized static TobotApplication getInstance() {

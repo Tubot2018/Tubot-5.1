@@ -185,7 +185,8 @@ public class TobotUtils {
         if (discernASR.contains("小猪小猪") || discernASR.contains("小图小图") || discernASR.contains("小偷小偷")
                 || discernASR.contains("晓彤晓彤") || discernASR.contains("小兔小兔") || discernASR.contains("下图下图")
                 || discernASR.contains("海豚海豚") || discernASR.contains("插头插头") || discernASR.contains("呷哺呷哺")
-                || discernASR.contains("下途下途")){
+                || discernASR.contains("下途下途") || discernASR.contains("下毒下毒") || discernASR.contains("小彭小彭")
+                || discernASR.contains("消毒消毒")){
             return true;
         }else{
             return false;
@@ -469,7 +470,15 @@ public class TobotUtils {
                         for (Enumeration<InetAddress> enumIpAddr = intf.getInetAddresses(); enumIpAddr.hasMoreElements(); ) {
                             InetAddress inetAddress = enumIpAddr.nextElement();
                             if (!inetAddress.isLoopbackAddress() && inetAddress instanceof Inet4Address) {
-                                BFrame.TTS("本机当前IP地址为:"+inetAddress.getHostAddress());
+                                //mohuaiyuan 20180108 原来的代码
+//                                BFrame.TTS("本机当前IP地址为:"+inetAddress.getHostAddress());
+                                //mohuaiyuan 20180108 新的代码 20180108
+                                String speech="speech:本机当前IP地址为:"+inetAddress.getHostAddress();
+                                try {
+                                    BFrame.response(speech);
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                }
                                 return inetAddress.getHostAddress();
                             }
                         }

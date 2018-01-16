@@ -24,6 +24,7 @@ public class Constants {
     /**图巴机器人服务端:IP+端口*/
     public final static String CIM_SERVER_HOST0 = "http://39.108.134.20/";
 
+    public final static String VERSIONS = CIM_SERVER_HOST0 + "tubarobot/disp/robot/version/last";//检测版本
     public final static String ROBOT_BOUND = CIM_SERVER_HOST0 + "tubarobot/disp/robot/add/";//绑定机器人
     public final static String AMEND_STATUS = CIM_SERVER_HOST0 + "tubarobot/disp/robot/attr/set/";//修改角色属性
     public final static String ACTION_LIST = CIM_SERVER_HOST0 + "tubarobot/disp/robot/action/list/";//动作列表
@@ -69,17 +70,17 @@ public class Constants {
     public static final String WAKEUP =  "/sdcard/.TuringResource/system/WakeUp.bin";
 
     public static final String PopularMusic =  "/sdcard/.TuubaResource/PopularMusic-28-";
-    public static final String Poetry =  "/sdcard/.TuubaResource/Poetry-17.txt";
-    public static final String NationSong =  "/sdcard/.TuubaResource/NationSong-25.txt";
-    public static final String IdiomStory =  "/sdcard/.TuubaResource/IdiomStory-12.txt";
-    public static final String FairytaleStory =  "/sdcard/.TuubaResource/FairytaleStory-10.txt";
-    public static final String FableStory =  "/sdcard/.TuubaResource/FableStory-14.txt";
-    public static final String ExampleSong =  "/sdcard/.TuubaResource/ExampleSong-7.txt";
-    public static final String EnglishSong =  "/sdcard/.TuubaResource/EnglishSong-22.txt";
-    public static final String Cradlesong =  "/sdcard/.TuubaResource/Cradlesong-23.txt";
-    public static final String ClassicsStory =  "/sdcard/.TuubaResource/ClassicsStory-9.txt";
-    public static final String CharacterStory =  "/sdcard/.TuubaResource/CharacterStory-11.txt";
-    public static final String ChantsSong =  "/sdcard/.TuubaResource/ChantsSong-6-.txt";
+    public static final String Poetry =  "/sdcard/.TuubaResource/Poetry-17";
+    public static final String NationSong =  "/sdcard/.TuubaResource/NationSong-25";
+    public static final String IdiomStory =  "/sdcard/.TuubaResource/IdiomStory-12";
+    public static final String FairytaleStory =  "/sdcard/.TuubaResource/FairytaleStory-10";
+    public static final String FableStory =  "/sdcard/.TuubaResource/FableStory-14";
+    public static final String ExampleSong =  "/sdcard/.TuubaResource/ExampleSong-7";
+    public static final String EnglishSong =  "/sdcard/.TuubaResource/EnglishSong-22";
+    public static final String Cradlesong =  "/sdcard/.TuubaResource/Cradlesong-23";
+    public static final String ClassicsStory =  "/sdcard/.TuubaResource/ClassicsStory-9";
+    public static final String CharacterStory =  "/sdcard/.TuubaResource/CharacterStory-11";
+    public static final String ChantsSong =  "/sdcard/.TuubaResource/ChantsSong-6-";
 
 
     public static final int squat = 6;

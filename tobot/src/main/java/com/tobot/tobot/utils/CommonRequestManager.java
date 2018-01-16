@@ -785,7 +785,8 @@ public class CommonRequestManager {
         if (motor==null){
             motor = new Motor(mContext, new CustomScenario(mContext));
         }
-        motor.doAction(Action.buildBodyAction(action, Action.PRMTYPE_EXECUTION_TIMES, 1), simpleFrameCallback);
+//        motor.doAction(Action.buildBodyAction(action, Action.PRMTYPE_EXECUTION_TIMES, 1), simpleFrameCallback);
+        BFrame.motion(action);
     }
 
     public String getString(int id){

@@ -63,10 +63,10 @@ public class MusicClassify implements IScenario {
                 Log.i(TAG, "音乐分类代号:" + matcher.replaceAll("").trim());
                 switch (matcher.replaceAll("").trim()){
                     case "1":
-                        main.mInterrupted.Music("唱"+TobotUtils.getMusic(Constants.PopularMusic + Math.abs( new Random().nextInt())%3+".txt"));
+                        main.mInterrupted.Music("唱"+TobotUtils.getMusic(Constants.PopularMusic + Math.abs( new Random().nextInt())%3));
                         break;
                     case "2":
-                        main.mInterrupted.Music("唱"+TobotUtils.getMusic(Constants.ChantsSong + Math.abs( new Random().nextInt())%2+".txt"));
+                        main.mInterrupted.Music("唱"+TobotUtils.getMusic(Constants.ChantsSong + Math.abs( new Random().nextInt())%2));
                         break;
                     case "3":
                         main.mInterrupted.Music("唱"+TobotUtils.getMusic(Constants.EnglishSong));

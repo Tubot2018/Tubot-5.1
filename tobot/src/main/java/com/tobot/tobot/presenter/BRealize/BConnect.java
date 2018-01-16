@@ -179,9 +179,11 @@ public class BConnect implements IConnect{
                         SocketThreadManager.sharedInstance().sendMsg(Transform.HexString2Bytes(Joint.setRegister()));
                         bindRobot();//绑定
                         if(TobotUtils.isEmploy()){//首次使用
+                            Log.e(TAG,"首次使用加载 onInitiate()");
                             BFrame.instance(mISceneV).onInitiate(true);
                             user.setUltr("1");
                         }else if (!isLoad){//加载失败
+                            Log.e(TAG,"加载失败重新加载 onInitiate()");
                             BFrame.instance(mISceneV).onInitiate(true);
                         }
                         user.setMobile(phone);

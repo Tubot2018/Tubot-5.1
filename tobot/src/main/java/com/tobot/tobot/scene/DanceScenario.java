@@ -17,6 +17,7 @@ import com.tobot.tobot.Listener.SimpleFrameCallback;
 import com.tobot.tobot.R;
 import com.tobot.tobot.entity.DetailsEntity;
 import com.tobot.tobot.entity.SongEntity;
+import com.tobot.tobot.presenter.BRealize.VolumeControl;
 import com.tobot.tobot.presenter.ICommon.ISceneV;
 import com.tobot.tobot.utils.AudioUtils;
 import com.tobot.tobot.utils.CommonRequestManager;
@@ -97,6 +98,7 @@ public class DanceScenario implements IScenario{
     private ScenarioManager scenarioManager;
 
     private AudioUtils audioUtils;
+
 
     public DanceScenario(ISceneV mISceneV){
         Log.d(TAG, "DanceScenario: ");
@@ -297,56 +299,56 @@ public class DanceScenario implements IScenario{
 //                    }
 //                }
                     //mohuaiyuan 20180104 原来的代码
-                    if (interrupt.contains("大声点")
-                            || interrupt.contains("大点声")
-                            || interrupt.contains("声音大一点")
-                            || interrupt.contains("音量大一点")) {
-
-                        int currentVolumeLevel = audioUtils.getCurrentVolume();
-                        Log.d(TAG, "currentVolumeLevel: " + currentVolumeLevel);
-                        int result = audioUtils.adjustRaiseMusicVolume();
-                        if (result < 0) {
-                            switch (result) {
-                                case AudioUtils.CURRENT_LEVEL_IS_MAX_VOLUME_LEVEL:
-                                    tts.speak(manager.getString(R.string.maxMusicVolume), null);
-                                    break;
-
-                                default:
-                                    break;
-
-                            }
-                        } else {
-                            tts.speak(manager.getString(R.string.raiseMusicVolume), null);
-                        }
-                        currentVolumeLevel = audioUtils.getCurrentVolume();
-                        Log.d(TAG, "currentVolumeLevel: " + currentVolumeLevel);
-
-                    }
+//                    if (interrupt.contains("大声点")
+//                            || interrupt.contains("大点声")
+//                            || interrupt.contains("声音大一点")
+//                            || interrupt.contains("音量大一点")) {
+//
+//                        int currentVolumeLevel = audioUtils.getCurrentVolume();
+//                        Log.d(TAG, "currentVolumeLevel: " + currentVolumeLevel);
+//                        int result = audioUtils.adjustRaiseMusicVolume();
+//                        if (result < 0) {
+//                            switch (result) {
+//                                case AudioUtils.CURRENT_LEVEL_IS_MAX_VOLUME_LEVEL:
+//                                    tts.speak(manager.getString(R.string.maxMusicVolume), null);
+//                                    break;
+//
+//                                default:
+//                                    break;
+//
+//                            }
+//                        } else {
+//                            tts.speak(manager.getString(R.string.raiseMusicVolume), null);
+//                        }
+//                        currentVolumeLevel = audioUtils.getCurrentVolume();
+//                        Log.d(TAG, "currentVolumeLevel: " + currentVolumeLevel);
+//
+//                    }
                     //mohuaiyuan 20180104 原来的代码
-                    if (interrupt.contains("小声点")
-                            || interrupt.contains("小点声")
-                            || interrupt.contains("声音小一点")
-                            || interrupt.contains("音量小一点")) {
-                        int currentVolumeLevel = audioUtils.getCurrentVolume();
-                        Log.d(TAG, "currentVolumeLevel: " + currentVolumeLevel);
-                        int result = audioUtils.adjustLowerMusicVolume();
-                        if (result < 0) {
-                            switch (result) {
-                                case AudioUtils.CURRENT_LEVEL_IS_MIN_VOLUME_LEVEL:
-                                    tts.speak(manager.getString(R.string.minMusicVolume), null);
-                                    break;
-
-                                default:
-                                    break;
-
-                            }
-                        } else {
-                            tts.speak(manager.getString(R.string.lowerMusicVolume), null);
-                        }
-                        currentVolumeLevel = audioUtils.getCurrentVolume();
-                        Log.d(TAG, "currentVolumeLevel: " + currentVolumeLevel);
-
-                    }
+//                    if (interrupt.contains("小声点")
+//                            || interrupt.contains("小点声")
+//                            || interrupt.contains("声音小一点")
+//                            || interrupt.contains("音量小一点")) {
+//                        int currentVolumeLevel = audioUtils.getCurrentVolume();
+//                        Log.d(TAG, "currentVolumeLevel: " + currentVolumeLevel);
+//                        int result = audioUtils.adjustLowerMusicVolume();
+//                        if (result < 0) {
+//                            switch (result) {
+//                                case AudioUtils.CURRENT_LEVEL_IS_MIN_VOLUME_LEVEL:
+//                                    tts.speak(manager.getString(R.string.minMusicVolume), null);
+//                                    break;
+//
+//                                default:
+//                                    break;
+//
+//                            }
+//                        } else {
+//                            tts.speak(manager.getString(R.string.lowerMusicVolume), null);
+//                        }
+//                        currentVolumeLevel = audioUtils.getCurrentVolume();
+//                        Log.d(TAG, "currentVolumeLevel: " + currentVolumeLevel);
+//
+//                    }
 
 
                 } catch (IllegalStateException e) {
@@ -469,19 +471,17 @@ public class DanceScenario implements IScenario{
 //        scenarioRuntimeConfig.addInterruptCmd("跳支舞");
 //        scenarioRuntimeConfig.addInterruptCmd("下一个");
         //mohuaiyuan 20180104 原来的代码
-        scenarioRuntimeConfig.addInterruptCmd("大声点");
-        scenarioRuntimeConfig.addInterruptCmd("小声点");
-
-        scenarioRuntimeConfig.addInterruptCmd("大点声");
-        scenarioRuntimeConfig.addInterruptCmd("小点声");
-
-        scenarioRuntimeConfig.addInterruptCmd("声音大一点");
-        scenarioRuntimeConfig.addInterruptCmd("声音小一点");
-
-        scenarioRuntimeConfig.addInterruptCmd("音量大一点");
-        scenarioRuntimeConfig.addInterruptCmd("音量小一点");
-
-
+//        scenarioRuntimeConfig.addInterruptCmd("大声点");
+//        scenarioRuntimeConfig.addInterruptCmd("小声点");
+//
+//        scenarioRuntimeConfig.addInterruptCmd("大点声");
+//        scenarioRuntimeConfig.addInterruptCmd("小点声");
+//
+//        scenarioRuntimeConfig.addInterruptCmd("声音大一点");
+//        scenarioRuntimeConfig.addInterruptCmd("声音小一点");
+//
+//        scenarioRuntimeConfig.addInterruptCmd("音量大一点");
+//        scenarioRuntimeConfig.addInterruptCmd("音量小一点");
 
         return scenarioRuntimeConfig;
     }
