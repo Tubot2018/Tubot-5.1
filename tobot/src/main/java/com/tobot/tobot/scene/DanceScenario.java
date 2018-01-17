@@ -17,6 +17,9 @@ import com.tobot.tobot.Listener.SimpleFrameCallback;
 import com.tobot.tobot.R;
 import com.tobot.tobot.entity.DetailsEntity;
 import com.tobot.tobot.entity.SongEntity;
+import com.tobot.tobot.presenter.BRealize.BFrame;
+import com.tobot.tobot.presenter.BRealize.BaseTTSCallback;
+import com.tobot.tobot.presenter.BRealize.InterruptTTSCallback;
 import com.tobot.tobot.presenter.BRealize.VolumeControl;
 import com.tobot.tobot.presenter.ICommon.ISceneV;
 import com.tobot.tobot.utils.AudioUtils;
@@ -198,7 +201,16 @@ public class DanceScenario implements IScenario{
                         prepareExecuteSong(songName);
                     }catch (Exception e){
                         Log.e(TAG, "指定舞蹈 不存在 e : "+e.getMessage() );
-                        tts.speak(manager.getString(R.string.noExistDance));
+                        //mohuaiyuan 20180111 原来的代码
+//                        tts.speak(manager.getString(R.string.noExistDance));
+                        //mohuaiyuan 20180111 新的代码 20180111
+                        try {
+                            BFrame.response(R.string.noExistDance);
+                        } catch (Exception e1) {
+                            Log.e(TAG, "noExistDance 出现Exception e1 : "+e1.getMessage() );
+                            e1.printStackTrace();
+                        }
+						
                         e.printStackTrace();
                         onExit();
                     }
@@ -650,7 +662,17 @@ public class DanceScenario implements IScenario{
             executeSong(musicName);
         } catch (IOException e) {
             e.printStackTrace();
-            tts.speak(manager.getString(R.string.noExistDance));
+			
+            //mohuaiyuan 20180111 原来的代码
+//            tts.speak(manager.getString(R.string.noExistDance));
+            //mohuaiyuan 20180111 新的代码 20180111
+            try {
+                BFrame.response(R.string.noExistDance);
+            } catch (Exception e1) {
+                Log.e(TAG, "executeSong 出现 Exception e1: "+e1.getMessage());
+                e1.printStackTrace();
+            }
+
             Log.e(TAG, "executeSong e: "+e.getMessage() );
         }
 
@@ -678,43 +700,68 @@ public class DanceScenario implements IScenario{
                     }
                 }
                 Log.d(TAG, "songName: "+songName);
-                String speech=manager.getString(R.string.beforePlayDance)+":"+songName;
-                tts.speak(speech, new ITTSCallback() {
-                    @Override
-                    public void onStart(String s) {
-                        Log.d(TAG, "tts onStart: ");
+                //mohuaiyuan 20180111 原来的代码
+//                String speech=manager.getString(R.string.beforePlayDance)+":"+songName;
+//                tts.speak(speech, new ITTSCallback() {
+//                    @Override
+//                    public void onStart(String s) {
+//                        Log.d(TAG, "tts onStart: ");
+//
+//                    }
+//
+//                    @Override
+//                    public void onPaused() {
+//                        Log.d(TAG, "tts onPaused: ");
+//
+//                    }
+//
+//                    @Override
+//                    public void onResumed() {
+//                        Log.d(TAG, "tts onResumed: ");
+//
+//                    }
+//
+//                    @Override
+//                    public void onCompleted() {
+//                        Log.d(TAG, "tts onCompleted: ");
+//                        //机器人开始跳舞动作
+//                        getMediaPlayer().start();
+//                        sendBodyAction(actionCode);
+//
+//                    }
+//
+//                    @Override
+//                    public void onError(String s) {
+//                        Log.d(TAG, "tts onError: ");
+//
+//                    }
+//                });
+                //mohuaiyuan 20180111 新的代码 20180111
+                String speech=manager.getString(R.string.beforePlayDance,songName);
+                Map<String,String> map=null;
+                try {
+                    map= BFrame.getString(speech);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
 
-                    }
-
-                    @Override
-                    public void onPaused() {
-                        Log.d(TAG, "tts onPaused: ");
-
-                    }
-
-                    @Override
-                    public void onResumed() {
-                        Log.d(TAG, "tts onResumed: ");
-
-                    }
-
+                BaseTTSCallback baseTTSCallback=new BaseTTSCallback(){
                     @Override
                     public void onCompleted() {
-                        Log.d(TAG, "tts onCompleted: ");
+						
                         //机器人开始跳舞动作
                         getMediaPlayer().start();
                         sendBodyAction(actionCode);
 
                     }
+                };
+                BFrame.setInterruptTTSCallback(new InterruptTTSCallback(BFrame.main,baseTTSCallback));
 
-                    @Override
-                    public void onError(String s) {
-                        Log.d(TAG, "tts onError: ");
-
-                    }
-                });
-
-
+                try {
+                    BFrame.responseWithCallback(map);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
 
 
             }

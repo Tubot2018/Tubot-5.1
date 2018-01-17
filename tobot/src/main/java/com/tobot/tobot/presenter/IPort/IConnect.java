@@ -10,6 +10,6 @@ public interface IConnect {
     void shunt();
     void shuntVoice();
     void shut();
-    void isLoad(boolean load);
+//    void isLoad(boolean load);//废弃
     void onAgain();
 }

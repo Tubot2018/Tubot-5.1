@@ -31,7 +31,8 @@ public class AudioUtils {
     private static MinVolumeListener minVolumeListener;
     private static VolumeLegalListener volumeLegalListener;
     private static VolumeCopyListener volumeCopyListener;
-	
+    private static VolumeSpaceListener volumeSpaceListener;
+
     public AudioUtils(Context context){
         this.mContext=context;
         getManager();
@@ -172,8 +173,13 @@ public class AudioUtils {
     }
 
     public double getVolumeSpace(){
-        double space=(double) (getMaxVolume()-getMinVolume())/getVolumeCopies();
-        return space;
+        if (volumeSpaceListener!=null){
+            return volumeSpaceListener.getVolumeSpace();
+        }else {
+            double space=(double) (getMaxVolume()-getMinVolume())/(getVolumeCopies()-1);
+            return space;
+        }
+		
     }
 
     /**
@@ -245,6 +251,11 @@ public class AudioUtils {
 
     public interface VolumeCopyListener{
         int getVolumeCopies();
+    }
+
+    public interface VolumeSpaceListener{
+        double getVolumeSpace();
+
     }
 
 

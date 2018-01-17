@@ -20,7 +20,7 @@
     <!--<string name="Connection_Break_Hint">网络断了,小图在努力恢复中,小主人也可以长摸头帮我换个新网络</string>-->
 
     <!--mohuaiyuan 20171220 新的字符串-->
-    <string name="Connection_Succeed">speech:联网成功，我们可以愉快的聊天了。#,#action:72#,#expression:excites#,#earLightCircle:1</string><!--表情：15-兴奋-->
+    <string name="Connection_Succeed">speech:联网成功，我们可以愉快的聊天了。#,#action:72#,#expression:excites</string><!--表情：15-兴奋-->
 
     <!--<string name="Connection_Start">speech:联网模式已开启，请打开手机app帮我联网吧#,#action:46#,#expression:calm#,#earLightCircle:6</string>&lt;!&ndash;表情不可用：22-尴尬&ndash;&gt;
     -->
@@ -46,7 +46,7 @@
 
     <!--mohuaiyuan 20171220 新的字符串-->
     <!--（联网模式，长按三秒退出联网）--><!--mohuaiyuan 备注：无表情-->
-    <string name="Connection_Close">speech:联网模式已解除。#,#action:1#,#earLightCircle:1</string>
+    <string name="Connection_Close">speech:联网模式已解除。#,#action:1</string>
     <string name="Connection_Recover">@string/Connection_Succeed</string>
 
 
@@ -89,29 +89,29 @@
     <!--#########################################   音乐场景   #################################################################################-->
 
     <!-- 音乐场景 提示语句   -->
-    <string name="noExistMusic">speech:糟糕，这首歌唱不出来了，要不我给你换一首吧。#,#action:93#,#earLightCircle:1</string>
+    <string name="noExistMusic">speech:糟糕，这首歌唱不出来了，要不我给你换一首吧。#,#action:93</string>
     <string name="beforePlayMusic">speech:好的，即将播放 %1$s#,#expression:desire#,#earLightCircle:8</string>
     <string name="continuePlayMusic_response">speech:那我给你唱首 %1$s #,#expression:desire#,#earLightCircle:8</string>
-    <string name="playMusicInterrupt_response">earLightCircle:1</string>
+    <string name="playMusicInterrupt_response"></string>
 
     <!--#########################################   故事场景   #################################################################################-->
     <!-- 故事场景 提示语句   -->
-    <string name="noExistStory">speech:糟糕，这个故事我没学会，要不我给你换一个吧。#,#action:85#,#earLightCircle:1</string>
+    <string name="noExistStory">speech:糟糕，这个故事我没学会，要不我给你换一个吧。#,#action:85</string>
     <string name="beforePlayStory">speech:好的，即将讲 %1$s 的故事#,#expression:desire#,#earLightCircle:8</string>
     <string name="continuePlayStory_response">speech:那我给你讲个 %1$s 的故事#,#expression:desire#,#earLightCircle:8</string>
-    <string name="playStoryInterrupt_response">earLightCircle:1</string>
+    <string name="playStoryInterrupt_response"></string>
 
     <!--#########################################   舞蹈场景   #################################################################################-->
     <!-- 舞蹈场景 提示语句   -->
-    <string name="noExistDance">speech:糟糕，这个舞蹈我还没学会，要不我给你换一个吧。#,#action:93#,#earLightCircle:1</string>
+    <string name="noExistDance">speech:糟糕，这个舞蹈我还没学会，要不我给你换一个吧。#,#action:93</string>
     <string name="beforePlayDance">speech:好的，即将表演 %1$s #,#expression:desire#,#earLightCircle:8</string>
     <string name="continuePlayDance_response">speech:那我给你挑个 %1$s #,#expression:desire#,#earLightCircle:8</string>
-    <string name="playDanceInterrupt_response">earLightCircle:1</string>
+    <string name="playDanceInterrupt_response"></string>
 
 
     <!--#########################################   打断   #################################################################################-->
     <!--mohuaiyuan 20171220 新的字符串-->
-    <string name="wake_up_the_callback">speech:主人，我在！#,#action:82#,#expression:nervous</string><!--表情不可用:24- 左看右看,已找到表情-->
+    <string name="wake_up_the_callback">speech:主人，我在！#,#expression:nervous</string><!--表情不可用:24- 左看右看,已找到表情-->
 
     <string-array name="onceTouchHead">
         <item>speech:可以跟我聊天，不要乱摸头#,#action:1#,#expression:naughtys</item><!--表情：6- 调皮-->
@@ -155,9 +155,9 @@
     </string-array>
     <!--mohuaiyuan 修改 20180103-->
     <!--
-    <string name="straightToSleep_Response">speech:好的，想和我说话你可以叫“小图小图”或者摸头叫我#,#action:1#,#expression:doze#,#earLightCircle:1</string>&lt;!&ndash;表情不可用:11-睡觉,已找到表情&ndash;&gt;
+    <string name="straightToSleep_Response">speech:好的，想和我说话你可以叫“小图小图”或者摸头叫我#,#action:1#,#expression:doze</string>&lt;!&ndash;表情不可用:11-睡觉,已找到表情&ndash;&gt;
     -->
-    <string name="straightToSleep_Response">speech:我休息会，想和我说话你可以叫“小图小图”或者摸头叫我#,#action:1#,#expression:doze#,#earLightCircle:1</string><!--表情不可用:11-睡觉,已找到表情-->
+    <string name="straightToSleep_Response">speech:我休息会，想和我说话你可以叫“小图小图”或者摸头叫我#,#action:1#,#expression:doze</string><!--表情不可用:11-睡觉,已找到表情-->
     <string name="straightToSleep_awaken">speech:主人，是不是想我了，现在可以和我聊天啦#,#action:82#,#expression:happys#,#earLightCircle:2</string><!--表情：16-开心-->
 
     <string-array name="sitDownAndSleep_keyWorks_array">
@@ -165,8 +165,8 @@
         <item>你去休息吧</item>
         <item>休息去</item>
     </string-array>
-    <string name="sitDownAndSleep_Response">speech:那我去休息了，你可以叫“小图小图”或者摸头叫醒我#,#action:8#,#expression:doze#,#earLightCircle:1</string><!--表情不可用：全灭-->
-    <string name="sitDownAndSleep_awaken">speech:是不是想我了，快来和我聊天吧#,#action:9#,#expression:excites#,#earLightCircle:1</string><!--表情：15-兴奋-->
+    <string name="sitDownAndSleep_Response">speech:那我去休息了，你可以叫“小图小图”或者摸头叫醒我#,#action:8#,#expression:doze</string><!--表情不可用：全灭-->
+    <string name="sitDownAndSleep_awaken">speech:是不是想我了，快来和我聊天吧#,#action:9#,#expression:excites</string><!--表情：15-兴奋-->
 
     <string-array name="lieDownAndSleep_keyWorks_array">
         <item>你去睡觉吧</item>
@@ -174,7 +174,7 @@
         <item>睡觉去</item>
     </string-array>
     <string name="lieDownAndSleep_Response">speech:那我去睡觉了，你可以叫“小图小图”或者摸头叫醒我#,#action:10#,#expression:doze#,#earLightCircle:0</string><!--表情不可用：全灭-->
-    <string name="lieDownAndSleep_awaken">speech:啊！我睡醒了，地板好冷，小图都快感冒了#,#action:11#,#expression:happys#,#earLightCircle:1</string><!--表情不可用：16-眨眼-->
+    <string name="lieDownAndSleep_awaken">speech:啊！我睡醒了，地板好冷，小图都快感冒了#,#action:11#,#expression:happys</string><!--表情不可用：16-眨眼-->
 
     <!--####################################    拍照 photograph    ###################################################################################-->
     <string-array name="photograph_keyWords_array">
@@ -185,7 +185,7 @@
         <item>照个相</item>
         <item>照相</item>
     </string-array>
-    <string name="photograph_response">speech:好的，请站在我前面，摆好姿势。一二三，茄子！#,#action:39#,#earLightCircle:1</string>
+    <string name="photograph_response">speech:好的，请站在我前面，摆好姿势。一二三，茄子！#,#action:39</string>
     <string name="photograph_success_response">speech:拍照成功，你可以到手机App查看照片啦！#,#action:1</string>
 
 
@@ -221,10 +221,12 @@
         <item>音量最小</item>
         <item>音量调到最大</item>
         <item>音量调到最小</item>
+        <item>声音调到</item>
+        <item>音量调到</item>
 
         //mohuaiyuan  20180108 测试
-        <item>音量</item>
-        <item>声音</item>
+       <!-- <item>音量</item>
+        <item>声音</item>-->
 
     </string-array>
 
@@ -235,22 +237,25 @@
 
     </string-array>
 
-    <string name="raiseMusicVolume">speech:好的，声音已经增大一格#,#action:57#,#earLightCircle:1</string>
-    <string name="lowerMusicVolume">speech:好的，声音已经减小一格#,#action:58#,#earLightCircle:1</string>
-    <string name="minMusicVolume">speech:已经是最小声了#,#action:89#,#earLightCircle:1</string>
-    <string name="maxMusicVolume">speech:已经是最大声了#,#action:89#,#earLightCircle:1</string>
-    <string name="tuneToTheLoudest">speech:好的，已经调到最大声了</string>
-    <string name="tuneToTheSmalleseVoice">speech:好的，已经调到最小声了</string>
+    <string name="raiseMusicVolume">speech:好的，音量已经条到%1$s </string>
+    <string name="lowerMusicVolume">speech:好的，音量已经条到%1$s </string>
+    <string name="minMusicVolume">speech:已经是最小声了</string>
+    <string name="maxMusicVolume">speech:已经是最大声了</string>
+    <string name="tuneToTheLoudest">speech:好的，已经条到最大声了</string>
+    <string name="tuneToTheSmalleseVoice">speech:好的，已经条到最小声了</string>
+
+    //mohuaiyuan  20180116 测试
+    <string name="getCurrentVolume">speech:当前音量为%1$s</string>
 
     <!--####################################    跟随 模式  ######################################################################-->
     <!--跟随模式 启动 -->
     <string name="beginFollowMode_response">speech:已进入跟随模式。#,#action:???#,#earLightCircle:10</string><!--动作不可用:行走准备动作-2 -->
     <!--跟随模式 退出-->
-    <string name="endFollowMode_response">speech:已退出跟随模式#,#action:1#,#earLightCircle:1</string>
+    <string name="endFollowMode_response">speech:已退出跟随模式#,#action:1</string>
 
     <!--####################################    遥控模式  ######################################################################-->
     <string name="beginRemoteControlMode_response">speech:已进入遥控模式#,#earLightCircle:9</string>
-    <string name="endRemoteControlMode_response">speech:已退出遥控模式#,#earLightCircle:1</string>
+    <string name="endRemoteControlMode_response">speech:已退出遥控模式</string>
 
     <!--#######################################################################################################################################-->
 
@@ -294,6 +299,24 @@
         <item>praise</item>-->
 
     </string-array>
+    
+    <string-array name="earArray">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+
+        <item>4</item>
+        <item>5</item>
+        <item>6</item>
+        <item>7</item>
+
+        <item>8</item>
+        <item>9</item>
+        <item>10</item>
+
+    </string-array>
+    
 
     <string name="app_key">368b04b9925de143809fe8e0592c9101</string>
     <string name="app_secret">5986e3dca32b626d8e4c70f73b8ded01</string>

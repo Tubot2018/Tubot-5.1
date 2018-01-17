@@ -1,19 +1,11 @@
 package com.tobot.tobot.base;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URL;
-
 
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.net.Uri;
+
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
@@ -22,6 +14,17 @@ import android.widget.Toast;
 
 import com.tobot.tobot.R;
 import com.tobot.tobot.utils.AppTools;
+import com.tobot.tobot.utils.TobotUtils;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.LinkedList;
+import java.util.List;
 
 
 /**
@@ -29,9 +32,9 @@ import com.tobot.tobot.utils.AppTools;
  * @author zwen
  */
 public class UpgradeManger {
-
+	
+	private static String TAG = "Javen UpgradeManger";
 	private Context mContext;
-	private int vision;
 	private static final int DOWN_UPDATE = 1;
 	private static final int DOWN_OVER = 2;
 	private String apkUrl;
@@ -64,7 +67,8 @@ public class UpgradeManger {
 					break;
 				case DOWN_OVER:
 					updateDialog.dismiss();
-					installApk();
+					StartOtherApplications();
+//					installApk();
 					break;
 				default:
 					break;
@@ -72,6 +76,7 @@ public class UpgradeManger {
 		};
 	};
 
+	
 	public UpgradeManger(Context context, String apkUrl) {
 		this.mContext = context;
 		this.apkUrl = apkUrl;
@@ -90,11 +95,11 @@ public class UpgradeManger {
 		}
 		File thedir = new File(savePath());
 		if (!thedir.exists() && !thedir.mkdirs()) {
+
 		}
 	}
 
-	public void showDownloadDialog(int vision) {
-		this.vision=vision;
+	public void showDownloadDialog() {
 		updateDialog.show();
 		downloadApk();
 	}
@@ -104,7 +109,7 @@ public class UpgradeManger {
 		public void run() {
 			try {
 				URL url = new URL(apkUrl);
-				Log.i("Javen", apkUrl);
+				Log.i(TAG,"apk地址: " + apkUrl);
 				HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 				conn.connect();
 				int length = conn.getContentLength();
@@ -129,7 +134,6 @@ public class UpgradeManger {
 					if (numread <= 0) {
 						// 下载完成通知安装
 						mHandler.sendEmptyMessage(DOWN_OVER);
-						Log.i("Javen", "当前版本 vision:"+vision);
 						break;
 					}
 					fos.write(buf, 0, numread);
@@ -147,7 +151,6 @@ public class UpgradeManger {
 	/**
 	 * 下载apk
 	 */
-
 	private void downloadApk() {
 		downLoadThread = new Thread(mdownApkRunnable);
 		downLoadThread.start();
@@ -161,12 +164,43 @@ public class UpgradeManger {
 		if (!apkfile.exists()) {
 			return;
 		}
-		Intent intent = new Intent(Intent.ACTION_VIEW);
-		intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-		intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-		intent.setClassName("com.android.packageinstaller", "com.android.packageinstaller.PackageInstallerActivity");
-		intent.setDataAndType(Uri.parse("file://" + apkfile.toString()), "application/vnd.android.package-archive");
-		mContext.startActivity(intent);
+
+		//adb命令安装
+		Log.i(TAG,"apk保存路径:"+apkfile.toString());
+		List<String> list = new LinkedList<>();
+		list.add("adb shell");
+		list.add("cd " + savePath());
+		list.add("adb install -r tobot.apk");
+		try {
+			TobotUtils.doCmds(list);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		//Android安装
+//		Intent intent = new Intent(Intent.ACTION_VIEW);
+//		intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+//		intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+//		intent.setClassName("com.android.packageinstaller", "com.android.packageinstaller.PackageInstallerActivity");
+//		intent.setDataAndType(Uri.parse("file://" + apkfile.toString()), "application/vnd.android.package-archive");
+//		mContext.startActivity(intent);
 	}
+
+	private void StartOtherApplications() {
+		Intent intent = mContext.getPackageManager().getLaunchIntentForPackage("com.robot.restart");
+		if (intent != null) {
+			Log.i(TAG, "已启动应用");
+			mContext.startActivity(intent);
+		} else {
+			//创建一个意图（装载广播事件）
+			Intent broadcast = new Intent();
+			broadcast.setAction("adb.restart.start");
+			//发送无序广播
+			mContext.sendBroadcast(broadcast);
+			Log.i(TAG, "没有要启动的应用");
+		}
+		installApk();
+	}
+
 
 }
