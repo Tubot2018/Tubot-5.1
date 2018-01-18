@@ -210,6 +210,7 @@ public class DanceScenario implements IScenario{
                             Log.e(TAG, "noExistDance 出现Exception e1 : "+e1.getMessage() );
                             e1.printStackTrace();
                         }
+						
                         e.printStackTrace();
                         onExit();
                     }
@@ -661,6 +662,7 @@ public class DanceScenario implements IScenario{
             executeSong(musicName);
         } catch (IOException e) {
             e.printStackTrace();
+			
             //mohuaiyuan 20180111 原来的代码
 //            tts.speak(manager.getString(R.string.noExistDance));
             //mohuaiyuan 20180111 新的代码 20180111
@@ -746,6 +748,7 @@ public class DanceScenario implements IScenario{
                 BaseTTSCallback baseTTSCallback=new BaseTTSCallback(){
                     @Override
                     public void onCompleted() {
+						
                         //机器人开始跳舞动作
                         getMediaPlayer().start();
                         sendBodyAction(actionCode);

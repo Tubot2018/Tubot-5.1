@@ -67,6 +67,21 @@ public class AppTools {
 
 	/**
 	 *
+	 * 获取App版本号
+	 *
+	 */
+	public static String getVersionName(Context context) {
+		try {
+			PackageInfo mPackageInfo = context.getPackageManager().getPackageInfo(
+					context.getPackageName(), 0);
+			return mPackageInfo.versionName;
+		} catch (NameNotFoundException e) {
+		}
+		return null;
+	}
+
+	/**
+	 *
 	 * 获取android系统版本号
 	 *
 	 */

@@ -52,7 +52,6 @@ public class BConnect implements IConnect{
     private Context mContent;
     private ISceneV mISceneV;
     private MainActivity mainActivity;
-    private boolean isLoad = true;//是否加载框架
     private WifiConfiguration wc;
     private ApConfiguration apc;
     private User user = new User();
@@ -160,10 +159,6 @@ public class BConnect implements IConnect{
         networkHandler.sendMessage(message);
     }
 
-    @Override
-    public void isLoad(boolean load) {
-        isLoad = load;
-    }
 
     Handler networkHandler = new Handler(){
         @Override
@@ -182,7 +177,7 @@ public class BConnect implements IConnect{
                             Log.e(TAG,"首次使用加载 onInitiate()");
                             BFrame.instance(mISceneV).onInitiate(true);
                             user.setUltr("1");
-                        }else if (!isLoad){//加载失败
+                        }else if (!BFrame.initiate){//加载失败
                             Log.e(TAG,"加载失败重新加载 onInitiate()");
                             BFrame.instance(mISceneV).onInitiate(true);
                         }

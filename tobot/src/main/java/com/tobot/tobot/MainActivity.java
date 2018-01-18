@@ -114,13 +114,11 @@ public class MainActivity extends BaseActivity implements ISceneV {
     private boolean isSquagging = true;//自锁
 //    private boolean anewConnect;//进入重新联网
     private boolean isInitiativeOff;//判断是否主动断网
-    public static boolean ACTIVATESIGN;//框架启动标志
+//    public static boolean ACTIVATESIGN;//框架启动标志
     private Bundle packet;
     private long exitTime; // 短时间内是否连续点击返回键
     private boolean whence;
-	
 //    private boolean isOFF_HINT;//休眠期间断网不提示
-
     public static Context mContext;
     private BroadcastReceiver mReceiver;
     private SocketThreadManager manager;
@@ -187,7 +185,7 @@ public class MainActivity extends BaseActivity implements ISceneV {
            BaseTTSCallback baseTTSCallback=new BaseTTSCallback(){
                @Override
                public void onCompleted() {
-                   TobotUtils.getIPAddress(mContext);
+//                   TobotUtils.getIPAddress(mContext);
                }
            };
            BFrame.setInterruptTTSCallback(new InterruptTTSCallback(this,baseTTSCallback));
@@ -227,7 +225,6 @@ public class MainActivity extends BaseActivity implements ISceneV {
 //                                    BFrame.Ear(6);
 //                                    Log("发声效果  灯圈 2 绿色常亮。。。");
                                     Log("发声效果  灯圈 。。。");
-
                                     activeTimer.cancel();
                                     activeTimer = new Timer();
                                 }
@@ -396,7 +393,7 @@ public class MainActivity extends BaseActivity implements ISceneV {
     @Override
     public void isKeyDown(int keyCode, KeyEvent event) {
         Log("触摸事件===>keyCode:"+keyCode+"KeyEvent:"+event);
-        if (ACTIVATESIGN) {
+        if (BFrame.initiate) {
             switch (keyCode) {
                 case KeyEvent.KEYCODE_BACK:
                     if (!BFrame.robotState && isNotWakeup) {
@@ -505,6 +502,7 @@ public class MainActivity extends BaseActivity implements ISceneV {
                                 BFrame.Ear(Integer.valueOf(currentEar));
                                 earList.remove(index);*/
 
+								
                                 //mohuaiyuan 20180104 测试 获取音量
                                // AudioUtils audioUtils=new AudioUtils(mContext);
                                // int currentVolume=audioUtils.getCurrentVolume();
@@ -647,7 +645,6 @@ public class MainActivity extends BaseActivity implements ISceneV {
     public void FrameLoadSuccess(boolean whence) {
         this.whence = whence;
 //        isDormant = true;
-        ACTIVATESIGN = true;
         manifestation();
     }
 
@@ -872,7 +869,7 @@ public class MainActivity extends BaseActivity implements ISceneV {
     @Override
     protected void onRestart() {
         super.onRestart();
-        if (!ACTIVATESIGN) {
+        if (!BFrame.initiate) {
             Log.e(TAG,"重新启动时加载 onInitiate()");
             mBFrame.onInitiate(true);
         }

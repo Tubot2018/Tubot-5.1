@@ -34,8 +34,8 @@ public class TobotApplication extends Application {
         crashHandler.init(instance);
 //        Thread.setDefaultUncaughtExceptionHandler(handler);//直接重启
 //        StartOtherApplications();
-        MemoryDBManager.getManager().clear();
         QASRFunction.close();
+        MemoryDBManager.getManager().clear();
     }
 
     public synchronized static TobotApplication getInstance() {
@@ -57,6 +57,7 @@ public class TobotApplication extends Application {
         // 程序终止的时候执行
         super.onTerminate();
         Log.i("Javen","TobotApplication onTerminate");
+        QASRFunction.close();
         MemoryDBManager.getManager().clear();
     }
 

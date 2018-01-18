@@ -240,7 +240,7 @@ public class QASRFunction implements IASRFunction {
                     Log.d(TAG, "唤醒方位角回调:" + direction + "\n");
                     angleEntity = gson.fromJson(direction, AngleEntity.class);
                     Log.d(TAG, "唤醒方位角:" + angleEntity.getTheta());
-                    BFrame.motion(BodyActionCode.ACTION_20,PRMTYPE_ANGLES,angleEntity.getTheta());
+                    BFrame.motion(BodyActionCode.ACTION_STAND_STILL,PRMTYPE_ANGLES,angleEntity.getTheta());
                     break;
 //                case QModule.QVOICE_ASR_RESULT://识别结果
 //                    Log.d(TAG, "识别结果:" + new String(data));

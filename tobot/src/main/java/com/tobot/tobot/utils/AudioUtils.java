@@ -179,6 +179,7 @@ public class AudioUtils {
             double space=(double) (getMaxVolume()-getMinVolume())/(getVolumeCopies()-1);
             return space;
         }
+		
     }
 
     /**

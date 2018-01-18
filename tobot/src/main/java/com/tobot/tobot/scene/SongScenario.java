@@ -811,7 +811,6 @@ public class SongScenario implements IScenario {
 
             }
         };
-        
         MediaPlayer.OnCompletionListener onCompletionListener=new MediaPlayer.OnCompletionListener() {
             @Override
             public void onCompletion(MediaPlayer mp) {
@@ -946,10 +945,12 @@ public class SongScenario implements IScenario {
 
                     int index = random.nextInt(keyLists.size());
                     int action = keyLists.get(index);
+					
                     //mohuaiyuan 20180111 原来的代码
 //                    sleepTime = musicActionMaps.get(action);
                     //mohuaiyuan  20180111 测试
                     sleepTime = musicActionMaps.get(action)+3*1000;
+					
                     currentTimeSum += sleepTime;
                     Log.d(TAG, "action: " + action);
                     Log.d(TAG, "sleepTime: " + sleepTime);

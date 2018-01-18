@@ -67,7 +67,7 @@ public class VolumeControl implements VolumeControlBehavior {
     private AudioUtils audioUtils;
     private List<String> volumeKeyWords;
 
-
+	
     public VolumeControl(){
 
     }
@@ -338,6 +338,7 @@ public class VolumeControl implements VolumeControlBehavior {
         }
     }
 
+	
     private void raiseVolumeResponse(int currentVolume){
         Log.d(TAG, "raiseVolumeResponse: ");
         String speech=BFrame.getString(R.string.raiseMusicVolume,String.valueOf(currentVolume));
