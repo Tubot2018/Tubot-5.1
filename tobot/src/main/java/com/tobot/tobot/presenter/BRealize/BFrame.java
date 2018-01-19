@@ -978,13 +978,28 @@ public class BFrame implements IFrame {
         //动作
         String action = dataMap.get(RESPONSE_ACTION);
         if (action != null && action.length() > 0) {
-            int actionCode = -1;
-            try {
-                actionCode = Integer.valueOf(action);
-            } catch (NumberFormatException e) {
-                throw new Exception("umberFormatException e:" + e.getMessage());
+            if (action.contains("#a_a#")){
+                String[] actionTemp=action.split("#a_a#");
+                for (int i=0;i<actionTemp.length;i++){
+                    int actionCode = -1;
+                    try {
+                        actionCode = Integer.valueOf(actionTemp[i].trim());
+                    } catch (NumberFormatException e) {
+                        throw new Exception("umberFormatException e:" + e.getMessage());
+                    }
+                    motion(actionCode);
+                }
+
+            }else {
+                int actionCode = -1;
+                try {
+                    actionCode = Integer.valueOf(action);
+                } catch (NumberFormatException e) {
+                    throw new Exception("umberFormatException e:" + e.getMessage());
+                }
+                motion(actionCode);
             }
-            motion(actionCode);
+
         }
         //表情
         String expression = dataMap.get(RESPONSE_EXPRESSION);
@@ -1023,13 +1038,28 @@ public class BFrame implements IFrame {
         //动作
         String action = dataMap.get(RESPONSE_ACTION);
         if (action != null && action.length() > 0) {
-            int actionCode = -1;
-            try {
-                actionCode = Integer.valueOf(action);
-            } catch (NumberFormatException e) {
-                throw new Exception("umberFormatException e:" + e.getMessage());
+            if (action.contains("#a_a#")){
+                String[] actionTemp=action.split("#a_a#");
+                for (int i=0;i<actionTemp.length;i++){
+                    int actionCode = -1;
+                    try {
+                        actionCode = Integer.valueOf(actionTemp[i].trim());
+                    } catch (NumberFormatException e) {
+                        throw new Exception("umberFormatException e:" + e.getMessage());
+                    }
+                    outActionWithCallback(actionCode,1,1,actionSimpleFrameCallback);
+                }
+
+            }else {
+                int actionCode = -1;
+                try {
+                    actionCode = Integer.valueOf(action);
+                } catch (NumberFormatException e) {
+                    throw new Exception("umberFormatException e:" + e.getMessage());
+                }
+                outActionWithCallback(actionCode,1,1,actionSimpleFrameCallback);
             }
-            outActionWithCallback(actionCode,1,1,actionSimpleFrameCallback);
+
         }
         //表情
         String expression = dataMap.get(RESPONSE_EXPRESSION);

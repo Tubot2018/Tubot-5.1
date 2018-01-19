@@ -20,7 +20,7 @@
     <!--<string name="Connection_Break_Hint">网络断了,小图在努力恢复中,小主人也可以长摸头帮我换个新网络</string>-->
 
     <!--mohuaiyuan 20171220 新的字符串-->
-    <string name="Connection_Succeed">speech:联网成功，我们可以愉快的聊天了。#,#action:72#,#expression:excites</string><!--表情：15-兴奋-->
+    <string name="Connection_Succeed">speech:联网成功，我们可以愉快的聊天了。#,#action:72#a_a#1#,#expression:excites</string><!--表情：15-兴奋-->
 
     <!--<string name="Connection_Start">speech:联网模式已开启，请打开手机app帮我联网吧#,#action:46#,#expression:calm#,#earLightCircle:6</string>&lt;!&ndash;表情不可用：22-尴尬&ndash;&gt;
     -->
@@ -111,7 +111,7 @@
 
     <!--#########################################   打断   #################################################################################-->
     <!--mohuaiyuan 20171220 新的字符串-->
-    <string name="wake_up_the_callback">speech:主人，我在！#,#expression:nervous</string><!--表情不可用:24- 左看右看,已找到表情-->
+    <string name="wake_up_the_callback">speech:我在！#,#expression:nervous</string><!--表情不可用:24- 左看右看,已找到表情-->
 
     <string-array name="onceTouchHead">
         <item>speech:可以跟我聊天，不要乱摸头#,#action:1#,#expression:naughtys</item><!--表情：6- 调皮-->

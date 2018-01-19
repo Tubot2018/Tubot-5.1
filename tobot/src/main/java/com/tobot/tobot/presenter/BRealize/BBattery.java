@@ -1,6 +1,7 @@
 package com.tobot.tobot.presenter.BRealize;
 
 import android.content.Context;
+import android.util.Log;
 
 import com.tobot.tobot.MainActivity;
 import com.tobot.tobot.Listener.SimpleFrameCallback;
@@ -22,12 +23,13 @@ import static com.turing123.robotframe.multimodal.action.Action.PRMTYPE_EXECUTIO
  */
 
 public class BBattery implements IBattery{
+    private String TAG = "Javen BBattery";
     private Context mContent;
     private ISceneV mISceneV;
     private BodyState mBodyState;
     private TTS tts;
     private Timer mTimer = new Timer(true);
-    private long T1 = 3000, T2 = 12000;
+    private long T1 = 15000, T2 = 2000, T3 = 300000, T4 = 9000;
     private int FULL,CHARGING,LOW,DISCHARGE,NATURE_DISCHARGE;//播报次数
     //0:冲满电;;1:充电状态;2:低电量状态;3:自然放电状态;4:拔电时低电量提示5:拔电时电量不足提示
 //    private int FULL_STATE,CHARGING_STATE,LOW_STATE,NATURE_DISCHARGE = -1,PLUCK_LOW,PLUCK_INSUFFCIENT;
@@ -44,61 +46,64 @@ public class BBattery implements IBattery{
 
     @Override
     public void energy() {
-//        Log.i("Javen", "电量:" + mBodyState.getBatteryLevel() + "电池状态:" +  mBodyState.getBatteryState());
+//        Log.i(TAG, "电量:" + mBodyState.getBatteryLevel() + "电池状态:" +  mBodyState.getBatteryState());
         if (mBodyState.getBatteryState() == BodyState.BATTERY_STATE_FULL){
             if (mBodyState.getBatteryLevel() == 100 && setFrequency("FULL") < 3){
                 mTimer.cancel();
                 mTimer = new Timer();
-                mTimer.schedule(new BatteryTimer(),600000,12000);
-                tts.speak("满血复活,我胡汉三又回来了");
+                mTimer.schedule(new BatteryTimer(),T3,T2);
+                tts.speak("电量满格,哈哈,我胡汉三又回来啦");
+
             }
         }
         if (mBodyState.getBatteryState() == BodyState.BATTERY_STATE_CHARGING){
             if (mBodyState.getBatteryLevel() < 100 && setFrequency("CHARGING") < 1){
-                Battery_pull = 1;
-                tts.speak("插入电源,充血中");
+                tts.speak("插入电源,充电中");
+            }else if(mBodyState.getBatteryLevel() >= 100 && setFrequency("FULL") < 3){
+                tts.speak("电已充满,请帮我拔掉电源");
             }
+            Battery_pull = 1;
         }
         if (mBodyState.getBatteryState() == BodyState.BATTERY_STATE_LOW){
-            if ((mBodyState.getBatteryLevel() == 19 && setFrequency("LOW") < 3) || (mBodyState.getBatteryLevel() == 9) && setFrequency("LOW") < 5){
+            if ((mBodyState.getBatteryLevel() == 20 && setFrequency("LOW") < 3) || (mBodyState.getBatteryLevel() == 9) && setFrequency("LOW") < 5){
                 mTimer.cancel();
                 mTimer = new Timer();
-                mTimer.schedule(new BatteryTimer(),9000,12000);
+                mTimer.schedule(new BatteryTimer(),T4,T2);
                 tts.speak("电量过低，快饿死了,赶紧给我充电吧");
             }
         }
         if (mBodyState.getBatteryState() == BodyState.BATTERY_STATE_DISCHARGE && setFrequency("DISCHARGE") > 0){
-
             if ((mBodyState.getBatteryLevel() < 30 && Battery_pull == 0) && setFrequency("NATURE_DISCHARGE") < 2){
                 tts.speak("亲,我有点饿了,帮我充电吧");
             }else if((mBodyState.getBatteryLevel() < 30 && Battery_pull == 1)) {
                 Battery_pull = 0;
-                tts.speak("我还没吃饱呢,你确定要这么做");
+                tts.speak("已拔掉电源,但我还没吃饱呢,你确定要这么做");
             }else if((mBodyState.getBatteryLevel() < 60 && Battery_pull == 1)) {
                 Battery_pull = 0;
-                tts.speak("我才吃到半饱,你真小气");
+                tts.speak("已拔掉电源,但我只吃了半饱,你真小气");
+            }else if((mBodyState.getBatteryLevel() <= 100 && Battery_pull == 1)){
+                Battery_pull = 0;
+                tts.speak("当前电量" + mBodyState.getBatteryLevel() + "已拔掉电源");
             }
         }
-
     }
 
     @Override
     public void balance() {
         if (mBodyState.getBatteryLevel() >= 70) {
-            BFrame.motion(BodyActionCode.ACTION_120);
-            tts.speak("还有百分之" + mBodyState.getBatteryLevel() + "体力充足,小子放马过来吧.");
+            BFrame.motion(BodyActionCode.ACTION_CHEST);
+            tts.speak("还有百分之" + mBodyState.getBatteryLevel() + "体力充足,嗝嗝带你去浪吧");
         } else if (mBodyState.getBatteryLevel() >= 40){
-            BFrame.motion(BodyActionCode.ACTION_31);
-            tts.speak("还剩百分之" + mBodyState.getBatteryLevel() + "的电量,继续嗨没问题啦.");
+            BFrame.motion(BodyActionCode.ACTION_CHEST);
+            tts.speak("还剩百分之" + mBodyState.getBatteryLevel() + "的电量");
         } else if (mBodyState.getBatteryLevel() >= 20){
-            tts.speak("仅剩百分之" + mBodyState.getBatteryLevel() + "的电量了,感觉自己有点晕,巴拉巴拉巴拉.");
+            tts.speak("仅剩百分之" + mBodyState.getBatteryLevel() + "的电量了,感觉自己有点晕,巴拉巴拉巴拉");
         } else if (mBodyState.getBatteryLevel() >= 6){
-            tts.speak("糟糕只剩不到百分" + mBodyState.getBatteryLevel() + "了,一不小心透支了,你扶我起来我还能继续嗨.");
+            tts.speak("糟糕只剩不到百分" + mBodyState.getBatteryLevel() + "了,一不小心透支了,你扶我起来我还能继续嗨");
         } else {
             tts.speak("只有不到百分" + mBodyState.getBatteryLevel() + "的电,我现在四肢无力快给我充电");
         }
     }
-
 
     private class BatteryTimer extends TimerTask {
         public void run() {
