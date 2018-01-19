@@ -83,25 +83,23 @@ public class BBattery implements IBattery{
                 tts.speak("已拔掉电源,但我只吃了半饱,你真小气");
             }else if((mBodyState.getBatteryLevel() <= 100 && Battery_pull == 1)){
                 Battery_pull = 0;
-                tts.speak("当前电量" + mBodyState.getBatteryLevel() + "已拔掉电源");
+                tts.speak("当前电量百分之" + mBodyState.getBatteryLevel() + ",已拔掉电源");
             }
         }
     }
 
     @Override
     public void balance() {
-        if (mBodyState.getBatteryLevel() >= 70) {
+        if (mBodyState.getBatteryLevel() >= 50) {
             BFrame.motion(BodyActionCode.ACTION_CHEST);
-            tts.speak("还有百分之" + mBodyState.getBatteryLevel() + "体力充足,嗝嗝带你去浪吧");
-        } else if (mBodyState.getBatteryLevel() >= 40){
-            BFrame.motion(BodyActionCode.ACTION_CHEST);
-            tts.speak("还剩百分之" + mBodyState.getBatteryLevel() + "的电量");
-        } else if (mBodyState.getBatteryLevel() >= 20){
-            tts.speak("仅剩百分之" + mBodyState.getBatteryLevel() + "的电量了,感觉自己有点晕,巴拉巴拉巴拉");
-        } else if (mBodyState.getBatteryLevel() >= 6){
-            tts.speak("糟糕只剩不到百分" + mBodyState.getBatteryLevel() + "了,一不小心透支了,你扶我起来我还能继续嗨");
-        } else {
-            tts.speak("只有不到百分" + mBodyState.getBatteryLevel() + "的电,我现在四肢无力快给我充电");
+            tts.speak("我的电量还有百分" + mBodyState.getBatteryLevel() + "我们可以尽情的玩耍");
+        } else if (mBodyState.getBatteryLevel() > 20){
+            BFrame.motion(BodyActionCode.ACTION_26);
+            tts.speak("我的电量还有百分" + mBodyState.getBatteryLevel() + "我们继续玩吧");
+        } else if (mBodyState.getBatteryLevel() <= 20 && Battery_pull == 1){
+            tts.speak("糟糕只剩不到百分" + mBodyState.getBatteryLevel() + "的电量,我需要补充能量");
+        } else if (mBodyState.getBatteryLevel() <= 20 && Battery_pull == 0){
+            tts.speak("只有不到百分" + mBodyState.getBatteryLevel() + "的电了,等我满血复活就可以陪你继续玩了");
         }
     }
 
