@@ -96,6 +96,6 @@ public class Constants {
     public static final int SitBack_stand = 15;
     public static final int SideDown_stand = 29;
 
-    public static final String KIND_KEY="kind";
+    public static final String KIND_KEY = "kind";
 
 }

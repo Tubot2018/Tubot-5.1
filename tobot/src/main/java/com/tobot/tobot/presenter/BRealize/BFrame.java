@@ -116,6 +116,7 @@ public class BFrame implements IFrame {
 //    private ServiceHandler serviceHandler;
     public static boolean robotState = true;
     public static boolean initiate;
+    private boolean astrict;
 
     private static InterruptTTSCallback interruptTTSCallback;
     private static SimpleFrameCallback actionSimpleFrameCallback;
@@ -165,14 +166,19 @@ public class BFrame implements IFrame {
         // 设置状态机工作模式。查看API Ref以了解更多关于框架工作模式的信息
         int state = new StateBuilder(StateBuilder.DefaultMode).build();
         // prepare（）这个方法必须在你做任何事情之前被调用
+        Log.d(TAG,"框架初始化");
         mRobotFrameManager.prepare(state, new RobotFramePreparedListener() {
 
             @Override
             public void onPrepared() {
                 // 激活
-                frameHandle.sendEmptyMessage(Constants.REPLACE_ASR);
+                if (!astrict) {
+                    astrict = true;
+                    Log.d(TAG, "框架激活");
+                    frameHandle.sendEmptyMessage(Constants.REPLACE_ASR);
 //                mRobotFrameManager.start();
 //                frameHandle.sendEmptyMessage(Constants.START_SUCESS_MSG);
+                }
             }
 
             @Override
@@ -205,6 +211,7 @@ public class BFrame implements IFrame {
                     //替换
                     replaceFunction();
                     mRobotFrameManager.start();
+                    Log.d(TAG,"框架启动");
                     frameHandle.sendEmptyMessage(Constants.START_SUCESS_MSG);
                     break;
 					
@@ -212,15 +219,12 @@ public class BFrame implements IFrame {
                     Log.e(TAG, "⊙_⊙  框架加载成功");
                     initiate = true;
 //                    mBConnect.isLoad(true);
-
                     //运行TTS
                     onTTS();
                     //初始化功能
                     onFunction();
                     //调度
                     onAssemble();
-					
-					
                     //进入次场景
                     onMinorscene();
                     //通知
@@ -228,7 +232,7 @@ public class BFrame implements IFrame {
                     //手臂触摸
                     onBArmtouch();
                     //mohuaiyuan 20171226 原来的代码
-                  /*  //休眠
+                    /*  //休眠
                     onDormant();*/
                     //mohuaiyuan 20171226 新的代码 20171226
                     //站着休眠
@@ -978,13 +982,27 @@ public class BFrame implements IFrame {
         //动作
         String action = dataMap.get(RESPONSE_ACTION);
         if (action != null && action.length() > 0) {
-            int actionCode = -1;
-            try {
-                actionCode = Integer.valueOf(action);
-            } catch (NumberFormatException e) {
-                throw new Exception("umberFormatException e:" + e.getMessage());
+            if (action.contains("#a_a#")){
+                String[] actionTemp=action.split("#a_a#");
+                for (int i=0;i<actionTemp.length;i++){
+                    int actionCode = -1;
+                    try {
+                        actionCode = Integer.valueOf(actionTemp[i].trim());
+                    } catch (NumberFormatException e) {
+                        throw new Exception("umberFormatException e:" + e.getMessage());
+                    }
+                    motion(actionCode);
+                }
+
+            }else {
+                int actionCode = -1;
+                try {
+                    actionCode = Integer.valueOf(action);
+                } catch (NumberFormatException e) {
+                    throw new Exception("umberFormatException e:" + e.getMessage());
+                }
+                motion(actionCode);
             }
-            motion(actionCode);
         }
         //表情
         String expression = dataMap.get(RESPONSE_EXPRESSION);
@@ -1023,13 +1041,27 @@ public class BFrame implements IFrame {
         //动作
         String action = dataMap.get(RESPONSE_ACTION);
         if (action != null && action.length() > 0) {
-            int actionCode = -1;
-            try {
-                actionCode = Integer.valueOf(action);
-            } catch (NumberFormatException e) {
-                throw new Exception("umberFormatException e:" + e.getMessage());
+            if (action.contains("#a_a#")){
+                String[] actionTemp=action.split("#a_a#");
+                for (int i=0;i<actionTemp.length;i++){
+                    int actionCode = -1;
+                    try {
+                        actionCode = Integer.valueOf(actionTemp[i].trim());
+                    } catch (NumberFormatException e) {
+                        throw new Exception("umberFormatException e:" + e.getMessage());
+                    }
+                    outActionWithCallback(actionCode,1,1,actionSimpleFrameCallback);
+                }
+
+            }else {
+                int actionCode = -1;
+                try {
+                    actionCode = Integer.valueOf(action);
+                } catch (NumberFormatException e) {
+                    throw new Exception("umberFormatException e:" + e.getMessage());
+                }
+                outActionWithCallback(actionCode,1,1,actionSimpleFrameCallback);
             }
-            outActionWithCallback(actionCode,1,1,actionSimpleFrameCallback);
         }
         //表情
         String expression = dataMap.get(RESPONSE_EXPRESSION);

@@ -24,6 +24,7 @@ import com.tobot.tobot.base.DetectionVersions;
 import com.tobot.tobot.base.MyTouchResponse;
 import com.tobot.tobot.base.UpdateAction;
 import com.tobot.tobot.base.UpdateAnswer;
+import com.tobot.tobot.base.UpgradeManger;
 import com.tobot.tobot.control.Demand;
 import com.tobot.tobot.control.SaveAction;
 import com.tobot.tobot.db.bean.UserDBManager;
@@ -151,10 +152,12 @@ public class MainActivity extends BaseActivity implements ISceneV {
 //        }
 //        regBroadcast();
 
-        TelephonyManager tm = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
-        Log("设备id"+tm.getDeviceId());
+        new DetectionVersions(this);
 
-       new DetectionVersions(this);
+        TelephonyManager tm = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
+        Log("设备id:"+tm.getDeviceId()+"MAC地址:"+TobotUtils.getMacAddress());
+
+
     }
 
     //联网
@@ -167,13 +170,6 @@ public class MainActivity extends BaseActivity implements ISceneV {
 //        }
        if (AppTools.netWorkAvailable(this) && !isInitiativeOff && !whence) {//自动联网成功
            mCloud = new Cloud(this, new MainScenarioCallback());
-           //mohuaiyuan 20171221 原来的代码
-//           //mBFrame.TTS(getResources().getString(R.string.Connection_Succeed));
-//           TobotUtils.getIPAddress(this);
-//           mBFrame.Facial(EmojNames.HAPPY);
-//           mBFrame.motion(BodyActionCode.ACTION_17);
-//           mBFrame.Ear(EarActionCode.EAR_MOTIONCODE_1);
-
            //mohuaiyuan 20171221 新的代码 20171221
            Map<String,String> map=null;
            try {
@@ -196,6 +192,7 @@ public class MainActivity extends BaseActivity implements ISceneV {
                e.printStackTrace();
            }
        }
+//       new DetectionVersions(this);
    }
 
    //蓝牙
@@ -394,16 +391,17 @@ public class MainActivity extends BaseActivity implements ISceneV {
     public void isKeyDown(int keyCode, KeyEvent event) {
         Log("触摸事件===>keyCode:"+keyCode+"KeyEvent:"+event);
         if (BFrame.initiate) {
-            switch (keyCode) {
-                case KeyEvent.KEYCODE_BACK:
-                    if (!BFrame.robotState && isNotWakeup) {
+            if (!UpgradeManger.upgrade){
+                switch (keyCode) {
+                    case KeyEvent.KEYCODE_BACK:
+                        if (!BFrame.robotState && isNotWakeup) {
 //                    if (isWakeup && isNotWakeup) {
-                        Log("触摸--唤醒");
+                            Log("触摸--唤醒");
 //                        isDormant = true;
 //                        isWakeup = false;
-                        mBFrame.Wakeup();
-                    } else if (BFrame.isInterrupt || BFrame.prevent || TobotUtils.isInScenario(mScenario)) {
-                        Log("触摸--打断:" + mScenario + "  BFrame.isInterrupt:" + BFrame.isInterrupt + "  BFrame.prevent:" + BFrame.prevent);
+                            mBFrame.Wakeup();
+                        } else if (BFrame.isInterrupt || BFrame.prevent || TobotUtils.isInScenario(mScenario)) {
+                            Log("触摸--打断:" + mScenario + "  BFrame.isInterrupt:" + BFrame.isInterrupt + "  BFrame.prevent:" + BFrame.prevent);
 //                        switch (mScenario) {
 //                            case "os.sys.song":
 ////                                SongScenario.instance(this).Backspacing();
@@ -415,77 +413,75 @@ public class MainActivity extends BaseActivity implements ISceneV {
 //
 //                                break;
 //                        }
-                        KeyInputEvent mKeyInputEvent = new KeyInputEvent(keyCode, KEYCODE_HEAD);
-                        mBFrame.InterruptTouch();
+                            KeyInputEvent mKeyInputEvent = new KeyInputEvent(keyCode, KEYCODE_HEAD);
+                            mBFrame.InterruptTouch();
 //                        if (TobotUtils.isNotEmpty(mInterrupted)){
 //                            mInterrupted.Voice(false);//不可打断
 //                        }
 //                        BFrame.isInterrupt = false;//不可打断
 //                        BFrame.prevent = false;
-                    } else {
-                        Log("触摸--调侃聊天");
-                        Log.d("helloworld", "触摸--调侃聊天: ");
-                        try {
-                            long l = (System.currentTimeMillis() - exitTime);
-                            if (l < 4000) {//连续点击
-                                Log("触摸--连续点击");
-                                Log.d("helloworld", "触摸--连续点击: ");
-								
+                        } else {
+                            Log("触摸--调侃聊天");
+                            try {
+                                long l = (System.currentTimeMillis() - exitTime);
+                                if (l < 4000) {//连续点击
+                                    Log("触摸--连续点击");
+
 //                                onBle();
-																
-                                //mohuaiyuan 20171228 新的代码 新增的代码
-                                exitTime = 0;
 
-                                //mohuaiyuan 20171220 新的代码 新增的代码
-                                MyTouchResponse myTouchResponse=new MyTouchResponse(mContext);
-                                //BFrame.response(myTouchResponse.doubleTouchHeadResponse());
+                                    //mohuaiyuan 20171228 新的代码 新增的代码
+                                    exitTime = 0;
 
-                                Map<String,String> map=null;
-                                try {
-                                    map=BFrame.getString(myTouchResponse.doubleTouchHeadResponse());
-                                } catch (Exception e) {
-                                    e.printStackTrace();
-                                }
+                                    //mohuaiyuan 20171220 新的代码 新增的代码
+                                    MyTouchResponse myTouchResponse=new MyTouchResponse(mContext);
+                                    //BFrame.response(myTouchResponse.doubleTouchHeadResponse());
 
-                                BaseTTSCallback baseTTSCallback=new BaseTTSCallback(){
-                                    @Override
-                                    public void onCompleted() {
-                                        TobotUtils.getIPAddress(mContext);//播报ip
+                                    Map<String,String> map=null;
+                                    try {
+                                        map=BFrame.getString(myTouchResponse.doubleTouchHeadResponse());
+                                    } catch (Exception e) {
+                                        e.printStackTrace();
                                     }
-                                };
-                                BFrame.setInterruptTTSCallback(new InterruptTTSCallback(this,baseTTSCallback));
 
-                                try {
-                                    BFrame.responseWithCallback(map);
-                                } catch (Exception e) {
-                                    e.printStackTrace();
-                                }
+                                    BaseTTSCallback baseTTSCallback=new BaseTTSCallback(){
+                                        @Override
+                                        public void onCompleted() {
+                                            TobotUtils.getIPAddress(mContext);//播报ip
+                                        }
+                                    };
+                                    BFrame.setInterruptTTSCallback(new InterruptTTSCallback(this,baseTTSCallback));
 
-
-                                //mohuaiyuan 20180104 测试 获取音量
-                                //AudioUtils audioUtils=new AudioUtils(mContext);
-                                //int currentVolume=audioUtils.getCurrentVolume();
-                                //int maxVolume=audioUtils.getMaxVolume();
-                                //Log.d("IDormant", "currentVolume: "+currentVolume);
-                                //Log.d("IDormant", "maxVolume: "+maxVolume);
-                                //int code = audioUtils.adjustLowerMusicVolume();
-                                //Log.d("IDormant", "code: "+code);
+                                    try {
+                                        BFrame.responseWithCallback(map);
+                                    } catch (Exception e) {
+                                        e.printStackTrace();
+                                    }
 
 
-                            } else {
-                                Log("触摸--单击");
-                                Log.d("helloworld", "触摸--单击: ");
-                                exitTime = System.currentTimeMillis();
+                                    //mohuaiyuan 20180104 测试 获取音量
+                                    //AudioUtils audioUtils=new AudioUtils(mContext);
+                                    //int currentVolume=audioUtils.getCurrentVolume();
+                                    //int maxVolume=audioUtils.getMaxVolume();
+                                    //Log.d("IDormant", "currentVolume: "+currentVolume);
+                                    //Log.d("IDormant", "maxVolume: "+maxVolume);
+                                    //int code = audioUtils.adjustLowerMusicVolume();
+                                    //Log.d("IDormant", "code: "+code);
 
-                                //mohuaiyuan 20171220 原来的代码
+
+                                } else {
+                                    Log("触摸--单击");
+                                    Log.d("helloworld", "触摸--单击: ");
+                                    exitTime = System.currentTimeMillis();
+
+                                    //mohuaiyuan 20171220 原来的代码
 //                                mBFrame.TTS(TouchResponse.getResponse(this));
-                                //mohuaiyuan 20171220 新的代码 20171220
-                                MyTouchResponse myTouchResponse=new MyTouchResponse(mContext);
-                                mBFrame.response(myTouchResponse.onceTouchHeadResponse());
+                                    //mohuaiyuan 20171220 新的代码 20171220
+                                    MyTouchResponse myTouchResponse=new MyTouchResponse(mContext);
+                                    mBFrame.response(myTouchResponse.onceTouchHeadResponse());
 
-                                Demand.instance(this).stopDemand();//停止点播
+                                    Demand.instance(this).stopDemand();//停止点播
 
-                                //mohuaiyuan  20180115 测试 耳朵灯圈颜色
+                                    //mohuaiyuan  20180115 测试 耳朵灯圈颜色
                                /* if (earList==null){
                                     earList=new ArrayList<>();
                                     String []earArray=mContext.getResources().getStringArray(R.array.earArray);
@@ -501,19 +497,19 @@ public class MainActivity extends BaseActivity implements ISceneV {
                                 BFrame.TTS("当前的灯圈颜色是 ："+currentEar);
                                 BFrame.Ear(Integer.valueOf(currentEar));
                                 earList.remove(index);*/
-
 								
-                                //mohuaiyuan 20180104 测试 获取音量
-                               // AudioUtils audioUtils=new AudioUtils(mContext);
-                               // int currentVolume=audioUtils.getCurrentVolume();
-                               // int maxVolume=audioUtils.getMaxVolume();
-                               // Log.d("IDormant", "currentVolume: "+currentVolume);
-                               // Log.d("IDormant", "maxVolume: "+maxVolume);
-                               // int code = audioUtils.adjustRaiseMusicVolume();
-                               // Log.d("IDormant", "code: "+code);
-                               
+                                    //mohuaiyuan 20180104 测试 获取音量
+                                    // AudioUtils audioUtils=new AudioUtils(mContext);
+                                    // int currentVolume=audioUtils.getCurrentVolume();
+                                    // int maxVolume=audioUtils.getMaxVolume();
+                                    // Log.d("IDormant", "currentVolume: "+currentVolume);
+                                    // Log.d("IDormant", "maxVolume: "+maxVolume);
+                                    // int code = audioUtils.adjustRaiseMusicVolume();
+                                    // Log.d("IDormant", "code: "+code);
 
-                               //mohuaiyuan  20171225 测试 表情 序号
+
+                                    //mohuaiyuan  20171225 测试 表情 序号
+									
                                /* if (expressionList==null){
                                     expressionList=new ArrayList<>();
                                     String []expressionArray=mContext.getResources().getStringArray(R.array.expressionArray);
@@ -531,52 +527,40 @@ public class MainActivity extends BaseActivity implements ISceneV {
 
                                 expressionList.remove(index);*/
 								
+                                }
+                            } catch (Exception e) {
+                                e.printStackTrace();
                             }
-                        } catch (Exception e) {
-                            e.printStackTrace();
                         }
-                    }
-                    break;
-                case KeyEvent.FLAG_LONG_PRESS:
-                    Log("触摸--进入长按事件");
-                    if (isFeelHead) {
-                        isInitiativeOff = true;//主动断网
-                        mBConnect.shunt();//启动ap联网
-
-                        //mohuaiyuan 20171220 原来的代码
-//                        mBFrame.TTS(getResources().getString(R.string.Connection_Start));
-//                        mBFrame.Facial(EmojNames.EXPECT);
-//                        mBFrame.motion(BodyActionCode.ACTION_95);
-                        //mohuaiyuan 20171220 新的代码 20171220
-                        try {
-                            BFrame.response(R.string.Connection_Start);
-                        } catch (Exception e) {
-                            e.printStackTrace();
+                        break;
+                    case KeyEvent.FLAG_LONG_PRESS:
+                        Log("触摸--进入长按事件");
+                        if (isFeelHead) {
+                            isInitiativeOff = true;//主动断网
+                            mBConnect.shunt();//启动ap联网
+                            try {
+                                BFrame.response(R.string.Connection_Start);
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                            isFeelHead = false;
+                        } else {
+                            isInitiativeOff = false;//关掉主动断网
+                            mBConnect.shut();//关闭ap联网
+                            try {
+                                BFrame.response(R.string.Connection_Close);
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                            isFeelHead = true;
                         }
+                        break;
 
-
-                        isFeelHead = false;
-                    } else {
-                        isInitiativeOff = false;//关掉主动断网
-                        mBConnect.shut();//关闭ap联网
-
-                        //mohuaiyuan 20180103 原来的代码
-//                        mBFrame.TTS(getResources().getString(R.string.Connection_Close));
-//                        mBFrame.Facial(EmojNames.DEPRESSED);
-//                        mBFrame.motion(BodyActionCode.ACTION_STAND_STILL);
-                        //mohuaiyuan 20180103 新的代码 20180103
-                        try {
-                            BFrame.response(R.string.Connection_Close);
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
-
-                        isFeelHead = true;
-                    }
-                    break;
-
-                default:
-                    break;
+                    default:
+                        break;
+                }
+            }else {
+                BFrame.TTS(mContext.getResources().getString(R.string.Upgrade_prompt_passivity));
             }
         }else{
             mBConnect.shuntVoice();
@@ -729,11 +713,6 @@ public class MainActivity extends BaseActivity implements ISceneV {
                 mBFrame.choiceFunctionProcessor(IASRFunction.DEFAULT_ASR_PROCESSOR_OFFLINE);//离线asr
 //                anewConnect = true;
                 hintConnect = true;
-
-                //mohuaiyuan 20180103 原来的代码
-//                mBFrame.Facial(EmojNames.DEPRESSED);
-//                mBFrame.motion(BodyActionCode.ACTION_80);
-//                mBFrame.Ear(EarActionCode.EAR_MOTIONCODE_6,10);
                 detectionTime.schedule(new TimeMachineTimerTask(),0,30000);
 //                TimeMachine.schedule(new TimeMachineTimerTask(),0,30000);
             }else if (AppTools.netWorkAvailable(MainActivity.this)){
@@ -744,9 +723,6 @@ public class MainActivity extends BaseActivity implements ISceneV {
                 SocketThreadManager.sharedInstance().sendMsg(Transform.HexString2Bytes(Joint.setRegister()));//发起tcp注册
 				
                 //mohuaiyuan 20171220 原来的代码
-//                mBFrame.Facial(EmojNames.TIRED);
-//                mBFrame.motion(BodyActionCode.ACTION_45);
-//                mBFrame.TTS(getResources().getString(R.string.Connection_Recover));
 //                detectionTime.cancel();
 //                detectionTime = new Timer();
 //                TobotUtils.getIPAddress(MainActivity.this);
@@ -785,9 +761,6 @@ public class MainActivity extends BaseActivity implements ISceneV {
 			
             if (hintConnect && BFrame.robotState){
 //            if (hintConnect && !isOFF_HINT){
-                //mohuaiyuan 20171220 原来的代码
-//                mBFrame.TTS(getResources().getString(R.string.Connection_Break_Hint));
-                //mohuaiyuan 20171220 新的代码 20171220
                 try {
                     //mohuaiyuan 20180103 原来的代码
 //                    mBFrame.response(R.string.Connection_Break_Hint);
@@ -845,7 +818,6 @@ public class MainActivity extends BaseActivity implements ISceneV {
 
     private void eliminate() {
         try {
-			
                 String time1 = UserDBManager.getManager().getCurrentUser().getRequestTime();
                 String time2 = TobotUtils.getCurrentlyDate();
                 long date = TobotUtils.DateMinusTime(time1, time2);
@@ -875,12 +847,7 @@ public class MainActivity extends BaseActivity implements ISceneV {
         }
     }
 
-
-//        TelephonyManager tm = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
-//        Log(tm.getDeviceId());
-//        Log("系统版本号"+android.os.Build.VERSION.RELEASE);
-
-
+	
 //asr----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 

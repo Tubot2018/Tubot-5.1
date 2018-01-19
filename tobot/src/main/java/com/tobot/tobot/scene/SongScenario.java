@@ -811,7 +811,8 @@ public class SongScenario implements IScenario {
 
             }
         };
-        
+		
+		
         MediaPlayer.OnCompletionListener onCompletionListener=new MediaPlayer.OnCompletionListener() {
             @Override
             public void onCompletion(MediaPlayer mp) {

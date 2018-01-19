@@ -3,6 +3,7 @@ package com.tobot.tobot.scene;
 import android.content.Context;
 import android.media.AudioManager;
 import android.os.Bundle;
+import android.util.Log;
 
 import com.iflytek.cloud.SpeechSynthesizer;
 import com.tobot.tobot.presenter.BRealize.BFrame;
@@ -52,9 +53,11 @@ public class VolumeScenario implements IScenario {
 
     @Override
     public boolean onTransmitData(Behavior behavior) {
+        Log.i("Javne","设置查询:"+behavior);
         if (behavior.results != null) {
             TTS tts = new TTS(mContext, this);
             String direction = behavior.intent.getOperateState();
+            Log.i("Javne","电量查询:"+direction);
             if (direction.equals("1011") || direction.equals("1010")){
 ////              int before = Integer.parseInt(Constants.DEFAULT_VOLUME);
 //                int before = mAudioManager.getStreamVolume(AudioManager.STREAM_MUSIC);
@@ -142,4 +145,5 @@ public class VolumeScenario implements IScenario {
 
         }
     };
+	
 }
