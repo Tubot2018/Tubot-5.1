@@ -121,6 +121,7 @@ public class StoryScenario implements IScenario {
 
     private void initData() {
         currentTimeSum = 0;
+        isWithAction = true;
         initVoluemKeyWord();
     }
 
@@ -526,11 +527,13 @@ public class StoryScenario implements IScenario {
                 }
             } else if (TobotUtils.isNotEmpty(bundle.getString("interrupt_extra_touch_keyEvent")) && i == 2) {
                 Log.i(TAG, "头部打断");
+                isWithAction = false;
                 this.onExit();
             }
         } catch (NullPointerException e) {
             if (TobotUtils.isEmpty(bundle) && i == 2) {
                 Log.d(TAG, "进入打断处理:catch");
+                isWithAction = false;
                 this.onExit();
             }
         }

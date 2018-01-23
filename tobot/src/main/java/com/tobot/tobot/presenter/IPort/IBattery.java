@@ -5,7 +5,7 @@ package com.tobot.tobot.presenter.IPort;
  */
 
 public interface IBattery {
-
+    void batteryLocal();
     void energy();
     void balance();
 }

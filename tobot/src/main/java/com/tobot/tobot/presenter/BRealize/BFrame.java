@@ -555,15 +555,18 @@ public class BFrame implements IFrame {
                     }
                 }else {
                     Log.w(TAG,"非场景中有记忆正确动作 code:"+code);
-//                    outAction(code, type, value);
+                    outAction(code, type, value);
+                    Log.w(TAG,"是否保存动作1 code:"+code);
+                    IsMemory(code);
                 }
             }else {
                 Log.w(TAG,"非场景中无记忆平常动作 code:"+code);
                 outAction(code, type, value);
+                Log.w(TAG,"是否保存动作2 code:"+code);
+                IsMemory(code);
             }
         }
-        Log.w(TAG,"是否保存动作 code:"+code);
-        IsMemory(code);
+
     }
 
     private static void outAction(int code, int type, int value) {
@@ -575,7 +578,10 @@ public class BFrame implements IFrame {
      * @param code
      */
     public static void outActionWithCallback(int code,int type,int value, IMotorCallback iMotorCallback){
-        motor.doAction(Action.buildBodyAction(code,type,value),iMotorCallback);
+        //mohuaiyuan 20180123 原来的代码
+//        motor.doAction(Action.buildBodyAction(code,type,value),iMotorCallback);
+        //mohuaiyuan 20180123 新的代码 20180123
+        motion(code,type,value);
     }
 
     //下发耳部灯圈

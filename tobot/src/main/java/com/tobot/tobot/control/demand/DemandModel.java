@@ -10,6 +10,7 @@ public class DemandModel {
     private String playUrl32;
     private String track_title;
     private int categoryId;
+    private String timestamp;
 
     public String getKind() {
         return kind;
@@ -41,6 +42,14 @@ public class DemandModel {
 
     public void setCategoryId(int categoryId) {
         this.categoryId = categoryId;
+    }
+
+    public String getTimestamp() {
+        return timestamp;
+    }
+
+    public void setTimestamp(String timestamp) {
+        this.timestamp = timestamp;
     }
 
     public void setInitialize(){

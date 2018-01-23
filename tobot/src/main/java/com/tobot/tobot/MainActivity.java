@@ -168,12 +168,21 @@ public class MainActivity extends BaseActivity implements ISceneV {
 //        if (TobotUtils.isEmployFack()){
 //            //首次使用提示语,动作等
 //        }
+
+       //mohuaiyuan 20180123 新的代码 20180123
+       onBle();
+
        if (AppTools.netWorkAvailable(this) && !isInitiativeOff && !whence) {//自动联网成功
            mCloud = new Cloud(this, new MainScenarioCallback());
            //mohuaiyuan 20171221 新的代码 20171221
            Map<String,String> map=null;
            try {
-               map=BFrame.getString(R.string.Connection_Succeed);
+//               map=BFrame.getString(R.string.Connection_Succeed);
+               int index =TobotUtils.getTimeIndex();
+               Log.d(TAG, "Time index: "+index);
+               String[] regardsArray = mContext.getResources().getStringArray(R.array.regardsArray);
+               String line = BFrame.getString(R.string.uprightBoot, regardsArray[index]);
+               map = BFrame.getString(line);
            } catch (Exception e) {
                e.printStackTrace();
            }
@@ -427,7 +436,7 @@ public class MainActivity extends BaseActivity implements ISceneV {
                                 if (l < 4000) {//连续点击
                                     Log("触摸--连续点击");
 
-//                                onBle();
+                                onBle();
 
                                     //mohuaiyuan 20171228 新的代码 新增的代码
                                     exitTime = 0;

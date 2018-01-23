@@ -137,12 +137,8 @@
     <!--#########################################   开机提示   #################################################################################-->
 
     <!--mohuaiyuan 20171221 新的字符串-->
-    <string-array name="uprightBoot">
-        speech:主人，%1$s，我已联网，现在可以和我聊天了！#,#action:1#,#expression:happys#,#earLightCircle:4
-    </string-array><!--表情不可用：16-眨眼-->
-    <string-array name="nonUprightBoot">
-        speech:哎呀，终于站起来了。主人，%1$s，我已联网，现在可以和我聊天了！#,#action:21#,#expression:boring#,#earLightCircle:4
-    </string-array><!--表情不可用:29-鬼脸,已找到表情-->
+    <string name="uprightBoot">speech:主人，%1$s，我已联网，现在可以和我聊天了！#,#action:1#,#expression:happys#,#earLightCircle:4</string><!--表情不可用：16-眨眼-->
+    <string name="nonUprightBoot">speech:哎呀，终于站起来了。主人，%1$s，我已联网，现在可以和我聊天了！#,#action:21#,#expression:boring#,#earLightCircle:4</string><!--表情不可用:29-鬼脸,已找到表情-->
 
     <string-array name="regardsArray">
         <item>早上好</item>
@@ -164,15 +160,15 @@
     <!--
     <string name="straightToSleep_Response">speech:好的，想和我说话你可以叫“小图小图”或者摸头叫我#,#action:1#,#expression:doze</string>&lt;!&ndash;表情不可用:11-睡觉,已找到表情&ndash;&gt;
     -->
-    <string name="straightToSleep_Response">speech:我休息会，想和我说话你可以叫“小图小图”或者摸头叫我#,#action:1#,#expression:doze</string><!--表情不可用:11-睡觉,已找到表情-->
-    <string name="straightToSleep_awaken">speech:主人，是不是想我了，现在可以和我聊天啦#,#action:82#,#expression:happys#,#earLightCircle:2</string><!--表情：16-开心-->
+    <string name="straightToSleep_Response">speech:我休息会，想和我说话你可以叫“小图小图”或者摸头叫我#,#expression:doze#,#earLightCircle:1</string><!--表情不可用:11-睡觉,已找到表情-->
+    <string name="straightToSleep_awaken">speech:主人，是不是想我了，现在可以和我聊天啦#,#expression:happys#,#earLightCircle:2</string><!--表情：16-开心-->
 
     <string-array name="sitDownAndSleep_keyWorks_array">
         <item>坐下休息</item>
         <item>你去休息吧</item>
         <item>休息去</item>
     </string-array>
-    <string name="sitDownAndSleep_Response">speech:那我去休息了，你可以叫“小图小图”或者摸头叫醒我#,#action:8#,#expression:doze</string><!--表情不可用：全灭-->
+    <string name="sitDownAndSleep_Response">speech:那我去休息了，你可以叫“小图小图”或者摸头叫醒我#,#action:8#,#expression:doze#,#earLightCircle:1</string><!--表情不可用：全灭-->
     <string name="sitDownAndSleep_awaken">speech:是不是想我了，快来和我聊天吧#,#action:9#,#expression:excites</string><!--表情：15-兴奋-->
 
     <string-array name="lieDownAndSleep_keyWorks_array">
@@ -180,7 +176,7 @@
         <item>躺下睡觉</item>
         <item>睡觉去</item>
     </string-array>
-    <string name="lieDownAndSleep_Response">speech:那我去睡觉了，你可以叫“小图小图”或者摸头叫醒我#,#action:10#,#expression:doze#,#earLightCircle:0</string><!--表情不可用：全灭-->
+    <string name="lieDownAndSleep_Response">speech:那我去睡觉了，你可以叫“小图小图”或者摸头叫醒我#,#action:10#,#expression:doze#,#earLightCircle:1</string><!--表情不可用：全灭-->
     <string name="lieDownAndSleep_awaken">speech:啊！我睡醒了，地板好冷，小图都快感冒了#,#action:11#,#expression:happys</string><!--表情不可用：16-眨眼-->
 
     <!--####################################    拍照 photograph    ###################################################################################-->
