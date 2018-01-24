@@ -17,6 +17,7 @@ import com.tobot.tobot.MainActivity;
 import com.tobot.tobot.R;
 import com.tobot.tobot.base.Constants;
 import com.tobot.tobot.base.Frequency;
+import com.tobot.tobot.control.Demand;
 import com.tobot.tobot.db.bean.MemoryDBManager;
 import com.tobot.tobot.db.model.Memory;
 import com.tobot.tobot.function.AssembleFunction;
@@ -537,9 +538,13 @@ public class BFrame implements IFrame {
             }else if (TobotUtils.isReset(code)){
                 Log.w(TAG,"场景中重置动作 code:"+code);
                 outAction(resetState(code), type, value);
+                Log.w(TAG,"是否保存动作3 code:"+code);
+                IsMemory(code);
             }else if (must == 0){
                 Log.w(TAG,"场景中正确动作 code:"+code);
                 outAction(code, type, value);
+                Log.w(TAG,"是否保存动作2 code:"+code);
+                IsMemory(code);
             }
         }else {
             if (must != 0) {
@@ -555,15 +560,17 @@ public class BFrame implements IFrame {
                     }
                 }else {
                     Log.w(TAG,"非场景中有记忆正确动作 code:"+code);
-//                    outAction(code, type, value);
+                    outAction(code, type, value);
+                    Log.w(TAG,"是否保存动作1 code:"+code);
+                    IsMemory(code);
                 }
             }else {
                 Log.w(TAG,"非场景中无记忆平常动作 code:"+code);
                 outAction(code, type, value);
+                Log.w(TAG,"是否保存动作2 code:"+code);
+                IsMemory(code);
             }
         }
-        Log.w(TAG,"是否保存动作 code:"+code);
-        IsMemory(code);
     }
 
     private static void outAction(int code, int type, int value) {
@@ -575,7 +582,8 @@ public class BFrame implements IFrame {
      * @param code
      */
     public static void outActionWithCallback(int code,int type,int value, IMotorCallback iMotorCallback){
-        motor.doAction(Action.buildBodyAction(code,type,value),iMotorCallback);
+//        motor.doAction(Action.buildBodyAction(code,type,value),iMotorCallback);
+        motion(code);
     }
 
     //下发耳部灯圈
@@ -760,6 +768,7 @@ public class BFrame implements IFrame {
         }
         prevent = false;
         isInterrupt = false;
+        Demand.instance(mContent).stopDemand();//停止点播
     }
 
     //触摸打断
@@ -886,14 +895,50 @@ public class BFrame implements IFrame {
         return reset;
     }
 
+//    //检索是否记忆
+//    public static void IsMemory(int action) {
+//        try{
+//            if (TobotUtils.isEmpty(memory)){
+//                memory = new Memory();
+//            }
+//            Log.w("Javen","动作 action:" + action);
+//            if (TobotUtils.isMemory(action)) {
+//                memory.setMotion(action+"");
+//                memory.setGlobal("1111");
+//                Log.w("Javen","要记忆动作 action:" + action);
+//                MemoryDBManager.getManager().insertOrUpdate(memory);
+//            }else if (memory.getGlobal().equals("0000")){
+//                memory.setMotion("0");
+//                memory.setGlobal("0000");
+//                Log.w("Javen","平常动作不记忆 action:" + action);
+//                MemoryDBManager.getManager().insertOrUpdate(memory);
+//            }else if (memory.getGlobal().equals("1111")){
+//                if (TobotUtils.isReset(action)){
+//                    memory.setMotion("0");
+//                    memory.setGlobal("0000");
+//                    Log.w("Javen","连续动作不记忆 action:" + action);
+//                    MemoryDBManager.getManager().insertOrUpdate(memory);
+//                }else if (!TobotUtils.isMemory(action)){
+//                    memory.setMotion("0");
+//                    memory.setGlobal("0000");
+//                    Log.w("Javen","重置后平常动作不记忆 action:" + action);
+//                    MemoryDBManager.getManager().insertOrUpdate(memory);
+//                }
+//            }
+//        }catch (Exception e){
+//
+//        }
+//    }
+
     //检索是否记忆
     public static void IsMemory(int action) {
         try{
             if (TobotUtils.isEmpty(memory)){
+                Log.w("Javen","memory 为空:");
                 memory = new Memory();
             }
             Log.w("Javen","动作 action:" + action);
-            if (TobotUtils.isMemory(action)) {
+            if (TobotUtils.isMemory(action)){
                 memory.setMotion(action+"");
                 memory.setGlobal("1111");
                 Log.w("Javen","要记忆动作 action:" + action);
@@ -909,18 +954,15 @@ public class BFrame implements IFrame {
                     memory.setGlobal("0000");
                     Log.w("Javen","连续动作不记忆 action:" + action);
                     MemoryDBManager.getManager().insertOrUpdate(memory);
-                }else if (!TobotUtils.isMemory(action)){
+                }else if (!TobotUtils.isMemory(action) && !memory.getGlobal().equals("1111")){
                     memory.setMotion("0");
                     memory.setGlobal("0000");
                     Log.w("Javen","重置后平常动作不记忆 action:" + action);
                     MemoryDBManager.getManager().insertOrUpdate(memory);
                 }
             }
-        }catch (Exception e){
-
-        }
+        }catch (Exception e){ }
     }
-
 
 
 

@@ -32,7 +32,7 @@ import static com.tobot.tobot.utils.socketblock.Const.HEART;
  * Created by TAG on 2017/10/9.
  */
 public class SocketConnectCoherence {
-    private String TAG = "Javen SocketConnectCoherence";
+    private String TAG = "Javen Socket";
     private WeakReference<Socket> mSocket;
     private ReadThread mReadThread;
     private long sendTime = 0L;
@@ -169,7 +169,7 @@ public class SocketConnectCoherence {
 //                            String message = new String(Arrays.copyOf(buffer, length)).trim();
 //                            String message2 = URLEncoder.encode(message, "GB2312");
 //                            String  message3 =  new String(buffer,"GB2312");
-                            Log.i(TAG, "SocketConnectTest回应消息......"+message);
+                            Log.i(TAG, "Socket回应消息:"+message);
                             //收到服务器过来的消息，就通过Broadcast发送出去
                             if (message.equals("[12]")) {//处理心跳回复
 
@@ -268,8 +268,9 @@ public class SocketConnectCoherence {
                     break;
                 case 8:
                     model.setCategoryId(88);
-                    model.setPlayUrl32(Joint.getPeelVerify(message));
-                    Log.i(TAG,"点播的舞蹈编号:"+model.getPlayUrl32()+"舞蹈指令:"+model.getCategoryId());
+                    model.setPlayUrl32(Joint.getCommaAmong(message,1));
+                    model.setTimestamp(Joint.getPeelVerify(message));
+                    Log.i(TAG,"点播的舞蹈编号:"+model.getPlayUrl32()+"舞蹈指令:"+model.getCategoryId()+"舞蹈时间戳:"+model.getTimestamp());
                     mdemandListener.setDemandResource(model);
 //                    Demand.instance(MainActivity.mContext).setResource(model);
                     break;

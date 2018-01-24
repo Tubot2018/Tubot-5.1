@@ -102,6 +102,8 @@ public class DanceScenario implements IScenario{
 
     private AudioUtils audioUtils;
 
+    private List<String> volumeKeyWords;
+    private VolumeControl volumeControl;
 
     public DanceScenario(ISceneV mISceneV){
         Log.d(TAG, "DanceScenario: ");
@@ -116,6 +118,10 @@ public class DanceScenario implements IScenario{
         scenarioManager = new ScenarioManager(mContext);
 
         audioUtils=new AudioUtils(mContext);
+    }
+
+    private void initData(){
+        initVoluemKeyWord();
     }
 
     @Override
@@ -171,6 +177,10 @@ public class DanceScenario implements IScenario{
                 Log.d(TAG, "没有在播放音乐: ");
             }
 
+            initData();
+            //用于跟踪代码
+            manager.setTAG(TAG);
+
 //            mISceneV.getScenario("os.sys.song");
             mISceneV.getScenario("os.sys.dance");
             Behavior.IntentInfo intent = behavior.intent;
@@ -222,6 +232,8 @@ public class DanceScenario implements IScenario{
         }
         return true;
     }
+
+
 
     private void prepareExecuteSong(String songName) throws Exception{
         Log.d(TAG, "prepareExecuteSong: ");
@@ -362,6 +374,24 @@ public class DanceScenario implements IScenario{
 //
 //                    }
 
+                    //mohuaiyuan 20180123 新的代码 20180123
+                    //音量控制
+                    boolean isContaintsVolumeKeyWord=false;
+                    Log.d(TAG, "interrupt:"+interrupt);
+                    for (int size=0;size<volumeKeyWords.size();size++){
+                        String keywork=volumeKeyWords.get(size);
+                        boolean isContains=interrupt.contains(keywork);
+                        Log.d(TAG, "onUserInterrupted: ");
+                        if (isContains){
+                            isContaintsVolumeKeyWord=true;
+                            break;
+                        }
+                    }
+                    Log.d(TAG, "isContaintsVolumeKeyWord: "+isContaintsVolumeKeyWord);
+                    if (isContaintsVolumeKeyWord){
+                        volumeControl.dealWithVolume(interrupt);
+                    }
+
 
                 } catch (IllegalStateException e) {
                     Log.d(TAG, "IllegalStateException e: "+e.getMessage());
@@ -495,7 +525,23 @@ public class DanceScenario implements IScenario{
 //        scenarioRuntimeConfig.addInterruptCmd("音量大一点");
 //        scenarioRuntimeConfig.addInterruptCmd("音量小一点");
 
+        //mohuaiyuan 20180123 新的代码 20180123
+        //音量控制
+        for (int i=0;i<volumeKeyWords.size();i++){
+            scenarioRuntimeConfig.addInterruptCmd(volumeKeyWords.get(i));
+        }
         return scenarioRuntimeConfig;
+    }
+
+    private void initVoluemKeyWord(){
+        Log.d(TAG, "initVoluemKeyWord: ");
+        if (volumeControl==null){
+            volumeControl=new VolumeControl();
+            volumeControl.setmContext(mContext);
+        }
+        if (volumeKeyWords==null || volumeKeyWords.isEmpty()){
+            volumeKeyWords=volumeControl.getVolumeKeyWords();
+        }
     }
 
 

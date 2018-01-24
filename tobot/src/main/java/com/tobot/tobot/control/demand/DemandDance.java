@@ -2,6 +2,8 @@ package com.tobot.tobot.control.demand;
 
 import android.content.Context;
 import android.media.MediaPlayer;
+import android.os.Message;
+import android.provider.ContactsContract;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -9,6 +11,7 @@ import com.tobot.tobot.Listener.SimpleFrameCallback;
 import com.tobot.tobot.scene.BaseScene;
 import com.tobot.tobot.scene.CustomScenario;
 import com.tobot.tobot.utils.CommonRequestManager;
+import com.tobot.tobot.utils.TobotUtils;
 import com.turing123.robotframe.function.motor.Motor;
 import com.turing123.robotframe.function.tts.TTS;
 import com.turing123.robotframe.multimodal.action.Action;
@@ -17,6 +20,9 @@ import java.io.File;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+import java.util.Date;
+import java.util.Timer;
+import java.util.TimerTask;
 
 /**
  * Created by YF-04 on 2017/10/9.
@@ -39,6 +45,9 @@ public class DemandDance implements DemandBehavior {
 
     private DemandUtils demandUtils;
     private Map<Integer,String> actionMap;
+
+    private String appointTime;
+    private Timer danceTimer = new Timer(true);
 
     public DemandDance(Context context,DemandModel danceModel){
         this.context=context;
@@ -88,6 +97,8 @@ public class DemandDance implements DemandBehavior {
         } else {
             throw new Exception("Init Dance Info error :playUrl or bodyActionCode init error!");
         }
+
+
 
     }
 
@@ -139,15 +150,37 @@ public class DemandDance implements DemandBehavior {
             manager.playMusic(playUrl, new MediaPlayer.OnPreparedListener() {
                 @Override
                 public void onPrepared(MediaPlayer mp) {
-                    mediaPlayer=mp;
+                    mediaPlayer = mp;
                     //发送舞蹈指令
-                    sendBodyAction();
+
+                    //Javen 20180122注释
+//                    sendBodyAction();
+                    AppointTime();
                 }
             }, null, null);
         } catch (Exception e) {
             e.printStackTrace();
         }
 
+    }
+
+    private void AppointTime(){
+        Log.i("Javen","服务器下发时间:"+TobotUtils.transformDateTime(demandModel.getTimestamp()));
+        appointTime = TobotUtils.DateAddTime(TobotUtils.transformDateTime(demandModel.getTimestamp()),+3);
+        Log.i("Javen","增加后时间:"+appointTime);
+        long l = TobotUtils.DateMinusTime(TobotUtils.getCurrentlyDate(), appointTime, 2);
+        Log.i("Javen", "与约定差距时间:" + l + "当前时间:" + TobotUtils.getCurrentlyDate());
+        danceTimer.schedule(new DanceTimerTask(), l);//约定时间
+//       danceTimer.schedule(new DanceTimerTask(),TobotUtils.DateMinusTime(appointTime,TobotUtils.getCurrentlyDate()));//约定时间
+    }
+
+    private class DanceTimerTask extends TimerTask {
+        public void run() {
+            Log.i("Javen", "下发时间:" + TobotUtils.getCurrentlyDate());
+            sendBodyAction();
+            danceTimer.cancel();
+            danceTimer = new Timer();
+        }
     }
 
     /**
