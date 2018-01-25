@@ -17,6 +17,7 @@ import com.tobot.tobot.MainActivity;
 import com.tobot.tobot.R;
 import com.tobot.tobot.base.Constants;
 import com.tobot.tobot.base.Frequency;
+import com.tobot.tobot.control.Demand;
 import com.tobot.tobot.db.bean.MemoryDBManager;
 import com.tobot.tobot.db.model.Memory;
 import com.tobot.tobot.function.AssembleFunction;
@@ -474,61 +475,20 @@ public class BFrame implements IFrame {
     }
 
     //下发动作
-    public static void motion(int code) {
-        motion1(code, PRMTYPE_EXECUTION_TIMES, 1, false);
-    }
+    public static void motion(int code) { motion(code, PRMTYPE_EXECUTION_TIMES, 1, false, true); }
 
     public static void motion(int code, int type) {
-        motion1(code, type, 1, false);
+        motion(code, type, 1, false, true);
     }
 
-    public static void motion(int code, int type, int value) {
-        motion1(code, type, value, false);
-    }
+    public static void motion(int code, int type, int value) { motion(code, type, value, false, true); }
 
-    public static void motion(int code,boolean scene) {
-        motion1(code, PRMTYPE_EXECUTION_TIMES, 1, scene);
-    }
+    public static void motion(int code,boolean scene) { motion(code, PRMTYPE_EXECUTION_TIMES, 1, scene, true); }
 
-//    private static void motion(int code, int type, int value, boolean scene) {
-//        int must = IsContinue();
-//        Log.w(TAG,"连续动做 must:"+must);
-//        if (scene){//场景中
-//            if (must != 0 && !TobotUtils.isReset(code)){//非正常状态
-//                TTS("没看到我现在正"+nowState(must)+"吗?你应该先让我站起来");
-//            }else if (TobotUtils.isReset(code)){
-//                Log.w(TAG,"场景中重置动作 code:"+code);
-//                outAction(resetState(code), type, value);
-//            }else if (must == 0){
-//                Log.w(TAG,"场景中正确动作 code:"+code);
-//                outAction(code, type, value);
-//            }
-//        }else {
-//            if (must != 0) {
-//                if (code != must) {
-//                    Log.w(TAG,"非场景中有记忆复位动作 must:"+must);
-//                    outAction(must, type, value);
-//                    try {
-//                        Thread.sleep(100);
-//                        Log.w(TAG,"非场景中有记忆复位后执行动作 must:"+must);
-//                        outAction(code, type, value);
-//                    } catch (InterruptedException e) {
-//                        e.printStackTrace();
-//                    }
-//                }else {
-//                    Log.w(TAG,"非场景中有记忆正确动作 code:"+code);
-//                    outAction(code, type, value);
-//                }
-//            }else {
-//                Log.w(TAG,"非场景中无记忆平常动作 code:"+code);
-//                outAction(code, type, value);
-//            }
-//        }
-//        Log.w(TAG,"是否保存动作 code:"+code);
-//        IsMemory(code);
-//    }
+    public static void motion(int code,boolean scene,boolean memory) { motion(code, PRMTYPE_EXECUTION_TIMES, 1, scene, memory); }
 
-    private static void motion1(int code, int type, int value, boolean scene) {
+
+    private static void motion(int code, int type, int value, boolean scene, boolean memory) {
         int must = IsContinue();
         Log.w(TAG,"连续动做 must:"+must);
         if (scene){//场景中
@@ -537,9 +497,13 @@ public class BFrame implements IFrame {
             }else if (TobotUtils.isReset(code)){
                 Log.w(TAG,"场景中重置动作 code:"+code);
                 outAction(resetState(code), type, value);
+                Log.w(TAG,"是否保存动作3 code:"+code);
+                IsMemory(code);
             }else if (must == 0){
                 Log.w(TAG,"场景中正确动作 code:"+code);
                 outAction(code, type, value);
+                Log.w(TAG,"是否保存动作2 code:"+code);
+                IsMemory(code);
             }
         }else {
             if (must != 0) {
@@ -566,8 +530,9 @@ public class BFrame implements IFrame {
                 IsMemory(code);
             }
         }
-
     }
+
+
 
     private static void outAction(int code, int type, int value) {
         motor.doAction(Action.buildBodyAction(code, type, value), new SimpleFrameCallback());
@@ -578,10 +543,8 @@ public class BFrame implements IFrame {
      * @param code
      */
     public static void outActionWithCallback(int code,int type,int value, IMotorCallback iMotorCallback){
-        //mohuaiyuan 20180123 原来的代码
 //        motor.doAction(Action.buildBodyAction(code,type,value),iMotorCallback);
-        //mohuaiyuan 20180123 新的代码 20180123
-        motion(code,type,value);
+        motion(code);
     }
 
     //下发耳部灯圈
@@ -766,6 +729,7 @@ public class BFrame implements IFrame {
         }
         prevent = false;
         isInterrupt = false;
+        Demand.instance(mContent).stopDemand();//停止点播
     }
 
     //触摸打断
@@ -861,13 +825,13 @@ public class BFrame implements IFrame {
                 state = "蹲着";
                 break;
             case Constants.sitDown_stand:
-                state = "坐在地上";
+                state = "坐着";
                 break;
             case Constants.lieDown_stand:
-                state = "躺在地上";
+                state = "躺着";
                 break;
             case Constants.goProne_stand:
-                state = "趴在地上";
+                state = "趴着";
                 break;
             case Constants.SitBack_stand:
                 state = "坐着";
@@ -878,6 +842,17 @@ public class BFrame implements IFrame {
         }
         return state;
     }
+
+    //是否为命令动作
+//    private static String orderState(){
+//        String order = "00";
+//        try{
+//            memory = MemoryDBManager.getManager().queryById("memory");
+//            order = memory.getOrder();
+//            Log.w("Javen","order:" + memory.getOrder());
+//        }catch (NullPointerException e){ }
+//        return order;
+//    }
 
     //重置状态
     public static int resetState(int action){
@@ -926,14 +901,6 @@ public class BFrame implements IFrame {
 
         }
     }
-
-
-
-
-
-
-
-
 
 
 

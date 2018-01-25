@@ -171,5 +171,50 @@ public class BSensor implements ISensor{
         });
     }
 
+    private void inFollow(){
+//        final SensorListener mSensorListener = new SensorListener();
+
+//        mProtocolManager.sendOrderToBoard();
+
+
+
+        mProtocolManager.registerSensorListener(Sensor.SENSOR_SHAKE_FALL, new OnProtocolListener() {
+            final byte[] mByte = new byte[8];
+
+            @Override
+            public void onMotionCompleted(byte[] receiveData) {
+                Log.d("Javen","摇晃结束时接收到的数据"+ receiveData);
+            }
+
+            @Override
+            public void onOrderFeedback(byte[] receiveData) {
+                Log.d("Javen","摇晃反馈接收到的数据长："+ receiveData.length + ";摇晃数据:"+Arrays.toString(receiveData));
+                mByte[0] = receiveData[0];
+                mByte[1] = receiveData[1];
+                mByte[2] = receiveData[2];
+                mByte[3] = receiveData[3];
+                mByte[4] = receiveData[4];
+                mByte[5] = receiveData[5];
+                mByte[6] = receiveData[6];
+                mByte[7] = 0x00;
+                mSensorListener.onOrderFeedback(mByte);
+            }
+
+            @Override
+            public void onMotionError(byte[] errorMessage) {
+                Log.d("Javen","摇晃出错时接收到的数据"+ errorMessage);
+            }
+
+            @Override
+            public void onMotionInterrupt() {
+            }
+
+            @Override
+            public void onMotionStart(byte[] receiveData) {
+                Log.d("Javen","摇晃开始时接收到的数据"+ receiveData);
+            }
+        });
+    }
+
 
 }

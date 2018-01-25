@@ -73,7 +73,7 @@ public class AssembleFunction implements IAssembleOutputFunction {
      */
     @Override
     public void start(List<AssembleData> list, IFrameAssembleOutputCallback iFrameAssembleOutputCallback, boolean last) {
-//        Log.d(TAG, "[ASSEMBLE] start with list:" + list + ", last:" + last);
+        Log.d(TAG, "[ASSEMBLE] start with list:" + list + ", last:" + last);
         index = 0;
         //1、先保存好传来的回调
         this.iFrameAssembleOutputCallback = iFrameAssembleOutputCallback;

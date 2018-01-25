@@ -17,6 +17,7 @@ import com.tobot.tobot.Listener.SimpleFrameCallback;
 import com.tobot.tobot.R;
 import com.tobot.tobot.entity.DetailsEntity;
 import com.tobot.tobot.entity.SongEntity;
+import com.tobot.tobot.presenter.BRealize.BBattery;
 import com.tobot.tobot.presenter.BRealize.BFrame;
 import com.tobot.tobot.presenter.BRealize.BaseTTSCallback;
 import com.tobot.tobot.presenter.BRealize.InterruptTTSCallback;
@@ -102,7 +103,8 @@ public class DanceScenario implements IScenario{
 
     private AudioUtils audioUtils;
 
-    private List<String> volumeKeyWords;
+    private List<String> volumeKeyWords;//音量
+    private List<String> batteryKeyWords;//电量
     private VolumeControl volumeControl;
 
     public DanceScenario(ISceneV mISceneV){
@@ -122,6 +124,7 @@ public class DanceScenario implements IScenario{
 
     private void initData(){
         initVoluemKeyWord();
+        initBatteryKeyWord();
     }
 
     @Override
@@ -272,107 +275,39 @@ public class DanceScenario implements IScenario{
 
             if (TobotUtils.isNotEmpty(interrupt) && i == 1) {
                 try {
-                    if (interrupt.contains("暂停")) {
-                        Log.d(TAG, "暂停: ");
-                        mISceneV.getScenario("os.sys.dance_stop");
-//                    mediaPlayer.pause();
-                    }
-                    if (interrupt.contains("不想听了") || interrupt.contains("好了") || interrupt.contains("可以了")) {
-                        Log.d(TAG, "不想听了 or 好了  or 可以了: ");
-//                    mediaPlayer.stop();
-                        mISceneV.getScenario("os.sys.dance_stop");
-                        interruptDance();
-                        onExit();
-                    }
-                    if (interrupt.contains("继续") && !getMediaPlayer().isPlaying()) {
-                        Log.d(TAG, "继续: ");
-                        mISceneV.getScenario("os.sys.dance");
-//                    mediaPlayer.start();
-                    }
-                    //mohuaiyuan 仅仅用于测试 20170912
-                    if (interrupt.contains("退出") || interrupt.contains("推出")) {
-                        Log.d(TAG, "退出: ");
-                        mISceneV.getScenario("os.sys.dance_stop");
-                        //mohuaiyuan 20171208   5、摸头或语音舞蹈打断，音乐马上停止，并下发直立动作，
-//                        beforeExit();
-                        interruptDance();
-                        onExit();
-
-                    }
+//                    if (interrupt.contains("暂停")) {
+//                        Log.d(TAG, "暂停: ");
+//                        mISceneV.getScenario("os.sys.dance_stop");
+////                    mediaPlayer.pause();
+//                    }
+//                    if (interrupt.contains("不想听了") || interrupt.contains("好了") || interrupt.contains("可以了")) {
+//                        Log.d(TAG, "不想听了 or 好了  or 可以了: ");
+////                    mediaPlayer.stop();
+//                        mISceneV.getScenario("os.sys.dance_stop");
+//                        interruptDance();
+//                        onExit();
+//                    }
+//                    if (interrupt.contains("继续") && !getMediaPlayer().isPlaying()) {
+//                        Log.d(TAG, "继续: ");
+//                        mISceneV.getScenario("os.sys.dance");
+////                    mediaPlayer.start();
+//                    }
+//                    //mohuaiyuan 仅仅用于测试 20170912
+//                    if (interrupt.contains("退出") || interrupt.contains("推出")) {
+//                        Log.d(TAG, "退出: ");
+//                        mISceneV.getScenario("os.sys.dance_stop");
+//                        //mohuaiyuan 20171208   5、摸头或语音舞蹈打断，音乐马上停止，并下发直立动作，
+////                        beforeExit();
+//                        interruptDance();
+//                        onExit();
+//
+//                    }
 
 //                //mohuaiyuan 测试 跳下一个舞蹈 ，仅仅用于测试 20170912
 //                if (interrupt.contains("再来一个") || interrupt.contains("再跳一个")|| interrupt.contains("跳支舞") ||interrupt.contains("下一个")){
 //                    Log.d(TAG, "跳下一个舞蹈: ");
 //                    playNextBackgroundMusic();
 //                }
-
-//                if (interrupt.contains("快进") || interrupt.contains("前进")) {
-//                    int percentage = Integer.parseInt(details.getDuration());
-//                    int speed = percentage / 100;
-//                    Pattern pattern = Pattern.compile("[^0-9]");
-//                    Matcher isNum = pattern.matcher(interrupt);
-//                    Log.i("Javen","运动代号..."+ isNum.replaceAll("").trim());
-//
-////                Pattern pattern = Pattern.compile("[0-9]*");
-////                Log.i("Javen", interrupt.substring(2, interrupt.length() - 1));
-////                Matcher isNum = pattern.matcher(interrupt.substring(2, interrupt.length() - 1));
-////                Log.i("Javen", isNum.matches() + "11");
-//                    if (isNum.matches()) {
-//                        Log.i("Javen", "快进" + Integer.parseInt(isNum.replaceAll("").trim()) * speed);
-//                        mediaPlayer.seekTo(Integer.parseInt(isNum.replaceAll("").trim()) * speed);
-//                    }
-//                }
-                    //mohuaiyuan 20180104 原来的代码
-//                    if (interrupt.contains("大声点")
-//                            || interrupt.contains("大点声")
-//                            || interrupt.contains("声音大一点")
-//                            || interrupt.contains("音量大一点")) {
-//
-//                        int currentVolumeLevel = audioUtils.getCurrentVolume();
-//                        Log.d(TAG, "currentVolumeLevel: " + currentVolumeLevel);
-//                        int result = audioUtils.adjustRaiseMusicVolume();
-//                        if (result < 0) {
-//                            switch (result) {
-//                                case AudioUtils.CURRENT_LEVEL_IS_MAX_VOLUME_LEVEL:
-//                                    tts.speak(manager.getString(R.string.maxMusicVolume), null);
-//                                    break;
-//
-//                                default:
-//                                    break;
-//
-//                            }
-//                        } else {
-//                            tts.speak(manager.getString(R.string.raiseMusicVolume), null);
-//                        }
-//                        currentVolumeLevel = audioUtils.getCurrentVolume();
-//                        Log.d(TAG, "currentVolumeLevel: " + currentVolumeLevel);
-//
-//                    }
-                    //mohuaiyuan 20180104 原来的代码
-//                    if (interrupt.contains("小声点")
-//                            || interrupt.contains("小点声")
-//                            || interrupt.contains("声音小一点")
-//                            || interrupt.contains("音量小一点")) {
-//                        int currentVolumeLevel = audioUtils.getCurrentVolume();
-//                        Log.d(TAG, "currentVolumeLevel: " + currentVolumeLevel);
-//                        int result = audioUtils.adjustLowerMusicVolume();
-//                        if (result < 0) {
-//                            switch (result) {
-//                                case AudioUtils.CURRENT_LEVEL_IS_MIN_VOLUME_LEVEL:
-//                                    tts.speak(manager.getString(R.string.minMusicVolume), null);
-//                                    break;
-//
-//                                default:
-//                                    break;
-//
-//                            }
-//                        } else {
-//                            tts.speak(manager.getString(R.string.lowerMusicVolume), null);
-//                        }
-//                        currentVolumeLevel = audioUtils.getCurrentVolume();
-//                        Log.d(TAG, "currentVolumeLevel: " + currentVolumeLevel);
-//
-//                    }
 
                     //mohuaiyuan 20180123 新的代码 20180123
                     //音量控制
@@ -392,6 +327,19 @@ public class DanceScenario implements IScenario{
                         volumeControl.dealWithVolume(interrupt);
                     }
 
+                    //场景中电量查询
+                    boolean isContaintsBatteryKeyWord = false;
+                    for (int size = 0; size < batteryKeyWords.size(); size++) {
+                        String keywork = batteryKeyWords.get(size);
+                        boolean isContains = interrupt.contains(keywork);
+                        if (isContains) {
+                            isContaintsBatteryKeyWord = true;
+                            break;
+                        }
+                    }
+                    if (isContaintsBatteryKeyWord){
+                        BFrame.getBBattery().balance();
+                    }
 
                 } catch (IllegalStateException e) {
                     Log.d(TAG, "IllegalStateException e: "+e.getMessage());
@@ -495,41 +443,32 @@ public class DanceScenario implements IScenario{
         scenarioRuntimeConfig.allowDefaultChat = false;
         scenarioRuntimeConfig.interruptMatchMode = scenarioRuntimeConfig.INTERRUPT_CMD_MATCH_MODE_FUZZY;
         //为场景添加打断语，asr 识别到打断语时将产生打断事件，回调到场景的onUserInterrupted() 方法。
-        scenarioRuntimeConfig.addInterruptCmd("暂停");
-        scenarioRuntimeConfig.addInterruptCmd("继续");
-        scenarioRuntimeConfig.addInterruptCmd("不想听了");
-        scenarioRuntimeConfig.addInterruptCmd("好了");
-        scenarioRuntimeConfig.addInterruptCmd("可以了");
-        scenarioRuntimeConfig.addInterruptCmd("快进");
-        scenarioRuntimeConfig.addInterruptCmd("前进");
-
-//        //mohuaiyuan 仅仅用于测试 20170912
-        scenarioRuntimeConfig.addInterruptCmd("退出");
-        scenarioRuntimeConfig.addInterruptCmd("推出");
+//        scenarioRuntimeConfig.addInterruptCmd("暂停");
+//        scenarioRuntimeConfig.addInterruptCmd("继续");
+//        scenarioRuntimeConfig.addInterruptCmd("不想听了");
+//        scenarioRuntimeConfig.addInterruptCmd("好了");
+//        scenarioRuntimeConfig.addInterruptCmd("可以了");
+//        scenarioRuntimeConfig.addInterruptCmd("快进");
+//        scenarioRuntimeConfig.addInterruptCmd("前进");
+//        scenarioRuntimeConfig.addInterruptCmd("退出");
+//        scenarioRuntimeConfig.addInterruptCmd("推出");
 //
 //        //mohuaiyuan 测试 跳下一个舞蹈,仅仅用于测试 20170912
 //        scenarioRuntimeConfig.addInterruptCmd("再来一个");
 //        scenarioRuntimeConfig.addInterruptCmd("再跳一个");
 //        scenarioRuntimeConfig.addInterruptCmd("跳支舞");
 //        scenarioRuntimeConfig.addInterruptCmd("下一个");
-        //mohuaiyuan 20180104 原来的代码
-//        scenarioRuntimeConfig.addInterruptCmd("大声点");
-//        scenarioRuntimeConfig.addInterruptCmd("小声点");
-//
-//        scenarioRuntimeConfig.addInterruptCmd("大点声");
-//        scenarioRuntimeConfig.addInterruptCmd("小点声");
-//
-//        scenarioRuntimeConfig.addInterruptCmd("声音大一点");
-//        scenarioRuntimeConfig.addInterruptCmd("声音小一点");
-//
-//        scenarioRuntimeConfig.addInterruptCmd("音量大一点");
-//        scenarioRuntimeConfig.addInterruptCmd("音量小一点");
 
         //mohuaiyuan 20180123 新的代码 20180123
         //音量控制
         for (int i=0;i<volumeKeyWords.size();i++){
             scenarioRuntimeConfig.addInterruptCmd(volumeKeyWords.get(i));
         }
+        //电量控制
+        for (int i=0;i<batteryKeyWords.size();i++){
+            scenarioRuntimeConfig.addInterruptCmd(batteryKeyWords.get(i));
+        }
+
         return scenarioRuntimeConfig;
     }
 
@@ -541,6 +480,13 @@ public class DanceScenario implements IScenario{
         }
         if (volumeKeyWords==null || volumeKeyWords.isEmpty()){
             volumeKeyWords=volumeControl.getVolumeKeyWords();
+        }
+    }
+
+    //电量
+    private void initBatteryKeyWord(){
+        if (batteryKeyWords==null || batteryKeyWords.isEmpty()){
+            batteryKeyWords = BBattery.getBatteryKeyWords();
         }
     }
 

@@ -5,6 +5,7 @@ import android.util.Log;
 
 import com.tobot.tobot.MainActivity;
 import com.tobot.tobot.Listener.SimpleFrameCallback;
+import com.tobot.tobot.R;
 import com.tobot.tobot.presenter.ICommon.ISceneV;
 import com.tobot.tobot.presenter.IPort.IBattery;
 import com.tobot.tobot.scene.BaseScene;
@@ -28,7 +29,7 @@ import static com.turing123.robotframe.multimodal.action.Action.PRMTYPE_EXECUTIO
 
 public class BBattery implements IBattery{
     private String TAG = "Javen BBattery";
-    private Context mContent;
+    private static Context mContext;
     private ISceneV mISceneV;
     private BodyState mBodyState;
     private TTS tts;
@@ -44,55 +45,13 @@ public class BBattery implements IBattery{
 
     public BBattery(ISceneV mISceneV){
         this.mISceneV = mISceneV;
-        this.mContent = (Context)mISceneV;
-        mBodyState = new BodyState(mContent,new BaseScene(mContent, "os.sys.chat"));
-        tts = new TTS(mContent, new BaseScene(mContent, "os.sys.chat"));
+        this.mContext = (Context)mISceneV;
+        mBodyState = new BodyState(mContext,new BaseScene(mContext, "os.sys.chat"));
+        tts = new TTS(mContext, new BaseScene(mContext, "os.sys.chat"));
         mTimer.schedule(new BatteryTimer(),T1,T2);//电量查看
         batteryLocal();
     }
 
-    @Override
-    public void batteryLocal() {
-        //1. 获取LocalCommandCenter 对象
-        localCommandCenter = LocalCommandCenter.getInstance(mContent);
-        //2. 定义本地命令的名字
-        String name = "battery";
-        //3. 定义匹配该本地命令的关键词，包含这些关键词的识别结果将交由该本地命令处理。
-        List<String> keyWords = new ArrayList<String>();
-        keyWords.add("电量");
-        keyWords.add("当前电量");
-        keyWords.add("当前电量多少");
-        keyWords.add("当前电量还有多少");
-        keyWords.add("还有多少电");
-        keyWords.add("你还有多少电");
-        keyWords.add("电量多少");
-        keyWords.add("电还有多少");
-        //4. 定义本地命令对象
-        localCommand = new LocalCommand(name, keyWords) {
-            //4.1. 在process 函数中实现该命令的具体动作。
-            @Override
-            protected void process(String name, String s) {
-                //4.1.1. 本示例中，当喊关键词中配置的词时将使机器人进入拍照
-                balance();
-                //5. 命令执行完成后需明确告诉框架，命令处理结束，否则无法继续进行主对话流程。
-                this.localCommandComplete.onComplete();
-            }
-
-            //4.2. 执行命令前的处理
-            @Override
-            public void beforeCommandProcess(String s) {
-
-            }
-
-            //4.3. 执行命令后的处理
-            @Override
-            public void afterCommandProcess() {
-
-            }
-        };
-        //5. 将定义好的local command 加入 LocalCommandCenter中。
-        localCommandCenter.add(localCommand);
-    }
 
     @Override
     public void energy() {
@@ -182,6 +141,61 @@ public class BBattery implements IBattery{
             default:
                 return 0;
         }
+    }
+
+    @Override
+    public void batteryLocal() {
+        //1. 获取LocalCommandCenter 对象
+        localCommandCenter = LocalCommandCenter.getInstance(mContext);
+        //2. 定义本地命令的名字
+        String name = "battery";
+        //3. 定义匹配该本地命令的关键词，包含这些关键词的识别结果将交由该本地命令处理。
+        List<String> keyWords = new ArrayList<String>();
+//        keyWords.add("电量");
+//        keyWords.add("当前电量");
+//        keyWords.add("当前电量多少");
+//        keyWords.add("当前电量还有多少");
+//        keyWords.add("还有多少电");
+//        keyWords.add("你还有多少电");
+//        keyWords.add("电量多少");
+//        keyWords.add("电还有多少");
+        for (int i=0;i<getBatteryKeyWords().size();i++){
+            keyWords.add(getBatteryKeyWords().get(i));
+        }
+        //4. 定义本地命令对象
+        localCommand = new LocalCommand(name, keyWords) {
+            //4.1. 在process 函数中实现该命令的具体动作。
+            @Override
+            protected void process(String name, String s) {
+                //4.1.1. 本示例中，当喊关键词中配置的词时将使机器人进入拍照
+                balance();
+                //5. 命令执行完成后需明确告诉框架，命令处理结束，否则无法继续进行主对话流程。
+                this.localCommandComplete.onComplete();
+            }
+
+            //4.2. 执行命令前的处理
+            @Override
+            public void beforeCommandProcess(String s) {
+
+            }
+
+            //4.3. 执行命令后的处理
+            @Override
+            public void afterCommandProcess() {
+
+            }
+        };
+        //5. 将定义好的local command 加入 LocalCommandCenter中。
+        localCommandCenter.add(localCommand);
+    }
+
+    public static List<String> getBatteryKeyWords() {
+        List<String> keyWords = new ArrayList<>();
+        String[] array = mContext.getResources().getStringArray(R.array.battery_keyWords_array);
+        for (int i = 0; i < array.length; i++) {
+            keyWords.add(array[i]);
+        }
+        return keyWords;
     }
 
 }

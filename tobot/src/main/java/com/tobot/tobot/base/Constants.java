@@ -48,8 +48,6 @@ public class Constants {
     public static final int AWAIT_ACTIVE = 7;
     public static final int REPLACE_ASR = 8;
 
-    public static final int SIT_DOWN_AND_SLEEP_DORMANT=34364;
-
     public static final int CLOSE_AP = 1000;
     public static final int FOR_RESULT = 1001;
 

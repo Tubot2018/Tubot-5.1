@@ -70,8 +70,30 @@
     <string name="Upgrade_prompt_initiative">检测到版本有重大更新,即将进入系统升级</string>
     <string name="Upgrade_prompt">系统升级中,请耐心等待,稍后将自行重启</string>
     <string name="Upgrade_prompt_passivity">系统升级中,请耐心等待</string>
-	
+
+
+    <!--############################################################电量查询##############################################################-->
+
+    <string-array name="battery_keyWords_array">
+        <item>你还有多少电量</item>
+        <item>你的电量还有多少</item>
+        <item>当前电量</item>
+        <item>当前电量多少</item>
+        <item>当前电量还有多少</item>
+        <item>还有多少电</item>
+        <item>你还有多少电</item>
+        <item>你还有多少电</item>
+        <item>电量多少</item>
+        <item>电还有多少</item>
+
+    </string-array>
+
+
 	<!--##########################################################################################################################-->
+
+
+
+
 
     <!-- &lt;!&ndash; 声音提示语句   &ndash;&gt;
      <string name="raiseMusicVolume">好的 ，我声音大点</string>
@@ -160,7 +182,7 @@
     <!--
     <string name="straightToSleep_Response">speech:好的，想和我说话你可以叫“小图小图”或者摸头叫我#,#action:1#,#expression:doze</string>&lt;!&ndash;表情不可用:11-睡觉,已找到表情&ndash;&gt;
     -->
-    <string name="straightToSleep_Response">speech:我休息会，想和我说话你可以叫“小图小图”或者摸头叫我#,#expression:doze#,#earLightCircle:1</string><!--表情不可用:11-睡觉,已找到表情-->
+    <string name="straightToSleep_Response">speech:我休息会，想和我说话你可以叫“小图小图”或者摸头叫我#,#earLightCircle:1</string><!--表情不可用:11-睡觉,已找到表情-->
     <string name="straightToSleep_awaken">speech:主人，是不是想我了，现在可以和我聊天啦#,#expression:happys#,#earLightCircle:2</string><!--表情：16-开心-->
 
     <string-array name="sitDownAndSleep_keyWorks_array">

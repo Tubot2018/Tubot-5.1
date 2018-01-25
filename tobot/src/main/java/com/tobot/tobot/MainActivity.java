@@ -65,7 +65,9 @@ import com.turing123.robotframe.multimodal.action.BodyActionCode;
 import com.turing123.robotframe.multimodal.action.EarActionCode;
 import com.turing123.robotframe.multimodal.expression.EmojNames;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -104,7 +106,7 @@ public class MainActivity extends BaseActivity implements ISceneV {
     private Ble mBle;
     private Timer dormantTimer = new Timer(true);//等待休眠时间
     private Timer activeTimer = new Timer(true);//主动交互时间
-    private Timer awakenTimer = new Timer(true);//休眠时间
+//    private Timer awakenTimer = new Timer(true);//休眠时间
     private Timer detectionTime = new Timer(true);//异常断网检测时间
 //    private Timer TimeMachine = new Timer(true);//异常断网语音播报时间
 //    private boolean isDormant;//休眠
@@ -170,7 +172,7 @@ public class MainActivity extends BaseActivity implements ISceneV {
 //        }
 
        //mohuaiyuan 20180123 新的代码 20180123
-       onBle();
+//       onBle();
 
        if (AppTools.netWorkAvailable(this) && !isInitiativeOff && !whence) {//自动联网成功
            mCloud = new Cloud(this, new MainScenarioCallback());
@@ -227,10 +229,6 @@ public class MainActivity extends BaseActivity implements ISceneV {
 //                                    BFrame.isInterrupt = true;//可打断//20171226注释一直停留在打断
                                     //mohuaiyuan 20180111 原来的代码
                                     mBFrame.Ear(EarActionCode.EAR_MOTIONCODE_2);//发声效果
-                                    //mohuaiyuan 20180115 新的代码 20180115
-//                                    BFrame.Ear(6);
-//                                    Log("发声效果  灯圈 2 绿色常亮。。。");
-                                    Log("发声效果  灯圈 。。。");
                                     activeTimer.cancel();
                                     activeTimer = new Timer();
                                 }
@@ -248,14 +246,7 @@ public class MainActivity extends BaseActivity implements ISceneV {
 //                                BFrame.prevent = false;
 //                                BFrame.isInterrupt = false;//不可打断//20171229考虑到全局tts已自主控制,asr不在暂停
                                 String asrContent = packet.getString("arg2");
-                                //mohuaiyuan 20180111 原来的代码
                                 mBFrame.Ear(EarActionCode.EAR_MOTIONCODE_3);//录音效果
-                                //mohuaiyuan 20180115 新的代码 20180115
-//                                BFrame.Ear(6);
-//                                Log("录音效果  灯圈 6 橙色常亮。。。");
-//                                BFrame.Ear(8);
-                                Log("录音效果  灯圈 。。。");
-
                                 if(packet.getInt("arg1") == 4){
                                     if(asrContent.contains("没有检查到网络")) {
                                         if (!hintConnect) {
@@ -271,8 +262,6 @@ public class MainActivity extends BaseActivity implements ISceneV {
                                         //等待主动交互
                                         activeTimer.cancel();
                                         activeTimer = new Timer();
-
-
                                     }
                                     if(hintConnect){//断网收到语音提示-->离线语音
                                         //mohuaiyuan 20171220 原来的代码
@@ -313,7 +302,6 @@ public class MainActivity extends BaseActivity implements ISceneV {
                                         Log.e("IDormant", "摸头唤醒 之后 回调，出现Exception e : "+e.getMessage());
                                         e.printStackTrace();
                                     }
-
                                 }
                                 break;
                         }
@@ -332,27 +320,11 @@ public class MainActivity extends BaseActivity implements ISceneV {
 //                        mBFrame.motion(BodyActionCode.ACTION_8);
 //                        mBFrame.FallAsleep();
                         //mohuaiyuan 20171226 新的代码 20171226
-                        Log.d("IDormant", "自动休眠: ");
+                        Log.d(TAG, "自动休眠: ");
                         StraightToSleep straightToSleep=new StraightToSleep();
                         straightToSleep.dormant();
                         DormantManager.setType(DormantManager.DORMANT_TYPE_STRAIGHT_TO_SLEEP);
-
-                        //站着休眠N分钟不唤醒 ,触发 坐下休眠
-//                        Message message=new Message();
-//                        message.what=Constants.SIT_DOWN_AND_SLEEP_DORMANT;
-//                        mainHandler.sendMessage(message);
-
                     }
-                    break;
-
-                //mohuaiyuan 20171226 新的代码 20171226
-                case Constants.SIT_DOWN_AND_SLEEP_DORMANT:
-                    Log.d("IDormant", "mainHandler: Constants.SIT_DOWN_AND_SLEEP_DORMANT:");
-                    //站着休眠N分钟不唤醒 ,触发 坐下休眠
-                    DormantManager dormantManager=new DormantManager();
-                    dormantManager.sitDownAndSleepTrigger();
-
-
                     break;
 
                 case Constants.AWAIT_AWAKEN ://等待唤醒
@@ -429,17 +401,19 @@ public class MainActivity extends BaseActivity implements ISceneV {
 //                        }
 //                        BFrame.isInterrupt = false;//不可打断
 //                        BFrame.prevent = false;
-                        } else {
-                            Log("触摸--调侃聊天");
-                            try {
-                                long l = (System.currentTimeMillis() - exitTime);
-                                if (l < 4000) {//连续点击
-                                    Log("触摸--连续点击");
-
-                                onBle();
-
-                                    //mohuaiyuan 20171228 新的代码 新增的代码
-                                    exitTime = 0;
+                    } else {
+                        Log("触摸--调侃聊天");
+                        Log.d("helloworld", "触摸--调侃聊天: ");
+                        try {
+                            long l = (System.currentTimeMillis() - exitTime);
+                            if (l < 4000) {//连续点击
+                                Log("触摸--连续点击");
+                                Log.d("helloworld", "触摸--连续点击: ");
+								
+//                                onBle();
+																
+                                //mohuaiyuan 20171228 新的代码 新增的代码
+                                exitTime = 0;
 
                                     //mohuaiyuan 20171220 新的代码 新增的代码
                                     MyTouchResponse myTouchResponse=new MyTouchResponse(mContext);
@@ -518,7 +492,7 @@ public class MainActivity extends BaseActivity implements ISceneV {
 
 
                                     //mohuaiyuan  20171225 测试 表情 序号
-									
+
                                /* if (expressionList==null){
                                     expressionList=new ArrayList<>();
                                     String []expressionArray=mContext.getResources().getStringArray(R.array.expressionArray);
@@ -623,9 +597,12 @@ public class MainActivity extends BaseActivity implements ISceneV {
         if (!TobotUtils.isInScenario(mScenario) && BFrame.robotState){
 //        if (!TobotUtils.isInScenario(mScenario) && isDormant){
             //等待睡眠
-            dormantTimer.cancel();
-            dormantTimer = new Timer();
-            dormantTimer.schedule(new DormantTimerTask(),3000000);//等待5分钟进入休眠
+            try{
+                dormantTimer.cancel();
+                dormantTimer = new Timer();
+                Log("场景后休眠");
+                dormantTimer.schedule(new DormantTimerTask(),3*60*1000);//等待3分钟进入休眠
+            }catch (Exception e){ }
         }
     }
 
@@ -684,7 +661,7 @@ public class MainActivity extends BaseActivity implements ISceneV {
 
 //        BFrame.getmBLocal().carryThrough("");
 
-        mBFrame.FallAsleep();
+//        mBFrame.FallAsleep();
 
     }
 
@@ -788,6 +765,7 @@ public class MainActivity extends BaseActivity implements ISceneV {
         public void run() {
             Message message = new Message();
             message.what = Constants.AWAIT_DORMANT;
+            Log("无asr后休眠");
             mainHandler.sendMessage(message);
         }
     }
@@ -856,7 +834,7 @@ public class MainActivity extends BaseActivity implements ISceneV {
         }
     }
 
-	
+
 //asr----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 

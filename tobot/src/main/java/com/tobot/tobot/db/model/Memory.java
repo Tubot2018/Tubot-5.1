@@ -33,6 +33,9 @@ public class Memory implements Serializable {
     @Column(name = "global")
     private String global = "0";//当true对全局动作进行阻拦
 
+//    @Column(name = "order")
+//    private String order = "0";//当false对全局非命令动作进行抛弃
+
     @Column(name = "motion")
     private String motion = "0";//保存当前需记忆的动作
 
@@ -51,6 +54,14 @@ public class Memory implements Serializable {
     public void setGlobal(String global) {
         this.global = global;
     }
+
+//    public String getOrder() {
+//        return order;
+//    }
+//
+//    public void setOrder(String order) {
+//        this.order = order;
+//    }
 
     public String getMotion() { return motion; }
 
