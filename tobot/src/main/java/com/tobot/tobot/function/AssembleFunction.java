@@ -9,6 +9,7 @@ import com.tobot.tobot.Listener.SimpleFrameCallback;
 import com.tobot.tobot.presenter.BRealize.BFrame;
 import com.tobot.tobot.scene.BaseScene;
 import com.tobot.tobot.scene.CustomScenario;
+import com.tobot.tobot.scene.SceneManager;
 import com.tobot.tobot.utils.TobotUtils;
 import com.turing123.robotframe.event.AppEvent;
 import com.turing123.robotframe.function.FunctionState;
@@ -23,6 +24,7 @@ import com.turing123.robotframe.multimodal.AssembleData;
 import com.turing123.robotframe.multimodal.Behavior;
 import com.turing123.robotframe.multimodal.action.Action;
 
+import com.turing123.robotframe.multimodal.action.EarActionCode;
 import com.turing123.robotframe.multimodal.expression.FacialExpression;
 import com.turing123.robotframe.multimodal.voice.Voice;
 import com.turing123.robotframe.scenario.IScenario;
@@ -164,6 +166,9 @@ public class AssembleFunction implements IAssembleOutputFunction {
         @Override
         public void onStart(String s) {
             mAssemble.Permit(true);
+            if (!TobotUtils.isInScenario(SceneManager.SCENE)) {
+                BFrame.Ear(EarActionCode.EAR_MOTIONCODE_2);//发声效果
+            }
         }
 
         @Override
@@ -194,6 +199,9 @@ public class AssembleFunction implements IAssembleOutputFunction {
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
+            }
+            if (!TobotUtils.isInScenario(SceneManager.SCENE)) {
+                BFrame.Ear(EarActionCode.EAR_MOTIONCODE_3);//asr效果
             }
            BFrame.hint();
         }
@@ -282,7 +290,11 @@ public class AssembleFunction implements IAssembleOutputFunction {
                 if ((boolean) dispose) {
                     tts.speak(" ", ittsCallback);
                 }else {
-                    tts.speak(" ");
+//                    tts.speak(" ");
+                    tts.stop();
+                    if (!TobotUtils.isInScenario(SceneManager.SCENE)) {
+                        BFrame.Ear(EarActionCode.EAR_MOTIONCODE_3);//asr效果
+                    }
                 }
             }
         });

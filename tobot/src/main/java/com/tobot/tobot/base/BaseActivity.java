@@ -21,6 +21,7 @@ import butterknife.ButterKnife;
 
 public abstract class BaseActivity extends Activity {
 
+    private String TAG = "BaseActivity";
     public abstract void isKeyDown(int keyCode, KeyEvent event);
     public abstract int getGlobalLayout();
     public abstract void initial(Bundle savedInstanceState);
@@ -43,7 +44,7 @@ public abstract class BaseActivity extends Activity {
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
-//        Log.e("Javen BaseActivity onKeyDown","==>keyCode:"+keyCode+"==>keyEvent:"+event);
+        Log.e(TAG,"onKeyDown==>keyCode:"+keyCode+"==>keyEvent:"+event);
         switch(keyCode){
 //            case KeyEvent.KEYCODE_VOLUME_UP:
             case KeyEvent.KEYCODE_BACK://需要识别长按事件
@@ -69,14 +70,14 @@ public abstract class BaseActivity extends Activity {
 
     @Override
     public boolean onKeyLongPress(int keyCode, KeyEvent event) {
-//        Log.e("Javen BaseActivity onKeyLongPress","==>keyCode:"+keyCode+"==>keyEvent:"+event);
+        Log.e(TAG,"onKeyLongPress==>keyCode:"+keyCode+"==>keyEvent:"+event);
         lockLongPressKey = true;
         return super.onKeyLongPress(keyCode, event);
     }
 
     @Override
     public boolean onKeyUp(int keyCode, KeyEvent event) {
-//        Log.e("Javen BaseActivity onKeyUp","==>keyCode:"+keyCode+"==>keyEvent:"+event);
+        Log.e(TAG,"onKeyUp==>keyCode:"+keyCode+"==>keyEvent:"+event);
         //Javen_BaseActivity_onKeyUp: keyCode:4
         // keyEvent:KeyEvent { action=ACTION_UP, keyCode=KEYCODE_BACK, scanCode=158, metaState=0, flags=0x208, repeatCount=0, eventTime=12233791, downTime=12231429, deviceId=1, source=0x101 }
         switch(keyCode){
@@ -88,7 +89,7 @@ public abstract class BaseActivity extends Activity {
                 if (isLongPressKey == true) {
                     if (lockLongPressKey) {
                             isKeyDown(KeyEvent.FLAG_LONG_PRESS,event);
-                        Log.e("Javen BaseActivity onKeyUp","进入长按事件处理");
+                        Log.e(TAG,"进入长按事件处理");
                     }
                 } else if (isLongPressKey == false) {
                     if (!lockLongPressKey) {

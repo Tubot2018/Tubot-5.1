@@ -1,9 +1,7 @@
 package com.tobot.tobot.utils.photograph;
 
-import java.io.IOException;
 import java.util.List;
 
-import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.PixelFormat;
@@ -14,7 +12,9 @@ import android.hardware.Camera.Size;
 import android.util.Log;
 import android.view.SurfaceHolder;
 
-import com.tobot.tobot.presenter.BRealize.BLocal;
+import com.tobot.tobot.R;
+import com.tobot.tobot.presenter.BRealize.BFrame;
+import com.tobot.tobot.presenter.BRealize.BPhoto;
 
 /**
  * Created by Javen on 2017/8/11.
@@ -27,7 +27,7 @@ public class CameraInterface {
     private boolean isPreviewing = false;
     private float mPreviwRate = -1f;
     private static CameraInterface mCameraInterface;
-    private BLocal mBLocal;
+    private BPhoto mBPhoto;
     private String FilePath;
 
     public interface CamOpenOverCallback{
@@ -53,7 +53,7 @@ public class CameraInterface {
         mCamera = Camera.open();
         Log.i(TAG, "Perform to Camera open over");
         callback.cameraHasOpened();
-        mBLocal = (BLocal) callback;
+        mBPhoto = (BPhoto) callback;
     }
 
     /**开启预览
@@ -127,7 +127,7 @@ public class CameraInterface {
     /**
      * 拍照
      */
-    public void doTakePicture(){
+    public void doTakePicture() throws Exception{
         Log.i(TAG, "Perform to doTakePicture===>isPreviewing:"+isPreviewing);
 
         if(mCamera != null){
@@ -142,6 +142,11 @@ public class CameraInterface {
     {
         public void onShutter() {
             // TODO Auto-generated method stub
+            try {
+                BFrame.response(R.string.photograph_response);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
             Log.i(TAG, "Perform to myShutterCallback:onShutter");
         }
     };
@@ -173,7 +178,7 @@ public class CameraInterface {
                 //图片竟然不能旋转了，故这里要旋转下
                 Bitmap rotaBitmap = ImageUtil.getRotateBitmap(bitmap, 90.0f);
                 FilePath = FileUtil.saveBitmap(rotaBitmap);
-                mBLocal.upload(FilePath);
+                mBPhoto.upload(FilePath);
             }
 
             //再次进入预览

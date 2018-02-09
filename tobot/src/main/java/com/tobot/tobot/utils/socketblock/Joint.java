@@ -12,15 +12,19 @@ import com.tobot.tobot.utils.Transform;
  */
 public class Joint {
     public final static String REGISTER= "5B3231";//注册请求
-    public final static String  COMMA = "2C";
+    public final static String COMMA = "2C";
     public final static String RESPONSE = "5D";
     public final static String SUCCEED_RESPONSE = "2C31";//成功响应
     public final static String FAILURE_RESPONSE = "2C30";//失败响应
     public final static String PHOTO = "5B3233";//拍照响应头
     public final static String DEMAND = "5B3234";//点播响应头
-    public final static String ROLE = "5B323530303030";//点播响应头
+    public final static String ROLE = "5B323530303030";//角色响应头
     public final static String RESTORE = "5B3236";//恢复出厂设置响应头
     public final static String DANCE = "5B3238";//舞蹈响应头
+    public final static String DEMAND_STOP = "5B3239";//点播响应头
+    public final static String ANSWER = "5B3241";//自定义问答响应头
+    public final static String FOLLOW = "5B3242";//跟随响应头
+    public final static String BLE = "5B3243";//蓝牙响应头
 
 
     /**
@@ -35,12 +39,24 @@ public class Joint {
     }
 
     /**
-     * tcp通用响应
+     * tcp通用响应(对无分号)
      * @param s
      * @return
      */
     public static String setResponse(String top,String s){
         String response = top + Transform.stringToHex(countDataLen(getDataLen(s) + 2)) + Transform.stringToHex(getSpecialRunning(s)) + SUCCEED_RESPONSE;
+        String succeed = response + Transform.stringToHex(CRC.CRC_16_UP_HEX(Transform.HexString2Bytes(response))) + RESPONSE;
+        return succeed;
+    }
+
+    /**
+     * tcp通用响应(对有分号)
+     * @param s
+     * @return
+     */
+    public static String setResponseSemicolon(String top,String s){
+        String data = Transform.stringToHex(getRunning(s)) + SUCCEED_RESPONSE;
+        String response = top + Transform.stringToHex(countDataLen(data.length()/2)) + data;
         String succeed = response + Transform.stringToHex(CRC.CRC_16_UP_HEX(Transform.HexString2Bytes(response))) + RESPONSE;
         return succeed;
     }
@@ -109,7 +125,7 @@ public class Joint {
         }
         char[] strChar = leng.toCharArray();
         for (char a:strChar){
-            Log.i("Javen","....................."+sb.toString());
+//            Log.i("Javen","计算长度"+sb.toString());
             sb.append(a);
         }
         return sb.toString();

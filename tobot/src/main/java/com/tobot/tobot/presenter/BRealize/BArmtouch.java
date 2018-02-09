@@ -4,7 +4,7 @@ import android.content.Context;
 import android.media.AudioManager;
 import android.util.Log;
 
-import com.tobot.tobot.presenter.ICommon.ISceneV;
+import com.tobot.tobot.presenter.ICommon.ICommonInterface;
 import com.tobot.tobot.presenter.IPort.IArmtouch;
 import com.tobot.tobot.scene.BaseScene;
 import com.tobot.tobot.scene.SongScenario;
@@ -20,7 +20,7 @@ import com.turing123.robotframe.function.tts.TTS;
 
 public class BArmtouch implements IArmtouch{
     private Context mContent;
-    private ISceneV mISceneV;
+    private ICommonInterface mISceneV;
     private String scenario = "scoff";//取得进入的场景
     private SongScenario mSongScenario;
     AudioManager mAudioManager;
@@ -29,7 +29,7 @@ public class BArmtouch implements IArmtouch{
     TTS tts;
 
 
-    public BArmtouch(ISceneV mISceneV){
+    public BArmtouch(ICommonInterface mISceneV){
         this.mISceneV = mISceneV;
         this.mContent = (Context)mISceneV;
         this.mAudioManager = (AudioManager) mContent.getSystemService(Context.AUDIO_SERVICE);;

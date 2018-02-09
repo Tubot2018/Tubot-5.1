@@ -6,6 +6,6 @@
 /.idea/libraries
 .DS_Store
 /build
-/tobot/build
+/tubot/build
 /captures
 .externalNativeBuild

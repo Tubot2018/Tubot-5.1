@@ -8,13 +8,19 @@ import android.util.Log;
 import android.widget.Toast;
 
 import com.tobot.tobot.Listener.SimpleFrameCallback;
+import com.tobot.tobot.R;
+import com.tobot.tobot.presenter.BRealize.BFrame;
+import com.tobot.tobot.presenter.BRealize.BaseTTSCallback;
+import com.tobot.tobot.presenter.BRealize.InterruptTTSCallback;
 import com.tobot.tobot.scene.BaseScene;
 import com.tobot.tobot.scene.CustomScenario;
 import com.tobot.tobot.utils.CommonRequestManager;
 import com.tobot.tobot.utils.TobotUtils;
+import com.tobot.tobot.utils.socketblock.Joint;
 import com.turing123.robotframe.function.motor.Motor;
 import com.turing123.robotframe.function.tts.TTS;
 import com.turing123.robotframe.multimodal.action.Action;
+import com.turing123.robotframe.multimodal.action.EarActionCode;
 
 import java.io.File;
 import java.util.Iterator;
@@ -35,9 +41,6 @@ public class DemandDance implements DemandBehavior {
     private CommonRequestManager manager;
     private Context context;
 
-    private TTS tts;
-    private Motor motor;
-
     private MediaPlayer mediaPlayer;
 
     private String playUrl;
@@ -49,6 +52,8 @@ public class DemandDance implements DemandBehavior {
     private String appointTime;
     private Timer danceTimer = new Timer(true);
 
+    private String songName;
+
     public DemandDance(Context context,DemandModel danceModel){
         this.context=context;
         this.demandModel=danceModel;
@@ -56,9 +61,6 @@ public class DemandDance implements DemandBehavior {
 
         this.manager=CommonRequestManager.getInstanse(context);
         demandUtils =new DemandUtils(context);
-
-        motor = new Motor(context, new CustomScenario(context));
-        tts = new TTS(context,new BaseScene(context,"os.sys.chat"));
 
         //TODO  mohuaiyuan 20171009: 初始化 playUrl 和 bodyActionCode
         try {
@@ -120,6 +122,8 @@ public class DemandDance implements DemandBehavior {
         // 根据舞蹈序列号 找到对应的背景音乐的文件名
         String backgroundMusicName=actionMap.get(bodyActionCode);
         Log.d(TAG, "backgroundMusicName: "+backgroundMusicName);
+        songName = backgroundMusicName.substring(0,backgroundMusicName.length()-4);
+        Log.d(TAG, "songName: "+songName);
 
         // 根据文件名 获取完整的文件路径
         File playUrlFile=manager.getSDcardFile(DemandUtils.DANCE_BACKGROUND_MUSIC_Dir+File.separator+backgroundMusicName);
@@ -145,28 +149,56 @@ public class DemandDance implements DemandBehavior {
     @Override
     public void executeDemand() {
 
-        //播放背景音乐
+//        String songName=demandModel.getTrack_title();
+        String speech=manager.getString(R.string.beforeDemandDance,songName);
+        Map<String,String> map=null;
         try {
-            manager.playMusic(playUrl, new MediaPlayer.OnPreparedListener() {
-                @Override
-                public void onPrepared(MediaPlayer mp) {
-                    mediaPlayer = mp;
-                    //发送舞蹈指令
-
-                    //Javen 20180122注释
-//                    sendBodyAction();
-                    AppointTime();
-                }
-            }, null, null);
+            map= BFrame.getString(speech);
         } catch (Exception e) {
             e.printStackTrace();
         }
 
+        BaseTTSCallback baseTTSCallback=new BaseTTSCallback(){
+            @Override
+            public void onCompleted() {
+
+                //播放背景音乐
+                try {
+                    manager.playMusic(playUrl, new MediaPlayer.OnPreparedListener() {
+                        @Override
+                        public void onPrepared(MediaPlayer mp) {
+                            mediaPlayer = mp;
+                            //发送舞蹈指令
+                            //Javen 20180122注释
+//                          sendBodyAction();
+                            try {
+                                AppointTime();
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    }, null, null);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+
+            }
+        };
+        BFrame.setInterruptTTSCallback(new InterruptTTSCallback(BFrame.main,baseTTSCallback));
+
+        try {
+            BFrame.responseWithCallback(map);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+
+
     }
 
-    private void AppointTime(){
+    private void AppointTime() throws Exception{
         Log.i("Javen","服务器下发时间:"+TobotUtils.transformDateTime(demandModel.getTimestamp()));
-        appointTime = TobotUtils.DateAddTime(TobotUtils.transformDateTime(demandModel.getTimestamp()),+3);
+        appointTime = TobotUtils.DateAddTime(TobotUtils.transformDateTime(demandModel.getTimestamp()),+5);
         Log.i("Javen","增加后时间:"+appointTime);
         long l = TobotUtils.DateMinusTime(TobotUtils.getCurrentlyDate(), appointTime, 2);
         Log.i("Javen", "与约定差距时间:" + l + "当前时间:" + TobotUtils.getCurrentlyDate());
@@ -187,34 +219,23 @@ public class DemandDance implements DemandBehavior {
      * 发送舞蹈指令 ，即机器人开始跳舞
      */
     private void sendBodyAction() {
-        motor.doAction(Action.buildBodyAction(bodyActionCode,Action.PRMTYPE_EXECUTION_TIMES,1),new SimpleFrameCallback(){
+        BFrame.motion(bodyActionCode,new SimpleFrameCallback(){
             @Override
             public void onStarted() {
                 super.onStarted();
                 Log.d(TAG, "onStarted: ");
-//                try{
-//                    new Thread(new Runnable() {
-//                        @Override
-//                        public void run() {
-//                            try {
-//                                Thread.sleep(1700);
-//                            } catch (InterruptedException e) {
-//                                e.printStackTrace();
-//                            }
-                            //开始播放背景音乐
-                            mediaPlayer.start();
-//
-//                        }
-//                    }).start();
-//                }catch (Exception e){
-//                    e.printStackTrace();
-//                    Log.e(TAG, "onStarted: "+e.getMessage());
-//                }
+
+                //开始播放背景音乐
+                mediaPlayer.start();
+
             }
 
             @Override
             public void onStopped() {
                 super.onStopped();
+                //20180206 Javen 新增
+                BFrame.Ear(EarActionCode.EAR_MOTIONCODE_3);
+                BFrame.motion(1);
                 Log.d(TAG, "onStopped: ");
             }
 
@@ -248,5 +269,6 @@ public class DemandDance implements DemandBehavior {
                 Log.d(TAG, "onError: "+s);
             }
         });
+
     }
 }

@@ -16,14 +16,15 @@ import java.util.TimerTask;
 public class DormantManager {
     private static final String TAG = "IDormant";
 
-    public static final int DORMANT_TYPE_STRAIGHT_TO_SLEEP=23;
-    public static final int DORMANT_TYPE_SIT_DOWN_AND_SLEEP=46;
-    public static final int DORMANT_TYPE_LIE_DOWN_AND_SLEEP=53;
+    public static final int DORMANT_TYPE_STRAIGHT_TO_SLEEP = 23;
+    public static final int DORMANT_TYPE_SIT_DOWN_AND_SLEEP = 46;
+    public static final int DORMANT_TYPE_LIE_DOWN_AND_SLEEP = 53;
+    public static boolean fixation = true;//固定休眠模式,防止某些特殊场合进入坐下或躺下休眠模式
 
     /**
      * 非正常睡觉
      */
-    public static final int DORMANT_TYPE_ABNORMAL_SLEEP=685;
+    public static final int DORMANT_TYPE_ABNORMAL_SLEEP = 685;
 
     private static int type;
 
@@ -32,7 +33,7 @@ public class DormantManager {
      */
     private static Timer sitDownAndSleepTimer;
 
-    private  SitDownAndSleepTimeTask sitDownAndSleepTimeTask;
+    private SitDownAndSleepTimeTask sitDownAndSleepTimeTask;
 
 
     public static int getType() {
@@ -50,20 +51,20 @@ public class DormantManager {
     /**
      * 创建任务：站着休眠N分钟不唤醒 ,进入坐下休息（休眠）
      */
-    public    void sitDownAndSleepTrigger(){
+    public void sitDownAndSleepTrigger() {
         Log.d(TAG, "DormantManager sitDownAndSleepTrigger: 开启任务");
 //        if (sitDownAndSleepTimeTask==null){
-            sitDownAndSleepTimeTask=new SitDownAndSleepTimeTask();
+            sitDownAndSleepTimeTask = new SitDownAndSleepTimeTask();
 //        }
-
-        sitDownAndSleepTimer=new Timer(true);
-        sitDownAndSleepTimer.schedule(sitDownAndSleepTimeTask,10*60*1000);//N分钟之后
-
+        if (fixation) {
+            sitDownAndSleepTimer = new Timer(true);
+            sitDownAndSleepTimer.schedule(sitDownAndSleepTimeTask, 10 * 60 * 1000);//N分钟之后
+        }
     }
 
-    public void cancelSitDownAndSleepTrigger(){
+    public void cancelSitDownAndSleepTrigger() {
         Log.d(TAG, "DormantManager cancelSitDownAndSleepTrigger:取消任务 ");
-        if (sitDownAndSleepTimer!=null){
+        if (sitDownAndSleepTimer != null) {
             sitDownAndSleepTimer.cancel();
         }
 //        sitDownAndSleepTimer=new Timer();
@@ -77,7 +78,5 @@ public class DormantManager {
     public static void setSitDownAndSleepTimer(Timer sitDownAndSleepTimer) {
         DormantManager.sitDownAndSleepTimer = sitDownAndSleepTimer;
     }
-
-    
 
 }

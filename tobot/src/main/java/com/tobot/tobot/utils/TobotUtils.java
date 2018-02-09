@@ -8,11 +8,17 @@ import android.net.wifi.WifiManager;
 import android.util.Log;
 
 
+import com.tobot.tobot.R;
 import com.tobot.tobot.base.Constants;
+import com.tobot.tobot.db.bean.AnswerDBManager;
 import com.tobot.tobot.db.bean.UserDBManager;
+import com.tobot.tobot.presenter.BRealize.BBattery;
 import com.tobot.tobot.presenter.BRealize.BFrame;
+import com.tobot.tobot.presenter.BRealize.VolumeControl;
+import com.tobot.tobot.scene.SceneManager;
 import com.turing123.libs.android.resourcemanager.ResourceManager;
 import com.turing123.libs.android.resourcemanager.ResourceMap;
+import com.turing123.robotframe.multimodal.action.EarActionCode;
 
 import java.io.BufferedReader;
 import java.io.DataInputStream;
@@ -29,6 +35,7 @@ import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Enumeration;
@@ -148,7 +155,7 @@ public class TobotUtils {
      * @return
      */
     public static boolean whichScenario(String Scenario){
-        if (Scenario.equals("os.sys.song") || Scenario.equals("os.sys.story")){
+        if (Scenario.equals("os.sys.song") || Scenario.equals("os.sys.story") || Scenario.equals("os.sys.dance")){
             return true;
         }else{
             return false;
@@ -182,6 +189,68 @@ public class TobotUtils {
     }
 
     /**
+     * 是否在使用播放器
+     * @param Scenario
+     * @return
+     */
+    public static boolean isInPlay(int state){
+        if (state == SceneManager.STATUS_PLAYING){
+            return true;
+        }else{
+            return false;
+        }
+    }
+
+    /**
+     * 灯圈等级-事件驱动
+     * @param ear
+     * @param priority
+     * @return
+     */
+
+    public static boolean isPriority(int ear,int priority){
+        pass = false;
+        if (priority >= grade){
+            pass = true;
+            grade = priority;
+            lastLamp = ear;
+        }else if (priority == 0){
+            pass = true;
+            grade = priority;
+        }
+        return pass;
+    }
+    private static int grade = 1;
+    private static boolean pass;
+    private static int lastLamp;
+    private static boolean rank;
+
+    /**
+     * 灯圈等级-颜色驱动
+     * @param ear
+     * @param priority
+     * @return
+     */
+    public static boolean isRank(int ear,int priority){
+        rank = false;
+        if ((ear == EarActionCode.EAR_MOTIONCODE_3) && (lastLamp == EarActionCode.EAR_MOTIONCODE_2)){
+            rank = true;
+            grade = priority;
+            lastLamp = ear;
+        }
+        return rank;
+    }
+
+    public static void resetZero(){
+        lastLamp = 0;
+        grade = 0;
+    }
+
+
+
+
+
+    /**
      * 模糊唤醒
      * @return
      * @param discernASR
@@ -196,6 +265,33 @@ public class TobotUtils {
         }else{
             return false;
         }
+    }
+
+    /**
+     *
+     * @return
+     */
+    public static boolean isLocalCommand(Context context,String asr) {
+        for (String local : BBattery.getBatteryKeyWords()) {
+            if (asr.contains(local)) {
+                return true;
+            }
+        }
+        for (String local : getVolumeKeyWords(context)) {
+            if (asr.contains(local)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public static List<String> getVolumeKeyWords(Context context){
+        List<String> keyWords=new ArrayList<>();
+        String[] array = context.getResources().getStringArray(R.array.volume_keyWords_array);
+        for (int i=0;i<array.length;i++){
+            keyWords.add(array[i]);
+        }
+        return keyWords;
     }
 
 
@@ -660,6 +756,7 @@ public class TobotUtils {
         return macAddress;
     }
 
+
     public static Integer getTimeIndex() {
         Calendar c = Calendar.getInstance();// 可以对每个时间域单独修改
         int year = c.get(Calendar.YEAR);
@@ -690,6 +787,32 @@ public class TobotUtils {
         }
 
         return index;
+    }
+
+
+    public static void DBClear(){
+        UserDBManager.getManager().clear();
+        AnswerDBManager.getManager().clear();
+    }
+
+    private static boolean REPORT_IP = false;
+    private static boolean OPEN_BLUETOOTH = false;
+    private static boolean IS_DEBUG = false;
+
+    /**
+     * 开发模式
+     * @return
+     */
+    public static boolean isDebug(){
+        return IS_DEBUG;
+    }
+
+    public static boolean isOpenBluetooth(){
+        return OPEN_BLUETOOTH;
+    }
+
+    public static boolean isReportIp(){
+        return REPORT_IP;
     }
 
 }

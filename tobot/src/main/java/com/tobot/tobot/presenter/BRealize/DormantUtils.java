@@ -18,7 +18,7 @@ public class DormantUtils {
 
     public void dealAwakenBehavior(){
         Log.d(TAG, "DormantUtils dealAwakenBehavior: ");
-        int type= DormantManager.getType();
+        int type = DormantManager.getType();
         Log.d(TAG, "type: "+type);
         AwakenBehavior awakenBehavior = null;
 

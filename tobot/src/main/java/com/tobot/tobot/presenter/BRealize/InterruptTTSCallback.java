@@ -3,6 +3,9 @@ package com.tobot.tobot.presenter.BRealize;
 import android.util.Log;
 
 import com.tobot.tobot.MainActivity;
+import com.tobot.tobot.scene.SceneManager;
+import com.tobot.tobot.utils.TobotUtils;
+import com.turing123.robotframe.multimodal.action.EarActionCode;
 
 /**
  * Created by YF-04 on 2017/12/21.
@@ -32,6 +35,11 @@ public class InterruptTTSCallback extends BaseTTSCallback {
 
         if (mBaseTTSCallback!=null){
             mBaseTTSCallback.onStart(s);
+        }
+
+        //20180204Javen新增
+        if (!TobotUtils.isInScenario(SceneManager.SCENE)) {
+            BFrame.Ear(EarActionCode.EAR_MOTIONCODE_2);//tts效果
         }
 
     }
@@ -65,6 +73,11 @@ public class InterruptTTSCallback extends BaseTTSCallback {
 
         if (mBaseTTSCallback!=null){
             mBaseTTSCallback.onCompleted();
+        }
+
+        //20180204Javen新增
+        if (!TobotUtils.isInScenario(SceneManager.SCENE)) {
+            BFrame.Ear(EarActionCode.EAR_MOTIONCODE_3);//asr效果
         }
     }
 

@@ -1,5 +1,7 @@
 package com.tobot.tobot.utils;
 
+import android.util.Log;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -45,8 +47,6 @@ public class Transform {
         byte ret = (byte) (_b0 ^ _b1);
         return ret;
     }
-
-
 
 
     /**
@@ -164,6 +164,31 @@ public class Transform {
      */
     public static String getGuid() {
         return UUID.randomUUID().toString().replaceAll("-", "");
+    }
+
+
+    /**
+     * 十进制转二进制取占位为1的位数
+     * @param n
+     */
+    public static String DecimalismTOBinaryBy1(int n){
+        StringBuffer stringBuffer = new StringBuffer();
+        char[] binary = Integer.toBinaryString(n).toCharArray();
+        char[] negation = new char[binary.length];
+        int count = 0;
+        for (int f = 0;f<binary.length;f++){
+            negation[f] = binary[binary.length - (f + 1)];
+        }
+        for (int i = 0;i<negation.length;i++){
+            count++;
+            if (negation[i] == '1')
+                stringBuffer.append(count).append(',');
+        }
+        if (stringBuffer.toString().length() == 0){
+            stringBuffer.append(0);
+        }
+//        Log.i("Javen","二进制位为1位数:"+stringBuffer.toString());
+        return stringBuffer.toString();
     }
 
 }

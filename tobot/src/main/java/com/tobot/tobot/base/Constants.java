@@ -48,8 +48,6 @@ public class Constants {
     public static final int AWAIT_ACTIVE = 7;
     public static final int REPLACE_ASR = 8;
 
-    public static final int SIT_DOWN_AND_SLEEP_DORMANT=34364;
-
     public static final int CLOSE_AP = 1000;
     public static final int FOR_RESULT = 1001;
 
@@ -64,7 +62,7 @@ public class Constants {
 //    public static final String  QVOICE_MIC = "/sdcard/qvoice/mic.wav";
     public static final String  QVOICE_PARAMS = "bfio";//bfasr
 //    public static final String  QVOICE = "role=asr;cfg=/sdcard/qvoice/cldasr.bin;use_json=1;min_conf=1.9;timeout=3000";
-    public static final String  QVOICE = "role=asr;cfg=/sdcard/qvoice/xasr/cfg;use_bin=0;use_json=1;min_conf=1.9;";//用asr2017.12.27
+    public static final String  QVOICE = "role=asr;cfg=/sdcard/qvoice/xasr/cfg;use_bin=0;use_json=1;min_conf=1.9;asr_min_time=1000;";//用asr2017.12.27
 
     public static final String HINT = "/sdcard/.TuringResource/audio/asr_prompt_tone.mp3";
     public static final String WAKEUP =  "/sdcard/.TuringResource/system/WakeUp.bin";
@@ -97,5 +95,17 @@ public class Constants {
     public static final int SideDown_stand = 29;
 
     public static final String KIND_KEY = "kind";
+
+    public static final int priority_0 = 0;
+    public static final int priority_1 = 1;
+    public static final int priority_2 = 2;
+    public static final int priority_3 = 3;
+    public static final int priority_4 = 4;
+    public static final int priority_5 = 5;
+    public static final int priority_6 = 6;
+    public static final int priority_7 = 7;
+    public static final int priority_8 = 8;
+    public static final int priority_9 = 9;
+
 
 }

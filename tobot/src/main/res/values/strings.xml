@@ -9,43 +9,28 @@
 
     <string name="Connection_First">机器人首次使用中,还未连接网络,请下载客户端根据说明帮我连接网络</string>
     <string name="Connection_Fail">网络连接失败,请重新连接</string>
-
-    <!--mohuaiyuan 20171220 原来的字符串-->
-    <!--<string name="Connection_Succeed">网络连接成功,小图可以陪你聊天了</string>-->
-    <!-- <string name="Connection_Start">您已启动联网模式,请帮我重新联网或长摸头三秒解除联网模式</string>-->
-
     <string name="Connection_Wait">联网中,请稍等</string>
     <string name="Connection_Break">糟糕!网络离家出走,快帮我联上吧</string>
-    <!--mohuaiyuan 20171220 原来的字符串-->
-    <!--<string name="Connection_Break_Hint">网络断了,小图在努力恢复中,小主人也可以长摸头帮我换个新网络</string>-->
 
-    <!--mohuaiyuan 20171220 新的字符串-->
-
-    <string name="Connection_Succeed">speech:联网成功，我们可以愉快的聊天了。#,#action:72#a_a#1#,#expression:excites</string><!--表情：15-兴奋-->
+    <string name="Connection_Succeed">speech:联网成功，我们可以愉快的聊天了。#,#action:72#a_a#1#,#expression:excites#,#earLightCircle:2#,#earPriority:0</string><!--表情：15-兴奋-->
 
     <!--<string name="Connection_Start">speech:联网模式已开启，请打开手机app帮我联网吧#,#action:46#,#expression:calm#,#earLightCircle:6</string>&lt;!&ndash;表情不可用：22-尴尬&ndash;&gt;
     -->
-    <string name="Connection_Start">speech:联网模式已开启，请打开手机app帮我联网，或摸头3秒退出联网#,#action:46#,#expression:calm#,#earLightCircle:6</string><!--表情不可用：22-尴尬-->
+    <string name="Connection_Start">speech:联网模式已开启，请打开手机app帮我联网，或摸头3秒退出联网#,#action:46#,#expression:calm#,#earLightCircle:6#,#earPriority:9</string><!--表情不可用：22-尴尬-->
 
     <!--
     <string name="Connection_Break_Hint">speech:联网失败，请摸头3秒帮我联网！#,#action:30#,#expression:disappointed#,#earLightCircle:6</string>&lt;!&ndash;表情不可用：23-委屈可怜，已找到表情&ndash;&gt;
     -->
     <!--网络连接失败（此时在联网模式，联网失败）--><!--mohuaiyuan 备注：无动作-->
-    <string name="Connection_Break_Hint">speech:网络连接失败，请重新帮我联网或摸头3秒退出联网。#,#expression:disappointed#,#earLightCircle:6</string><!--表情不可用：23-委屈可怜，已找到表情-->
+    <string name="Connection_Break_Hint">speech:网络连接失败，请重新帮我联网或摸头3秒退出联网。#,#expression:disappointed#,#earLightCircle:6#,#earPriority:9</string><!--表情不可用：23-委屈可怜，已找到表情-->
 
     <string name="connect_to_the_internet">@string/Connection_Break_Hint</string>
 
     <!--未联网 (开机后联网失败提示)-->
-    <string name="connect_network_failed_after_start_up">speech:未连接网络，请使用手机App帮我联网！#,#action:30#,#expression:disappointed#,#earLightCircle:6</string><!--表情：23-委屈可怜-->
+    <string name="connect_network_failed_after_start_up">speech:未连接网络，请使用手机App帮我联网！#,#action:30#,#expression:disappointed#,#earLightCircle:6#,#earPriority:9</string><!--表情：23-委屈可怜-->
     <!--超过10秒还未连上网络（使用过程断网）-->
-    <string name="the_network_is_broken">speech:网络断了，请摸头3秒重新帮我联网！#,#action:30#,#expression:disappointed#,#earLightCircle:6</string><!--表情：23-委屈可怜-->
+    <string name="the_network_is_broken">speech:网络断了，请摸头3秒重新帮我联网！#,#action:30#,#expression:disappointed#,#earLightCircle:6#,#earPriority:9</string><!--表情：23-委屈可怜-->
 
-
-    <!--mohuaiyuan 20171220 原来的字符串-->
-    <!--<string name="Connection_Close">您已关闭联网模式</string>-->
-    <!-- <string name="Connection_Recover">网络已恢复连接</string>-->
-
-    <!--mohuaiyuan 20171220 新的字符串-->
     <!--（联网模式，长按三秒退出联网）--><!--mohuaiyuan 备注：无表情-->
     <string name="Connection_Close">speech:联网模式已解除。#,#action:1</string>
     <string name="Connection_Recover">@string/Connection_Succeed</string>
@@ -67,10 +52,46 @@
 
     <!--############################################################版本更新##############################################################-->
 
-    <string name="Upgrade_prompt_initiative">检测到版本有重大更新,即将进入系统升级</string>
+    <string name="Upgrade_prompt_initiative">检测到新版本,即将进入系统升级</string>
     <string name="Upgrade_prompt">系统升级中,请耐心等待,稍后将自行重启</string>
     <string name="Upgrade_prompt_passivity">系统升级中,请耐心等待</string>
-	
+
+
+    <!--############################################################电量查询##############################################################-->
+
+    <string-array name="battery_keyWords_array">
+        <item>你还有多少电量</item>
+        <item>你还有多少电</item>
+        <item>你的电量还有多少</item>
+        <item>你还有电吗</item>
+        <item>当前电量</item>
+        <item>当前电量多少</item>
+        <item>当前多少电量</item>
+        <item>当前还有多少电量</item>
+        <item>当前电量还有多少</item>
+        <item>还有多少电</item>
+        <item>还有多少电量</item>
+        <item>电量多少</item>
+        <item>电量还有多少</item>
+        <item>电还有多少</item>
+        <item>还有多少电量</item>
+        <item>电量</item>
+        <item>你有电吗</item>
+
+    </string-array>
+
+    <!--############################################################跟随模式##############################################################-->
+
+    <string-array name="follow_keyWords_array">
+        <item>进入跟随</item>
+        <item>进入跟随模式</item>
+        <item>跟我走</item>
+        <item>跟着我走</item>
+        <item>跟着我的手</item>
+
+    </string-array>
+
+
 	<!--##########################################################################################################################-->
 
     <!-- &lt;!&ndash; 声音提示语句   &ndash;&gt;
@@ -79,39 +100,48 @@
      <string name="minMusicVolume">已经是最小声了哦</string>
      <string name="maxMusicVolume">已经是最大声了哦</string>-->
 
-
     <!-- 音乐场景 提示语句   -->
-  <!--  <string name="noExistMusic">抱歉，这首歌我暂时不会唱，要不你换一首吧</string>
+    <!--  <string name="noExistMusic">抱歉，这首歌我暂时不会唱，要不你换一首吧</string>
     <string name="beforePlayMusic">即将播放</string>-->
 
     <!-- 故事场景 提示语句   -->
-   <!-- <string name="noExistStory">抱歉，我暂时不会讲这个故事，要不你换一个吧</string>
+    <!-- <string name="noExistStory">抱歉，我暂时不会讲这个故事，要不你换一个吧</string>
     <string name="beforePlayStory">即将播报故事</string>-->
 
     <!-- 舞蹈场景 提示语句   -->
     <!--<string name="noExistDance">抱歉，我暂时不会这个表演，要不你换一个吧</string>
     <string name="beforePlayDance">即将表演</string>-->
 
+    <!--#########################################   点播    #################################################################################-->
+
+    <string name="beforeDemandMusic">speech:即将播放 %1$s#,#expression:desire#,#earLightCircle:8#,#earPriority:1</string>
+    <string name="beforeDemandStory">speech:即将讲 %1$s 的故事#,#expression:desire#,#earLightCircle:8#,#earPriority:1</string>
+    <string name="beforeDemandSinology">speech:即将朗诵国学%1$s#,#expression:desire#,#earLightCircle:8#,#earPriority:1</string>
+    <string name="beforeDemandDance">speech:即将表演舞蹈 %1$s #,#expression:desire#,#earLightCircle:8#,#earPriority:1</string>
+
     <!--#########################################   音乐场景   #################################################################################-->
 
     <!-- 音乐场景 提示语句   -->
-    <string name="noExistMusic">speech:糟糕，这首歌唱不出来了，要不我给你换一首吧。#,#action:93</string>
-    <string name="beforePlayMusic">speech:好的，即将播放 %1$s#,#expression:desire#,#earLightCircle:8</string>
-    <string name="continuePlayMusic_response">speech:那我给你唱首 %1$s #,#expression:desire#,#earLightCircle:8</string>
+    <!--<string name="noExistMusic">speech:糟糕，这首歌唱不出来了，要不我给你换一首吧。#,#action:93</string> Javen 20180208-->
+    <string name="noExistMusic">speech:糟糕，这首歌唱不出来了，要不你换一首吧。#,#action:93</string>
+    <string name="beforePlayMusic">speech:好的，即将播放 %1$s#,#expression:desire#,#earLightCircle:8#,#earPriority:5</string>
+    <string name="continuePlayMusic_response">speech:那我给你唱首 %1$s #,#expression:desire#,#earLightCircle:8#,#earPriority:5</string>
     <string name="playMusicInterrupt_response"></string>
 
     <!--#########################################   故事场景   #################################################################################-->
     <!-- 故事场景 提示语句   -->
-    <string name="noExistStory">speech:糟糕，这个故事我没学会，要不我给你换一个吧。#,#action:85</string>
-    <string name="beforePlayStory">speech:好的，即将讲 %1$s 的故事#,#expression:desire#,#earLightCircle:8</string>
-    <string name="continuePlayStory_response">speech:那我给你讲个 %1$s 的故事#,#expression:desire#,#earLightCircle:8</string>
+    <!--<string name="noExistStory">speech:糟糕，这个故事我没学会，要不我给你换一个吧。#,#action:85</string> Javen 20180208-->
+    <string name="noExistStory">speech:糟糕，这个故事我没学会，要不你换一个吧。#,#action:85</string>
+    <string name="beforePlayStory">speech:好的，即将讲 %1$s 的故事#,#expression:desire#,#earLightCircle:8#,#earPriority:5</string>
+    <string name="continuePlayStory_response">speech:那我给你讲个 %1$s 的故事#,#expression:desire#,#earLightCircle:8#,#earPriority:5</string>
     <string name="playStoryInterrupt_response"></string>
 
     <!--#########################################   舞蹈场景   #################################################################################-->
     <!-- 舞蹈场景 提示语句   -->
-    <string name="noExistDance">speech:糟糕，这个舞蹈我还没学会，要不我给你换一个吧。#,#action:93</string>
-    <string name="beforePlayDance">speech:好的，即将表演 %1$s #,#expression:desire#,#earLightCircle:8</string>
-    <string name="continuePlayDance_response">speech:那我给你挑个 %1$s #,#expression:desire#,#earLightCircle:8</string>
+    <!--<string name="noExistDance">speech:糟糕，这个舞蹈我还没学会，要不我给你换一个吧。#,#action:93</string> Javen 20180208-->
+    <string name="noExistDance">speech:糟糕，这个舞蹈我还没学会，要不你换一个吧。#,#action:93</string>
+    <string name="beforePlayDance">speech:好的，即将表演 %1$s #,#expression:desire#,#earLightCircle:8#,#earPriority:5</string>
+    <string name="continuePlayDance_response">speech:那我给你挑个 %1$s #,#expression:desire#,#earLightCircle:8#,#earPriority:5</string>
     <string name="playDanceInterrupt_response"></string>
 
 
@@ -137,8 +167,9 @@
     <!--#########################################   开机提示   #################################################################################-->
 
     <!--mohuaiyuan 20171221 新的字符串-->
-    <string name="uprightBoot">speech:主人，%1$s，我已联网，现在可以和我聊天了！#,#action:1#,#expression:happys#,#earLightCircle:4</string><!--表情不可用：16-眨眼-->
-    <string name="nonUprightBoot">speech:哎呀，终于站起来了。主人，%1$s，我已联网，现在可以和我聊天了！#,#action:21#,#expression:boring#,#earLightCircle:4</string><!--表情不可用:29-鬼脸,已找到表情-->
+    <!--<string name="uprightBoot">speech:主人，%1$s，我已联网，现在可以和我聊天了！#,#action:1#,#expression:happys#,#earLightCircle:4#,#earPriority:1</string>-->
+    <string name="uprightBoot">speech:主人，我已联网，现在可以和我聊天了！#,#action:1#,#expression:happys#,#earLightCircle:4#,#earPriority:1</string><!--表情不可用：16-眨眼-->
+    <string name="nonUprightBoot">speech:哎呀，终于站起来了。主人，%1$s，我已联网，现在可以和我聊天了！#,#action:21#,#expression:boring#,#earLightCircle:4#,#earPriority:1</string><!--表情不可用:29-鬼脸,已找到表情-->
 
     <string-array name="regardsArray">
         <item>早上好</item>
@@ -160,33 +191,38 @@
     <!--
     <string name="straightToSleep_Response">speech:好的，想和我说话你可以叫“小图小图”或者摸头叫我#,#action:1#,#expression:doze</string>&lt;!&ndash;表情不可用:11-睡觉,已找到表情&ndash;&gt;
     -->
-    <string name="straightToSleep_Response">speech:我休息会，想和我说话你可以叫“小图小图”或者摸头叫我#,#expression:doze#,#earLightCircle:1</string><!--表情不可用:11-睡觉,已找到表情-->
-    <string name="straightToSleep_awaken">speech:主人，是不是想我了，现在可以和我聊天啦#,#expression:happys#,#earLightCircle:2</string><!--表情：16-开心-->
+    <string name="straightToSleep_Response">speech:我休息会，想和我说话你可以叫“小图小图”或者摸头叫我#,#earLightCircle:1#,#earPriority:5</string><!--表情不可用:11-睡觉,已找到表情-->
+    <string name="straightToSleep_awaken">speech:主人，是不是想我了，现在可以和我聊天啦#,#expression:happys#,#earLightCircle:2#,#earPriority:5</string><!--表情：16-开心-->
 
     <string-array name="sitDownAndSleep_keyWorks_array">
         <item>坐下休息</item>
         <item>你去休息吧</item>
         <item>休息去</item>
     </string-array>
-    <string name="sitDownAndSleep_Response">speech:那我去休息了，你可以叫“小图小图”或者摸头叫醒我#,#action:8#,#expression:doze#,#earLightCircle:1</string><!--表情不可用：全灭-->
-    <string name="sitDownAndSleep_awaken">speech:是不是想我了，快来和我聊天吧#,#action:9#,#expression:excites</string><!--表情：15-兴奋-->
+    <string name="sitDownAndSleep_Response">speech:那我去休息了，你可以叫“小图小图”或者摸头叫醒我#,#action:8#,#expression:doze#,#earLightCircle:1#,#earPriority:5</string><!--表情不可用：全灭-->
+    <string name="sitDownAndSleep_awaken">speech:是不是想我了，快来和我聊天吧#,#action:9#,#expression:excites#,#earLightCircle:2#,#earPriority:5</string><!--表情：15-兴奋-->
 
     <string-array name="lieDownAndSleep_keyWorks_array">
         <item>你去睡觉吧</item>
         <item>躺下睡觉</item>
         <item>睡觉去</item>
     </string-array>
-    <string name="lieDownAndSleep_Response">speech:那我去睡觉了，你可以叫“小图小图”或者摸头叫醒我#,#action:10#,#expression:doze#,#earLightCircle:1</string><!--表情不可用：全灭-->
-    <string name="lieDownAndSleep_awaken">speech:啊！我睡醒了，地板好冷，小图都快感冒了#,#action:11#,#expression:happys</string><!--表情不可用：16-眨眼-->
+    <string name="lieDownAndSleep_Response">speech:那我去睡觉了，你可以叫“小图小图”或者摸头叫醒我#,#action:10#,#expression:doze#,#earLightCircle:1#,#earPriority:5</string><!--表情不可用：全灭-->
+    <string name="lieDownAndSleep_awaken">speech:啊！我睡醒了，地板好冷，小图都快感冒了#,#action:11#,#expression:happys#,#earLightCircle:2#,#earPriority:5</string><!--表情不可用：16-眨眼-->
 
     <!--####################################    拍照 photograph    ###################################################################################-->
     <string-array name="photograph_keyWords_array">
         <item>拍照</item>
         <item>拍张照</item>
-        <item>给我拍张照</item>
         <item>拍张照片</item>
         <item>照个相</item>
-        <item>照相</item>
+        <item>来,照个相</item>
+        <item>给我拍照</item>
+        <item>给我们拍照</item>
+        <item>给我拍张照</item>
+        <item>给我们拍张照</item>
+        <item>给我拍个照</item>
+        <item>给我们拍个照</item>
     </string-array>
     <string name="photograph_response">speech:好的，请站在我前面，摆好姿势。一二三，茄子！#,#action:39</string>
     <string name="photograph_success_response">speech:拍照成功，你可以到手机App查看照片啦！#,#action:1</string>
@@ -227,6 +263,15 @@
         <item>声音调到</item>
         <item>音量调到</item>
 
+        <item>音量调大</item>
+        <item>音量调小</item>
+        <item>声音调大</item>
+        <item>声音调小</item>
+        <item>音量调大一点</item>
+        <item>音量调小一点</item>
+        <item>声音调大一点</item>
+        <item>声音调小一点</item>
+
         //mohuaiyuan  20180108 测试
        <!-- <item>音量</item>
         <item>声音</item>-->
@@ -252,13 +297,13 @@
 
     <!--####################################    跟随 模式  ######################################################################-->
     <!--跟随模式 启动 -->
-    <string name="beginFollowMode_response">speech:已进入跟随模式。#,#action:???#,#earLightCircle:10</string><!--动作不可用:行走准备动作-2 -->
+    <string name="beginFollowMode_response">speech:已进入跟随模式。#,#action:2#,#earLightCircle:10#,#earPriority:5</string><!--动作不可用:行走准备动作-2 -->
     <!--跟随模式 退出-->
-    <string name="endFollowMode_response">speech:已退出跟随模式#,#action:1</string>
+    <string name="endFollowMode_response">speech:已退出跟随模式#,#action:1#,#earLightCircle:2#,#earPriority:5</string>
 
     <!--####################################    遥控模式  ######################################################################-->
-    <string name="beginRemoteControlMode_response">speech:已进入遥控模式#,#earLightCircle:9</string>
-    <string name="endRemoteControlMode_response">speech:已退出遥控模式</string>
+    <string name="beginRemoteControlMode_response">speech:已进入遥控模式#,#earLightCircle:9#,#earPriority:5</string>
+    <string name="endRemoteControlMode_response">speech:已退出遥控模式#,#earLightCircle:2#,#earPriority:5</string>
 
     <!--#######################################################################################################################################-->
 

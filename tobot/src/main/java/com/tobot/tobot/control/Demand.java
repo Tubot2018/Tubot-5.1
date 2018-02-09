@@ -45,6 +45,7 @@ public class Demand {
                     try {
                         Log.i(TAG,"进入点播关闭聊天");
                         BFrame.shutChat();
+                        demandStop();//停止点播
                         demandFactory.demands(demand);
                     } catch (Exception e) {
                         e.printStackTrace();
@@ -53,7 +54,7 @@ public class Demand {
 
                 @Override
                 public void stopDemand() {
-                    stopDemand();
+                    demandStop();
                 }
             });
         }
@@ -72,7 +73,7 @@ public class Demand {
 //        }
 //    }
 
-    public void stopDemand(){
+    public void demandStop(){
         DemandFactory demandFactory = DemandFactory.getInstance(context);
         try {
             demandFactory.stopPlayMusic();

@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.util.Log;
 
 import com.tobot.tobot.MainActivity;
+import com.tobot.tobot.function.QASRFunction;
 
 /**
  * Created by Javen on 2017/7/26.
@@ -14,11 +15,23 @@ import com.tobot.tobot.MainActivity;
 public class AutostartReceiver extends BroadcastReceiver {
 
     public void onReceive(Context context, Intent intent) {
-        Log.i("Javen","tobto 开机广播" + intent.getAction());
+        Log.i("Javen","tobto 广播" + intent.getAction());
         if (intent.getAction().equals(Intent.ACTION_BOOT_COMPLETED)) {
             Intent mIntent = new Intent(context, MainActivity.class);
             mIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             context.startActivity(mIntent);
+        }
+        if (intent.getAction().equals(Intent.ACTION_MY_PACKAGE_REPLACED)){
+            QASRFunction.close();
+        }
+        if (intent.getAction().equals(Intent.ACTION_PACKAGE_ADDED)){
+            QASRFunction.close();
+        }
+        if (intent.getAction().equals(Intent.ACTION_PACKAGE_REPLACED)){
+            QASRFunction.close();
+        }
+        if (intent.getAction().equals(Intent.ACTION_PACKAGE_REMOVED)){
+            QASRFunction.close();
         }
     }
 }

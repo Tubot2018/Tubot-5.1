@@ -7,8 +7,6 @@ import android.os.Message;
 import android.util.Log;
 
 import com.google.gson.Gson;
-import com.google.gson.JsonElement;
-import com.iflytek.cloud.thirdparty.E;
 import com.tobot.tobot.MainActivity;
 import com.tobot.tobot.base.Constants;
 import com.tobot.tobot.base.Frequency;
@@ -17,7 +15,7 @@ import com.tobot.tobot.db.bean.UserDBManager;
 import com.tobot.tobot.db.model.User;
 import com.tobot.tobot.entity.ActionEntity;
 import com.tobot.tobot.entity.ConnectionEntity;
-import com.tobot.tobot.presenter.ICommon.ISceneV;
+import com.tobot.tobot.presenter.ICommon.ICommonInterface;
 import com.tobot.tobot.presenter.IPort.IConnect;
 import com.tobot.tobot.utils.AppTools;
 import com.tobot.tobot.utils.socketblock.Joint;
@@ -32,15 +30,14 @@ import com.turing123.libs.android.connectivity.ConnectionStatus;
 import com.turing123.libs.android.connectivity.ConnectionStatusCallback;
 import com.turing123.libs.android.connectivity.DataReceiveCallback;
 import com.turing123.libs.android.connectivity.wifi.ap.ApConfiguration;
-import com.turing123.robotframe.multimodal.action.Action;
 import com.turing123.robotframe.multimodal.action.EarActionCode;
-
-import org.json.JSONObject;
 
 import java.util.Timer;
 import java.util.TimerTask;
 
 import okhttp3.Call;
+
+import static com.tobot.tobot.base.Constants.priority_9;
 
 
 /**
@@ -50,7 +47,7 @@ import okhttp3.Call;
 public class BConnect implements IConnect{
     private String TAG = "Javen BConnect";
     private Context mContent;
-    private ISceneV mISceneV;
+    private ICommonInterface mICommonInterface;
     private MainActivity mainActivity;
     private WifiConfiguration wc;
     private ApConfiguration apc;
@@ -64,10 +61,10 @@ public class BConnect implements IConnect{
     private boolean isBing = true,isSucceed;
 
 
-    public BConnect(ISceneV mISceneV){
-        this.mISceneV = mISceneV;
-        this.mContent = (Context)mISceneV;
-        this.mainActivity = (MainActivity)mISceneV;
+    public BConnect(ICommonInterface mICommonInterface){
+        this.mICommonInterface = mICommonInterface;
+        this.mContent = (Context)mICommonInterface;
+        this.mainActivity = (MainActivity)mICommonInterface;
         mOkHttp = OkHttpClientManager.getInstance();
 //        if (TobotUtils.isEmploy()){
 //            //首次使用录音播放
@@ -168,28 +165,26 @@ public class BConnect implements IConnect{
                 case Constants.NET_MSG:
                     int connect = (int) msg.obj;
                     if (connect == ConnectionStatus.WIFI_CONNECTED_SUCCESS) {
-                        mISceneV.getFeelHead(true);//摸头三秒判断
-                        mISceneV.getInitiativeOff(false);//主动断开关闭
+                        mICommonInterface.getFeelHead(true);//摸头三秒判断
+                        mICommonInterface.getInitiativeOff(false);//主动断开关闭
                         Frequency.start("/sdcard/.TuringResource/audio/networking_succeed.mp3");
                         SocketThreadManager.sharedInstance().sendMsg(Transform.HexString2Bytes(Joint.setRegister()));
                         bindRobot();//绑定
                         if(TobotUtils.isEmploy()){//首次使用
                             Log.e(TAG,"首次使用加载 onInitiate()");
-                            BFrame.instance(mISceneV).onInitiate(true);
+                            BFrame.instance(mICommonInterface).onInitiate(true);
                             user.setUltr("1");
                         }else if (!BFrame.initiate){//加载失败
                             Log.e(TAG,"加载失败重新加载 onInitiate()");
-                            BFrame.instance(mISceneV).onInitiate(true);
+                            BFrame.instance(mICommonInterface).onInitiate(true);
                         }
                         user.setMobile(phone);
                         user.setUltrAP("1");
                         mainActivity.tvConnResult.setText("已连接到网络");
                     } else if (connect == ConnectionStatus.AP_START_SERVER) {
                         try{
-                            BFrame.Ear(EarActionCode.EAR_MOTIONCODE_6);//断网-灯圈
-                        }catch (Exception e){
-
-                        }
+                            BFrame.Ear(EarActionCode.EAR_MOTIONCODE_6,priority_9);//断网-灯圈
+                        }catch (Exception e){ }
                         mainActivity.tvConnResult.setText("启动ap server, 并准备好ap连接网");
 //                    } else if(connect == ConnectionStatus.WIFI_CONNECTED_FAIL){
 //                        user.setUltrAP("2");
@@ -212,7 +207,7 @@ public class BConnect implements IConnect{
                     } else if(connect == ConnectionStatus.WIFI_CONNECTED_READY){
                         user.setUltrAP("0");
                         Frequency.start("/sdcard/.TuringResource/audio/networking_waiting.mp3");
-                        mainActivity.tvConnResult.setText("联网中...请稍等!");
+                        mainActivity.tvConnResult.setText("联网中 请稍等!");
                     } else if(connect == Constants.CLOSE_AP){
                         user.setUltrAP("3");
 //                        Frequency.start("/sdcard/.TuringResource/audio/close_networking.mp3");

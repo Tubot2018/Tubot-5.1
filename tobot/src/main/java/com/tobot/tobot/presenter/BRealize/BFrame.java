@@ -2,10 +2,7 @@ package com.tobot.tobot.presenter.BRealize;
 
 import android.content.Context;
 import android.content.res.Resources;
-import android.os.AsyncTask;
 import android.os.Handler;
-import android.os.HandlerThread;
-import android.os.Looper;
 import android.os.Message;
 import android.util.Log;
 
@@ -13,8 +10,8 @@ import com.tobot.tobot.Listener.ExpressionCallback;
 import com.tobot.tobot.Listener.LocalCommandGather;
 import com.tobot.tobot.Listener.MainScenarioCallback;
 import com.tobot.tobot.Listener.SimpleFrameCallback;
+import com.tobot.tobot.Listener.SomaModeListener;
 import com.tobot.tobot.MainActivity;
-import com.tobot.tobot.R;
 import com.tobot.tobot.base.Constants;
 import com.tobot.tobot.base.Frequency;
 import com.tobot.tobot.control.Demand;
@@ -22,13 +19,12 @@ import com.tobot.tobot.db.bean.MemoryDBManager;
 import com.tobot.tobot.db.model.Memory;
 import com.tobot.tobot.function.AssembleFunction;
 import com.tobot.tobot.function.QASRFunction;
-import com.tobot.tobot.presenter.ICommon.ISceneV;
+import com.tobot.tobot.presenter.ICommon.ICommonInterface;
 import com.tobot.tobot.presenter.IPort.IFrame;
 import com.tobot.tobot.scene.BaseScene;
 import com.tobot.tobot.scene.CustomScenario;
-import com.tobot.tobot.utils.AppTools;
+import com.tobot.tobot.scene.SceneManager;
 import com.tobot.tobot.utils.TobotUtils;
-import com.tobot.tobot.utils.bluetoothblock.Ble;
 import com.turing123.robotframe.RobotFrameManager;
 import com.turing123.robotframe.RobotFramePreparedListener;
 import com.turing123.robotframe.RobotFrameShutdownListener;
@@ -36,10 +32,8 @@ import com.turing123.robotframe.config.SystemConfig;
 import com.turing123.robotframe.event.AppEvent;
 import com.turing123.robotframe.function.FunctionManager;
 import com.turing123.robotframe.function.IInitialCallback;
-import com.turing123.robotframe.function.asr.IASRFunction;
 import com.turing123.robotframe.function.cloud.Cloud;
 import com.turing123.robotframe.function.expression.Expression;
-import com.turing123.robotframe.function.keyin.KeyInputEvent;
 import com.turing123.robotframe.function.motor.IMotorCallback;
 import com.turing123.robotframe.function.motor.Motor;
 import com.turing123.robotframe.function.tts.ITTSCallback;
@@ -47,15 +41,13 @@ import com.turing123.robotframe.function.tts.TTS;
 import com.turing123.robotframe.function.wakeup.VoiceWakeUp;
 import com.turing123.robotframe.interceptor.StateBuilder;
 import com.turing123.robotframe.multimodal.action.Action;
-import com.turing123.robotframe.multimodal.action.BodyActionCode;
 import com.turing123.robotframe.multimodal.action.EarActionCode;
-import com.turing123.robotframe.multimodal.expression.EmojNames;
 import com.turing123.robotframe.multimodal.expression.FacialExpression;
 import com.turing123.robotframe.scenario.ScenarioManager;
 
 import java.util.HashMap;
 import java.util.Map;
-import static com.turing123.robotframe.function.keyin.KeyInputEvent.KEYCODE_HEAD;
+
 import static com.turing123.robotframe.multimodal.action.Action.PRMTYPE_EXECUTION_TIMES;
 
 
@@ -67,7 +59,7 @@ public class BFrame implements IFrame {
     private static final String TAG = "Javen BFrame";
     private static BFrame mBFarme;
     private static Context mContent;
-    private ISceneV mISceneV;
+    private ICommonInterface mISceneV;
     public static MainActivity main;
     private boolean whence;
     private static RobotFrameManager mRobotFrameManager;
@@ -104,17 +96,18 @@ public class BFrame implements IFrame {
      */
     private VolumeControl volumeControl;
 
-    private static BLocal mBLocal;
+    private static BPhoto mBPhoto;
+    private SomaModeListener mSomaModeListener;
     private static BBattery mBBattery;
     private static BArmtouch mBArmtouch;
     private BProtect mBProtect;
-    private BSensor mBSensor;
-//    private static MotionFunction mMotionFunction;
+    public static BSensor mBSensor;
+    //    private static MotionFunction mMotionFunction;
     public static boolean replace;
     public static boolean prevent;//是否允许asr打断true/允许;false/阻止
     public static boolean isInterrupt;
     private static Memory memory;
-//    private ServiceHandler serviceHandler;
+    //    private ServiceHandler serviceHandler;
     public static boolean robotState = true;
     public static boolean initiate;
     private boolean astrict;
@@ -124,18 +117,18 @@ public class BFrame implements IFrame {
     private static ExpressionCallback expressionCallback;
     private static SimpleFrameCallback earLightCircleCallback;
 
-    public static synchronized BFrame instance(ISceneV mISceneV) {
+    public static synchronized BFrame instance(ICommonInterface mISceneV) {
         if (mBFarme == null) {
             mBFarme = new BFrame(mISceneV);
         }
         return mBFarme;
     }
 
-    private BFrame(ISceneV mISceneV) {
+    private BFrame(ICommonInterface mISceneV) {
         this.mISceneV = mISceneV;
         this.mContent = (Context) mISceneV;
         this.main = (MainActivity) mISceneV;
-        Log.e(TAG,"正常加载 onInitiate()");
+        Log.e(TAG, "正常加载 onInitiate()");
         onInitiate(false);
     }
 
@@ -146,7 +139,7 @@ public class BFrame implements IFrame {
         customScenario = new CustomScenario(mContent);
         //1. 设置对话模式为自动对话，主场景将维护对话的输入和输出。
         try {
-            if (!initiate){
+            if (!initiate) {
                 startRobotFramework();
             }
         } catch (Exception e) {
@@ -167,7 +160,7 @@ public class BFrame implements IFrame {
         // 设置状态机工作模式。查看API Ref以了解更多关于框架工作模式的信息
         int state = new StateBuilder(StateBuilder.DefaultMode).build();
         // prepare（）这个方法必须在你做任何事情之前被调用
-        Log.d(TAG,"框架初始化");
+        Log.d(TAG, "框架初始化");
         mRobotFrameManager.prepare(state, new RobotFramePreparedListener() {
 
             @Override
@@ -207,15 +200,15 @@ public class BFrame implements IFrame {
                     main.FrameLoadFailure();
                     Log.e(TAG, "start error ⊙﹏⊙b\n" + msg.obj);
                     break;
-					
+
                 case Constants.REPLACE_ASR:
                     //替换
                     replaceFunction();
                     mRobotFrameManager.start();
-                    Log.d(TAG,"框架启动");
+                    Log.d(TAG, "框架启动");
                     frameHandle.sendEmptyMessage(Constants.START_SUCESS_MSG);
                     break;
-					
+
                 case Constants.START_SUCESS_MSG:
                     Log.e(TAG, "⊙_⊙  框架加载成功");
                     initiate = true;
@@ -233,8 +226,8 @@ public class BFrame implements IFrame {
                     //手臂触摸
                     onBArmtouch();
                     //mohuaiyuan 20171226 原来的代码
-                    /*  //休眠
-                    onDormant();*/
+                    //休眠
+                    //onDormant();
                     //mohuaiyuan 20171226 新的代码 20171226
                     //站着休眠
                     onStraightToSleep();
@@ -246,14 +239,12 @@ public class BFrame implements IFrame {
                     onAdjustVolume();
                     //唤醒
                     onRouse();
-                    //本地命令
-                    onLocal();
-                    //电量
-                    onBattery();
-                    //自我保护
-                    onBProtect();
                     //注册监听器
                     onBSensor();
+                    //本地命令
+                    onLocal();
+                    //自我保护
+                    onBProtect();
                     //加载成功
                     main.FrameLoadSuccess(whence);
 
@@ -264,7 +255,7 @@ public class BFrame implements IFrame {
         }
     };
 
-    public void setConnectState(BConnect mBConnect){
+    public void setConnectState(BConnect mBConnect) {
         this.mBConnect = mBConnect;
     }
 
@@ -286,7 +277,7 @@ public class BFrame implements IFrame {
         memory = new Memory();
     }
 
-    private void onAssemble(){
+    private void onAssemble() {
         //1. 创建Assemble Function 实例。
         final AssembleFunction assembleFunction = new AssembleFunction(main);
         //2. 初始化
@@ -300,20 +291,21 @@ public class BFrame implements IFrame {
             }
 
             @Override
-            public void onError(String s) { }
+            public void onError(String s) {
+            }
         });
 
         assembleFunction.setAssembleFunction(new AssembleFunction.IAssembleFunction() {
             @Override
             public void Permit(Object interrupt) {
                 prevent = (boolean) interrupt;
-                Log.i(TAG,"prevent:" + prevent);
+                Log.i(TAG, "prevent:" + prevent);
             }
         });
     }
 
     //替换asr
-    private void replaceFunction(){
+    private void replaceFunction() {
         //1. 创建自定义Function 实例。
         final QASRFunction mQASRFunction = new QASRFunction(main);
         //2. 初始化自定义的Function.
@@ -326,12 +318,12 @@ public class BFrame implements IFrame {
                 //3.2 调用replaceFunction 替换系统中type相同的默认function（本示例替换asr）.
                 boolean replaced = functionManager.replaceFunction(mQASRFunction);
                 replace = replaced;
-                Log.i(TAG,"替换成功:" + replaced);
+                Log.i(TAG, "替换成功:" + replaced);
             }
 
             @Override
             public void onError(String errorMessage) {
-                Log.i(TAG,"替换失败:" + errorMessage);
+                Log.i(TAG, "替换失败:" + errorMessage);
             }
         });
     }
@@ -345,6 +337,7 @@ public class BFrame implements IFrame {
     private void onNotification() {
         mBMonitor = new BMonitor(main);
     }
+
     //mohuaiyuan 20171226 原来的代码
     /*// 休眠
     private void onDormant() {
@@ -352,41 +345,38 @@ public class BFrame implements IFrame {
     }*/
 
     //mohuaiyuan 20171226 新的代码 20171226
-
     /**
      * 站着休眠
      */
-    private void onStraightToSleep(){
-        mStraightToSleep=new StraightToSleep(main);
+    private void onStraightToSleep() {
+        mStraightToSleep = new StraightToSleep(main);
     }
 
     /**
      * 坐下休息（休眠）
      */
-    private void onSitDownAndSleep(){
-        mSitDownAndSleep=new SitDownAndSleep(main);
+    private void onSitDownAndSleep() {
+        mSitDownAndSleep = new SitDownAndSleep(main);
     }
 
     /**
-     *  躺下休息（休眠）
+     * 躺下休息（休眠）
      */
-    private void onLieDownAndSleep(){
-        mLieDownAndSleep=new LieDownAndSleep(main);
+    private void onLieDownAndSleep() {
+        mLieDownAndSleep = new LieDownAndSleep(main);
     }
 
     /**
      * 音量控制
      */
-    private void onAdjustVolume(){
-        volumeControl=new VolumeControl(mContent);
-
+    private void onAdjustVolume() {
+        volumeControl = new VolumeControl(mContent);
     }
-	
-    // 本地命令
-    private void onLocal() { mBLocal = BLocal.instance(main); }
 
-    // 电量检测
-    private void onBattery() {
+    // 本地命令
+    private void onLocal() {
+        mBPhoto = BPhoto.instance(main);
+        mSomaModeListener = SomaModeListener.instance(main);
         mBBattery = new BBattery(main);
     }
 
@@ -414,14 +404,14 @@ public class BFrame implements IFrame {
 
     // ASR提醒音
     public static void hint() {
-        if (replace){
+        if (replace) {
             Frequency.hint();
-        }else if(scenarioManager == null){
+        } else if (scenarioManager == null) {
             //1. 获取ScenarioManager.
             scenarioManager = new ScenarioManager(main);
             //2. 设置开关，true 为开， false 为关。
             scenarioManager.switchDefaultChatAsrPrompt(true, false);
-        }else{
+        } else {
             scenarioManager.switchDefaultChatAsrPrompt(true, false);
         }
     }
@@ -438,15 +428,15 @@ public class BFrame implements IFrame {
         }
     }
 
-    public static BLocal getmBLocal(){
+    public static BPhoto getmBPhoto() {
         if (TobotUtils.isNotEmpty(mBBattery)) {
-            return mBLocal;
+            return mBPhoto;
         } else {
             return null;
         }
     }
 
-    public static BBattery getBBattery(){
+    public static BBattery getBBattery() {
         if (TobotUtils.isNotEmpty(mBBattery)) {
             return mBBattery;
         } else {
@@ -454,7 +444,7 @@ public class BFrame implements IFrame {
         }
     }
 
-    public static BArmtouch getBArmtouch(){
+    public static BArmtouch getBArmtouch() {
         if (TobotUtils.isNotEmpty(mBBattery)) {
             return mBArmtouch;
         } else {
@@ -464,6 +454,7 @@ public class BFrame implements IFrame {
 
 
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
 
     //选择asr
     public void choiceFunctionProcessor(int type) {
@@ -476,328 +467,342 @@ public class BFrame implements IFrame {
 
     //下发动作
     public static void motion(int code) {
-        motion1(code, PRMTYPE_EXECUTION_TIMES, 1, false);
+        motion(code, Action.PRMTYPE_EXECUTION_TIMES, 1, false, false, new SimpleFrameCallback());
     }
 
     public static void motion(int code, int type) {
-        motion1(code, type, 1, false);
+        motion(code, type, 1, false, false, new SimpleFrameCallback());
     }
 
     public static void motion(int code, int type, int value) {
-        motion1(code, type, value, false);
+        motion(code, type, value, false, false, new SimpleFrameCallback());
     }
 
-    public static void motion(int code,boolean scene) {
-        motion1(code, PRMTYPE_EXECUTION_TIMES, 1, scene);
+    public static void motion(int code, boolean order) {
+        motion(code, Action.PRMTYPE_EXECUTION_TIMES, 1, order, false, new SimpleFrameCallback());
     }
 
-//    private static void motion(int code, int type, int value, boolean scene) {
-//        int must = IsContinue();
-//        Log.w(TAG,"连续动做 must:"+must);
-//        if (scene){//场景中
-//            if (must != 0 && !TobotUtils.isReset(code)){//非正常状态
-//                TTS("没看到我现在正"+nowState(must)+"吗?你应该先让我站起来");
-//            }else if (TobotUtils.isReset(code)){
-//                Log.w(TAG,"场景中重置动作 code:"+code);
-//                outAction(resetState(code), type, value);
-//            }else if (must == 0){
-//                Log.w(TAG,"场景中正确动作 code:"+code);
-//                outAction(code, type, value);
-//            }
-//        }else {
-//            if (must != 0) {
-//                if (code != must) {
-//                    Log.w(TAG,"非场景中有记忆复位动作 must:"+must);
-//                    outAction(must, type, value);
-//                    try {
-//                        Thread.sleep(100);
-//                        Log.w(TAG,"非场景中有记忆复位后执行动作 must:"+must);
-//                        outAction(code, type, value);
-//                    } catch (InterruptedException e) {
-//                        e.printStackTrace();
-//                    }
-//                }else {
-//                    Log.w(TAG,"非场景中有记忆正确动作 code:"+code);
-//                    outAction(code, type, value);
-//                }
-//            }else {
-//                Log.w(TAG,"非场景中无记忆平常动作 code:"+code);
-//                outAction(code, type, value);
-//            }
-//        }
-//        Log.w(TAG,"是否保存动作 code:"+code);
-//        IsMemory(code);
-//    }
+    public static void motion(int code, boolean order, boolean reset) {
+        motion(code, PRMTYPE_EXECUTION_TIMES, 1, order, reset, new SimpleFrameCallback());
+    }
 
-    private static void motion1(int code, int type, int value, boolean scene) {
+    public static void motion(int code, SimpleFrameCallback simpleFrameCallback) {
+        motion(code, PRMTYPE_EXECUTION_TIMES, 1, false, false, simpleFrameCallback);
+    }
+
+    private static void motion(int code, int type, int value, boolean order, boolean reset, SimpleFrameCallback simpleFrameCallback) {
         int must = IsContinue();
-        Log.w(TAG,"连续动做 must:"+must);
-        if (scene){//场景中
-            if (must != 0 && !TobotUtils.isReset(code)){//非正常状态
-                TTS("没看到我现在正"+nowState(must)+"吗?你应该先让我站起来");
-            }else if (TobotUtils.isReset(code)){
-                Log.w(TAG,"场景中重置动作 code:"+code);
-                outAction(resetState(code), type, value);
-                Log.w(TAG,"是否保存动作3 code:"+code);
-                IsMemory(code);
-            }else if (must == 0){
-                Log.w(TAG,"场景中正确动作 code:"+code);
-                outAction(code, type, value);
-                Log.w(TAG,"是否保存动作2 code:"+code);
-                IsMemory(code);
-            }
-        }else {
-            if (must != 0) {
-                if (code != must) {
-                    Log.w(TAG,"非场景中有记忆复位动作 must:"+must);
-//                    outAction(must, type, value);
-                    try {
-                        Thread.sleep(10);
-                        Log.w(TAG,"非场景中有记忆复位后执行动作 must:"+must);
-//                        outAction(code, type, value);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                }else {
-                    Log.w(TAG,"非场景中有记忆正确动作 code:"+code);
-                    outAction(code, type, value);
-                    Log.w(TAG,"是否保存动作1 code:"+code);
-                    IsMemory(code);
-                }
-            }else {
-                Log.w(TAG,"非场景中无记忆平常动作 code:"+code);
-                outAction(code, type, value);
-                Log.w(TAG,"是否保存动作2 code:"+code);
-                IsMemory(code);
+        Log.w(TAG, "有连续动作 must:" + must);
+        if (order) {//命令型动作
+            orderMemoryAction(code, type, value, must, order, simpleFrameCallback);
+        } else {
+            if (reset) {//普通动作带复位
+                notOrderMemoryResetAction(code, type, value, must, order, simpleFrameCallback);
+            } else {//普通动作不带复位
+                notOrderMemoryAction(code, type, value, must, order, simpleFrameCallback);
             }
         }
     }
 
-    private static void outAction(int code, int type, int value) {
-        motor.doAction(Action.buildBodyAction(code, type, value), new SimpleFrameCallback());
+    private static void orderMemoryAction(int code, int type, int value, int must, boolean order, SimpleFrameCallback simpleFrameCallback) {
+        if (must != 0 && !TobotUtils.isReset(code)) {//非正常状态
+            TTS("没看到我现在正" + nowState(must) + "吗?你应该先让我站起来");
+        } else if (TobotUtils.isReset(code)) {//命令动作是否为后续动作
+            Log.w(TAG, "命令动作自动重置 code:" + code);
+            outAction(resetState(code), type, value, simpleFrameCallback);
+            Log.w(TAG, "命令动作自动重置是否保存 code:" + code);
+            IsMemory(code, order);
+        } else if (must == 0) {//之前无记忆的命令动作
+            Log.w(TAG, "正常命令动作 code:" + code);
+            outAction(code, type, value, simpleFrameCallback);
+            Log.w(TAG, "正常命令动作是否保存 code:" + code);
+            IsMemory(code, order);
+        }
     }
 
-    /**
-     * 下发动作
-     * @param code
-     */
-    public static void outActionWithCallback(int code,int type,int value, IMotorCallback iMotorCallback){
-//        motor.doAction(Action.buildBodyAction(code,type,value),iMotorCallback);
-        motion(code);
+    private static void notOrderMemoryAction(int code, int type, int value, int must, boolean order, SimpleFrameCallback simpleFrameCallback) {
+        if (must != 0) {
+            if (code != must) {
+                Log.w(TAG, "非命令有记忆动作,不执行复位 must:" + must);
+//                    outAction(must, type, value);
+                try {
+                    Thread.sleep(10);
+                    Log.w(TAG, "非命令有记忆动作,不复位也不执行动作 must:" + must);
+//                        outAction(code, type, value);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            } else {
+                Log.w(TAG, "非命令有记忆正确动作 code:" + code);
+                if (orderState().contains("00")) {//记忆的动作为非命令型
+                    outAction(code, type, value, simpleFrameCallback);
+                }
+            }
+        } else {
+            Log.w(TAG, "非命令无记忆平常动作 code:" + code);
+            outAction(code, type, value, simpleFrameCallback);
+        }
+        Log.w(TAG, "非命令无复位动作是否保存 code:" + code);
+        IsMemory(code, order);
     }
 
-    //下发耳部灯圈
-    public static void Ear(int code) {
-        motor.doAction(Action.buildEarAction(code, 80, 1), new SimpleFrameCallback());
+    private static void notOrderMemoryResetAction(int code, int type, int value, int must, boolean order, SimpleFrameCallback simpleFrameCallback) {
+        if (must != 0) {
+            if (code != must) {
+                Log.w(TAG, "非命令有记忆动作,执行复位 must:" + must);
+                outAction(must, type, value, simpleFrameCallback);
+                try {
+                    Thread.sleep(10);
+                    Log.w(TAG, "非命令有记忆动作,复位后执行动作 must:" + must);
+                    outAction(code, type, value, simpleFrameCallback);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            } else {
+                Log.w(TAG, "非命令有记忆正确动作执行 code:" + code);
+                outAction(code, type, value, simpleFrameCallback);
+            }
+        } else {
+            Log.w(TAG, "非命令无记忆平常动作执行 code:" + code);
+            outAction(code, type, value, simpleFrameCallback);
+        }
+        Log.w(TAG, "非命令复位动作是否保存 code:" + code);
+        IsMemory(code, order);
     }
 
-    public static void Ear(int code, int pleasantness) {
-        motor.doAction(Action.buildEarAction(code, 80, pleasantness), new SimpleFrameCallback());
+    private static void outAction(int code, int type, int value, SimpleFrameCallback simpleFrameCallback) {
+        motor.doAction(Action.buildBodyAction(code, type, value), simpleFrameCallback);
     }
 
-    public static void Ear(int code, int brightness, int pleasantness) {
-        motor.doAction(Action.buildEarAction(code, brightness, pleasantness), new SimpleFrameCallback());
-    }
 
-	
     /**
      * 下发耳部灯圈
-     * @param code
-     * @param brightness
-     * @param pleasantness
-     * @param iMotorCallback
      */
-    public static void EarWithCallback(int code,int brightness,int pleasantness,IMotorCallback iMotorCallback) {
-        motor.doAction(Action.buildEarAction(code, brightness, pleasantness), iMotorCallback);
+    public static void Ear(int code) {
+        Ear(code, 80, 1, 1, new SimpleFrameCallback());
+    }
 
+    public static void Ear(int code, int priority) {
+        Ear(code, 80, 1, priority, new SimpleFrameCallback());
     }
-    //脱离主场景
-    public static void shutChat(){
-        mRobotFrameManager.toLostScenario();
+
+    public static void Ear(int code, int priority, IMotorCallback iMotorCallback) {
+        Ear(code, 80, 1, priority, iMotorCallback);
     }
+
+//    public static void Ear(int code, int pleasantness, int priority) {
+//        Ear(code, 80, pleasantness, priority, new SimpleFrameCallback());
+//    }
+//
+//    public static void Ear(int code, int brightness, int pleasantness, int priority) {
+//        Ear(code, brightness, pleasantness,priority, new SimpleFrameCallback());
+//    }
+
+    public static void Ear(int code, int brightness, int pleasantness, int priority, IMotorCallback iMotorCallback) {
+        Log.w(TAG, "下发耳部灯圈 code:" + code+ "优先级:" +priority);
+        if (TobotUtils.isPriority(code,priority)) {
+            Log.w(TAG, "耳部灯圈－事件 code:" + code+ "优先级:" +priority);
+            motor.doAction(Action.buildEarAction(code, brightness, pleasantness), iMotorCallback);
+        }else if (TobotUtils.isRank(code,priority)){
+            Log.w(TAG, "耳部灯圈－逻辑 code:" + code+ "优先级:" +priority);
+            motor.doAction(Action.buildEarAction(code, brightness, pleasantness), iMotorCallback);
+        }
+    }
+
+    public static void EarWithCallback(int code, int brightness, int pleasantness, IMotorCallback iMotorCallback) {
+        Ear(code, brightness, pleasantness,1, iMotorCallback);
+    }
+
+
+
 
     /**
-     * 回到主场景
+     * 下发表情
      */
-    public static void disparkChat(){
-        mRobotFrameManager.backMainScenario();
-    }
-
-
-    /**
-     *  下发表情
-     */
-    public static void Facial(String facial){
+    public static void Facial(String facial) {
         mFacialExpression.emoj = facial;
         mExpression.showExpression(mFacialExpression, new ExpressionCallback());
     }
 
     /**
      * 下发表情
+     *
      * @param facial
      * @param callback
      */
-    public static void FacialWithCallback(String facial,ExpressionCallback callback){
+    public static void FacialWithCallback(String facial, ExpressionCallback callback) {
         mFacialExpression.emoj = facial;
         mExpression.showExpression(mFacialExpression, callback);
-
     }
 
     /**
-     * 执行tts
+     * 脱离主场景
+     */
+    public static void shutChat() { mRobotFrameManager.toLostScenario(); }
+
+    /**
+     * 回到主场景
+     */
+    public static void disparkChat() {
+        mRobotFrameManager.backMainScenario();
+    }
+
+
+    /**
+     * tts语音
+     *
      * @param voice
      */
-    public static void TTS(String voice){
-        tts.speak(voice,ittsCallback);
+    public static void TTS(String voice) {
+        TTS(voice, ittsCallback);
     }
 
-
+    public static void TTS(String voice, ITTSCallback ittsCallback) {
+        tts.speak(voice, ittsCallback);
+    }
+    
     /**
      * 执行tts
+     *
      * @param voice
      * @param mIttsCallback
      */
-    public static synchronized void ttsWithCallback(String voice,ITTSCallback mIttsCallback){
+    public static synchronized void ttsWithCallback(String voice, ITTSCallback mIttsCallback) {
         Log.d(TAG, "ttsWithCallback: ");
-        if (mIttsCallback==null){
-            mIttsCallback=ittsCallback;
+        if (mIttsCallback == null) {
+            Log.d(TAG, "mIttsCallback 为空");
+            mIttsCallback = ittsCallback;
         }
-        Log.d(TAG, "voice: "+voice);
-        tts.speak(voice,mIttsCallback);
+        Log.d(TAG, "voice: " + voice);
+        TTS(voice, mIttsCallback);
     }
 
-     static ITTSCallback ittsCallback = new ITTSCallback() {
+    static ITTSCallback ittsCallback = new ITTSCallback() {
 
         @Override
         public void onStart(String s) {
-            Log.i(TAG ,"开始语音播报TTS:"+s);
+            Log.i(TAG, "开始语音播报TTS:" + s);
             isInterrupt = true;
+            if (!TobotUtils.isInScenario(SceneManager.SCENE)) {
+                Ear(EarActionCode.EAR_MOTIONCODE_2);//发声效果
+            }
         }
 
         @Override
         public void onPaused() {
             isInterrupt = false;
+            if (!TobotUtils.isInScenario(SceneManager.SCENE)) {
+                Ear(EarActionCode.EAR_MOTIONCODE_3);//asr效果
+            }
         }
 
         @Override
         public void onResumed() {
             isInterrupt = true;
+            if (!TobotUtils.isInScenario(SceneManager.SCENE)) {
+                Ear(EarActionCode.EAR_MOTIONCODE_2);//发声效果
+            }
         }
 
         @Override
         public void onCompleted() {
-//            if(anewConnect){
-//                Log("异常断网进入重连");
-//                anewConnect = false;
-//                mBConnect.shunt();//重新联网 -- 需要考虑是否要直接启动还是摸头三秒启动
-//            }
-            //自主休眠禁止唤醒
-//            try {
-//                if (mScoffEntity.getDormant()) {
-//                    Log("进入自主休眠10分钟" + isInterrupt);
-//                    motor.doAction(Action.buildBodyAction(BodyActionCode.ACTION_8, PRMTYPE_EXECUTION_TIMES, 1), new SimpleFrameCallback());
-//                    //注意： 若要唤醒机器人，可调用wakeup,或者使用语言唤醒词唤醒。
-//                    mRobotFrameManager.sleep();
-//                    //5.2 命令执行完成后需明确告诉框架，命令处理结束，否则无法继续进行主对话流程。
-//                    new LocalCommandGather().onComplete();
-//                    awakenTimer.schedule(new AwakenTimerTask(), 600000);//休眠10分钟
-//                    isOFF_HINT = true;
-//                    isNotWakeup = false;//禁止打断
-//                }
-//            } catch (NullPointerException e) {
-//                e.printStackTrace();
-//            }
-            hint();//提示音
+            Log.i(TAG, "TTS结束:");
             isInterrupt = false;
+            if (!TobotUtils.isInScenario(SceneManager.SCENE)) {
+                Ear(EarActionCode.EAR_MOTIONCODE_3);//asr效果
+            }
+            hint();//提示音
         }
 
         @Override
         public void onError(String s) {
-            Log.i(TAG ,"TTS错误"+s);
+            if (!TobotUtils.isInScenario(SceneManager.SCENE)) {
+                Ear(EarActionCode.EAR_MOTIONCODE_3);//asr效果
+            }
         }
     };
 
     /**
      * 进入睡眠
      */
-    public static void FallAsleep(){
-        if (TobotUtils.isNotEmpty(mRobotFrameManager)){
-            //mohuaiyuan 20180106 原来的代码
-//            Ear(EarActionCode.EAR_MOTIONCODE_1);//待机效果
+    public static void FallAsleep() {
+        if (TobotUtils.isNotEmpty(mRobotFrameManager)) {
             mRobotFrameManager.sleep();
             //5.2 命令执行完成后需明确告诉框架，命令处理结束，否则无法继续进行主对话流程。
             new LocalCommandGather().onComplete();
         }
     }
 
-    public static void Wakeup(){
+    public static void Wakeup() {
         if (TobotUtils.isNotEmpty(mRobotFrameManager)) {
-            //mohuaiyuan 20180106 原来的代码
-//            Ear(EarActionCode.EAR_MOTIONCODE_4);//启动效果
             mRobotFrameManager.wakeup();
         }
+        mBSensor.write2019Pattern((byte)0x00,SomaModeListener.instance(main));
     }
 
 
-    public static void Wakeup(int type){
-        if (TobotUtils.isNotEmpty(mRobotFrameManager)) {
-            mRobotFrameManager.wakeup();
-        }
+    public static void Wakeup(int type) {
+        Wakeup();
     }
 
     /**
      * 设置聊天模式
+     *
      * @param mode
      */
-    public static void setChatMode(int mode){
+    public static void setChatMode(int mode) {
         mRobotFrameManager.setChatMode(mode);
     }
 
     //打断
-    public static void Interrupt(){
+    public static void proceedInterrupt() {
         mRobotFrameManager.interrupt(SystemConfig.INTERRUPT_TYPE_TOUCH, null);
-        if (prevent){
+        if (prevent) {
             //统一下发tts打断处理
-            Log.i(TAG,"统一下发tts打断处理");
             mFrameThing.setAssemble(false);
         }
-        if (isInterrupt){
+        if (isInterrupt) {
             //框架tts打断处理
-            Log.i(TAG,"框架tts打断处理");
-            tts.speak(" ");
+//            tts.speak(" ");
+            ttsStop();
+            if (!TobotUtils.isInScenario(SceneManager.SCENE)) {
+                BFrame.Ear(EarActionCode.EAR_MOTIONCODE_3);//asr效果
+            }
         }
         prevent = false;
         isInterrupt = false;
-        Demand.instance(mContent).stopDemand();//停止点播
+        Demand.instance(mContent).demandStop();//停止点播
+        BFrame.Ear(EarActionCode.EAR_MOTIONCODE_3);
     }
 
     //触摸打断
-    public static void InterruptTouch(){
+    public static void touchInterrupt() {
         mRobotFrameManager.interrupt(SystemConfig.INTERRUPT_TYPE_TOUCH, null);
-        if (prevent){
+        if (prevent) {
             //统一下发tts打断处理
-            Log.i(TAG,"统一下发tts打断处理");
+            Log.i(TAG, "统一下发tts打断处理");
             mFrameThing.setAssemble(true);
         }
-        if (isInterrupt){
+        if (isInterrupt) {
             //框架tts打断处理
-            Log.i(TAG,"框架tts打断处理");
-            tts.speak(" ",ittsCallback);
+            Log.i(TAG, "框架tts打断处理");
+            tts.speak(" ", ittsCallback);
         }
+        BFrame.Ear(EarActionCode.EAR_MOTIONCODE_3);
     }
 
     //通知关机
-    public static void shutDown(){
+    public static void shutDown() {
         mRobotFrameManager.shutDown(new RobotFrameShutdownListener() {
 
             @Override
             public void onShutDown() {
-                Log.i(TAG,"已通知关机");
+                Log.i(TAG, "已通知关机");
             }
 
             @Override
             public void onError(String s) {
-                Log.i(TAG,"通知关机 onError" + s);
+                Log.i(TAG, "通知关机 onError" + s);
             }
         });
     }
@@ -814,21 +819,30 @@ public class BFrame implements IFrame {
 
     public interface IFrameThing { void setAssemble(Object dispose); }
 
+    public static void ttsPause() {
+        tts.pause();
+    }
 
+    public static void ttsResume() {
+        tts.resume();
+    }
+
+    public static void ttsStop() {
+        tts.stop();
+    }
 
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 
-
     //检索连贯动作
-    public static int IsContinue(){
+    public static int IsContinue() {
         int must = 0;
-        try{
+        try {
             memory = MemoryDBManager.getManager().queryById("memory");
-            Log.w("Javen","Global:" + memory.getGlobal());
-            if(memory.getGlobal().equals("1111")){
-                switch (Integer.parseInt(memory.getMotion())){
+            Log.w("Javen", "Global:" + memory.getGlobal());
+            if (memory.getGlobal().equals("1111")) {
+                switch (Integer.parseInt(memory.getMotion())) {
                     case Constants.squat:
                         must = Constants.squat_stand;
                         break;
@@ -849,10 +863,10 @@ public class BFrame implements IFrame {
                         break;
                 }
             }
-        }catch (NullPointerException e){
+        } catch (NullPointerException e) {
             return must;
         }
-        Log.i("Javen","检索连贯动作接下来应该做 must:"+must);
+        Log.i("Javen", "检索连贯动作接下来应该做 must:" + must);
         return must;
     }
 
@@ -864,13 +878,13 @@ public class BFrame implements IFrame {
                 state = "蹲着";
                 break;
             case Constants.sitDown_stand:
-                state = "坐在地上";
+                state = "坐着";
                 break;
             case Constants.lieDown_stand:
-                state = "躺在地上";
+                state = "躺着";
                 break;
             case Constants.goProne_stand:
-                state = "趴在地上";
+                state = "趴着";
                 break;
             case Constants.SitBack_stand:
                 state = "坐着";
@@ -882,151 +896,180 @@ public class BFrame implements IFrame {
         return state;
     }
 
-    //重置状态
-    public static int resetState(int action){
+    //是否为命令动作
+    private static String orderState() {
+        String order = "00";
+        try {
+            memory = MemoryDBManager.getManager().queryById("memory");
+            order = memory.getOrderType();
+            Log.w("Javen", "order:" + memory.getOrderType());
+        } catch (NullPointerException e) {
+        }
+        return order;
+    }
+
+    //动作重置
+    public static int resetState(int action) {
         int reset = 0;
-        try{
+        try {
             if (TobotUtils.isReset(action)) {
                 reset = IsContinue();
             }
-        }catch (Exception e){
+        } catch (Exception e) {
             return reset;
         }
-        return reset;
+        return reset != 0 ? reset : 1;
     }
-
-//    //检索是否记忆
-//    public static void IsMemory(int action) {
-//        try{
-//            if (TobotUtils.isEmpty(memory)){
-//                memory = new Memory();
-//            }
-//            Log.w("Javen","动作 action:" + action);
-//            if (TobotUtils.isMemory(action)) {
-//                memory.setMotion(action+"");
-//                memory.setGlobal("1111");
-//                Log.w("Javen","要记忆动作 action:" + action);
-//                MemoryDBManager.getManager().insertOrUpdate(memory);
-//            }else if (memory.getGlobal().equals("0000")){
-//                memory.setMotion("0");
-//                memory.setGlobal("0000");
-//                Log.w("Javen","平常动作不记忆 action:" + action);
-//                MemoryDBManager.getManager().insertOrUpdate(memory);
-//            }else if (memory.getGlobal().equals("1111")){
-//                if (TobotUtils.isReset(action)){
-//                    memory.setMotion("0");
-//                    memory.setGlobal("0000");
-//                    Log.w("Javen","连续动作不记忆 action:" + action);
-//                    MemoryDBManager.getManager().insertOrUpdate(memory);
-//                }else if (!TobotUtils.isMemory(action)){
-//                    memory.setMotion("0");
-//                    memory.setGlobal("0000");
-//                    Log.w("Javen","重置后平常动作不记忆 action:" + action);
-//                    MemoryDBManager.getManager().insertOrUpdate(memory);
-//                }
-//            }
-//        }catch (Exception e){
-//
-//        }
-//    }
 
     //检索是否记忆
-    public static void IsMemory(int action) {
-        try{
-            if (TobotUtils.isEmpty(memory)){
-                Log.w("Javen","memory 为空:");
+    public static void IsMemory(int action, boolean order) {
+        try {
+            if (TobotUtils.isEmpty(memory)) {
+                Log.w("Javen", "memory 为空:");
                 memory = new Memory();
             }
-            Log.w("Javen","动作 action:" + action);
-            if (TobotUtils.isMemory(action)){
-                memory.setMotion(action+"");
+            Log.w("Javen", "检索该动作是否需要保存 action:" + action);
+            if (memory.getGlobal().equals("1111")) {//1.1.0首先检索该动作之前是否有记忆动作
+                if (memory.getOrderType().contains("11")) {//1.1.1如果有,则检索之前记忆动作是否为命令动作
+                    if (TobotUtils.isReset(action) && order) {//1.1.2如果是,则只检索该动作是否为后续动作且当前命令也是命令动作
+                        memory.setMotion("0");
+                        memory.setGlobal("0000");
+                        Log.w("Javen", "之前有命令动作记忆,的后续动作(执行,不记忆,不保留之前记忆) action:" + action);
+                        setMemory(order);
+                    } else if (TobotUtils.isReset(action)) {//1.1.3.如果不是,则单独检索该动作是否为后续动作
+                        Log.w("Javen", "之前有命令动作记忆,的后续动作,现命令为非命令动作(不记忆,不执行,但保留之前记忆) action:" + action);
+                    } else if (TobotUtils.isMemory(action)) {//1.1.3.如果不是,则检索该动作是否为需记忆动作
+//                    memory.setMotion("0");
+//                    memory.setGlobal("0000");
+                        Log.w("Javen", "之前有命令动作记忆,的需记忆动作(非正常,不记忆,不执行,但保留之前记忆) action:" + action);
+                    } else {//1.1.4.如果该动作为非后续动作,也非需记忆动作的正常动作
+//                    memory.setMotion("0");
+//                    memory.setGlobal("0000");
+                        Log.w("Javen", "之前有命令动作记忆,的普通动作(不记忆,不执行,但保留之前记忆) action:" + action);
+                    }
+                } else {//1.2.1如果不是命令动作
+//                    if (TobotUtils.isReset(action) && !order){//1.2.2则检索是否为后续动作,且现动作为非命令
+//                        memory.setMotion("0");
+//                        memory.setGlobal("0000");
+//                        Log.w("Javen", "之前有非命令动作记忆,的非命令的后续动作执行,不记忆 action:" + action);
+//                    } else
+                    if (TobotUtils.isReset(action)) {//1.2.2则检索是否为后续动作
+                        memory.setMotion("0");
+                        memory.setGlobal("0000");
+                        Log.w("Javen", "之前有非命令动作记忆,的后续动作执行(执行,不记忆,不保留之前记忆) action:" + action);
+                        setMemory(order);
+                    } else if (TobotUtils.isMemory(action)) {//1.2.3如果不是,则检索该动作是否为需记忆动作
+                        Log.w("Javen", "之前有非命令动作记忆,的需记忆动作(非正常,不记忆,不执行,但保留之前记忆) action:" + action);
+                    } else {//1.2.4.如果该动作为非后续动作,也非需记忆动作的正常动作
+                        Log.w("Javen", "之前有非命令动作记忆,的普通动作(不记忆,不执行,但保留之前记忆) action:" + action);
+                    }
+                }
+
+
+//                if (TobotUtils.isReset(action) && !order){////1.1.如果有,则检索该动作是否为后续动作,且为非命令动作
+//                    Log.w("Javen", "为非命令的后续动作不记忆(不执行,保留之前记忆) action:" + action);
+//                }else if (TobotUtils.isReset(action)) {//1.2.如果不是,则只检索该动作是否为后续动作
+//                    memory.setMotion("0");
+//                    memory.setGlobal("0000");
+//                    Log.w("Javen", "后续动作不记忆(执行,不保留之前记忆) action:" + action);
+//                    setMemory(order);
+//                }else if (TobotUtils.isMemory(action)) {//1.3.如果没有,则检索该动作是否为需记忆动作
+////                    memory.setMotion("0");
+////                    memory.setGlobal("0000");
+//                    Log.w("Javen", "之前已经有记忆的需记忆动作(非正常,不记忆,不执行,但保留之前记忆) action:" + action);
+//                }else {//1.4.如果该动作为非后续动作,也非需记忆动作的正常动作
+////                    memory.setMotion("0");
+////                    memory.setGlobal("0000");
+//                    Log.w("Javen", "有记忆后的普通动作(不记忆,不执行,但保留之前记忆) action:" + action);
+//                }
+            } else if (TobotUtils.isMemory(action)) {//2.其次检索该动作是否在记忆序列;注意是否还需要在验证是否为命令动作
+                memory.setMotion(action + "");
                 memory.setGlobal("1111");
-                Log.w("Javen","要记忆动作 action:" + action);
-                MemoryDBManager.getManager().insertOrUpdate(memory);
-            }else if (memory.getGlobal().equals("0000")){
+                Log.w("Javen", "要记忆动作 action:" + action);
+                setMemory(order);
+            } else {//3.该动作之前无记忆动作,也非需要记忆动作(既普通动作)
                 memory.setMotion("0");
                 memory.setGlobal("0000");
-                Log.w("Javen","平常动作不记忆 action:" + action);
-                MemoryDBManager.getManager().insertOrUpdate(memory);
-            }else if (memory.getGlobal().equals("1111")){
-                if (TobotUtils.isReset(action)){
-                    memory.setMotion("0");
-                    memory.setGlobal("0000");
-                    Log.w("Javen","连续动作不记忆 action:" + action);
-                    MemoryDBManager.getManager().insertOrUpdate(memory);
-                }else if (!TobotUtils.isMemory(action) && !memory.getGlobal().equals("1111")){
-                    memory.setMotion("0");
-                    memory.setGlobal("0000");
-                    Log.w("Javen","重置后平常动作不记忆 action:" + action);
-                    MemoryDBManager.getManager().insertOrUpdate(memory);
-                }
+                Log.w("Javen", "普通动作不记忆 action:" + action);
+                setMemory(order);
             }
-        }catch (Exception e){ }
+        } catch (Exception e) {
+        }
+    }
+
+    private static void setMemory(boolean order) {
+        if (order) {
+            memory.setOrderType("11");
+        } else {
+            memory.setOrderType("00");
+        }
+        MemoryDBManager.getManager().insertOrUpdate(memory);
     }
 
 
-
-
-
-
-
-
-
-
-
-
-    public static final String RESPONSE_SPEECH="speech";
-    public static final String RESPONSE_ACTION="action";
-    public static final String RESPONSE_EXPRESSION="expression";
-    public static final String RESPONSE_EAR_LIGHT_CIRCLE="earLightCircle";
+    public static final String RESPONSE_SPEECH = "speech";
+    public static final String RESPONSE_ACTION = "action";
+    public static final String RESPONSE_EXPRESSION = "expression";
+    public static final String RESPONSE_EAR_LIGHT_CIRCLE = "earLightCircle";
+    public static final String RESPONSE_EAR_PRIORITY = "earPriority";//Javen 20180208
 
     /**
      * 反馈，包括语音、动作、表情、灯圈的反馈，有哪些反馈由配置信息决定
+     *
      * @param id ：配置信息的id
      * @throws Exception
      */
-    public static void response(int id)throws Exception {
+    public static void response(int id) throws Exception {
         Log.d(TAG, "response: ");
-        Map<String,String>map=getString(id);
-        Log.d(TAG, "map: "+map);
+        Map<String, String> map = getString(id);
+        Log.d(TAG, "map: " + map);
         response(map);
-
     }
 
     /**
      * 反馈，包括语音、动作、表情、灯圈的反馈，有哪些反馈由配置信息决定
+     *
      * @param line:配置信息
      * @throws Exception
      */
-    public static void response(String line)throws Exception {
+    public static void response(String line) throws Exception {
         Log.d(TAG, "response: ");
-        Map<String,String>map=getString(line);
-        Log.d(TAG, "map: "+map);
+        Map<String, String> map = getString(line);
+        Log.d(TAG, "map: " + map);
         response(map);
 
     }
 
     /**
      * 反馈，包括语音、动作、表情、灯圈的反馈，有哪些反馈由配置信息决定
+     *
      * @param dataMap:配置信息
      * @throws Exception
      */
-    public static void response(Map<String,String> dataMap)throws Exception {
+    public static void response(Map<String, String> dataMap) throws Exception {
         Log.d(TAG, "response: ");
         if (dataMap == null || dataMap.isEmpty()) {
             throw new Exception("dataMap==null ||dataMap.isEmpty()");
         }
+        //优先级 Javen 20180208
+        String earPriority = dataMap.get(RESPONSE_EAR_PRIORITY);
+        int earPriorityCode = 1;
+        if (earPriority != null && earPriority.length() > 0) {
+            try {
+                earPriorityCode = Integer.valueOf(earPriority);
+            } catch (NumberFormatException e) { }
+        }
         //讲话
         String speech = dataMap.get(RESPONSE_SPEECH);
         if (speech != null && speech.length() > 0) {
-            ttsWithCallback(speech,null);
+            ttsWithCallback(speech, null);
         }
         //动作
         String action = dataMap.get(RESPONSE_ACTION);
         if (action != null && action.length() > 0) {
-            if (action.contains("#a_a#")){
-                String[] actionTemp=action.split("#a_a#");
-                for (int i=0;i<actionTemp.length;i++){
+            if (action.contains("#a_a#")) {
+                String[] actionTemp = action.split("#a_a#");
+                for (int i = 0; i < actionTemp.length; i++) {
                     int actionCode = -1;
                     try {
                         actionCode = Integer.valueOf(actionTemp[i].trim());
@@ -1036,7 +1079,7 @@ public class BFrame implements IFrame {
                     motion(actionCode);
                 }
 
-            }else {
+            } else {
                 int actionCode = -1;
                 try {
                     actionCode = Integer.valueOf(action);
@@ -1060,56 +1103,75 @@ public class BFrame implements IFrame {
             } catch (NumberFormatException e) {
                 throw new Exception("NumberFormatException e:" + e.getMessage());
             }
-            Ear(earLightCircleCode);
+            Ear(earLightCircleCode,earPriorityCode);
         }
 
     }
 
     /**
      * 反馈，包括语音、动作、表情、灯圈的反馈，有哪些反馈由配置信息决定,可以设置回调接口
+     *
      * @param dataMap
      * @throws Exception
      */
-    public static void responseWithCallback(Map<String,String> dataMap)throws Exception {
+    public static void responseWithCallback(Map<String, String> dataMap) throws Exception {
         Log.d(TAG, "response: ");
         if (dataMap == null || dataMap.isEmpty()) {
             throw new Exception("dataMap==null ||dataMap.isEmpty()");
         }
+        //优先级 Javen 20180208
+        String earPriority = dataMap.get(RESPONSE_EAR_PRIORITY);
+        int earPriorityCode = 1;
+        if (earPriority != null && earPriority.length() > 0) {
+            try {
+                earPriorityCode = Integer.valueOf(earPriority);
+            } catch (NumberFormatException e) { }
+        }
         //讲话
         String speech = dataMap.get(RESPONSE_SPEECH);
         if (speech != null && speech.length() > 0) {
-            ttsWithCallback(speech,interruptTTSCallback);
+            ttsWithCallback(speech, interruptTTSCallback);
         }
         //动作
         String action = dataMap.get(RESPONSE_ACTION);
         if (action != null && action.length() > 0) {
-            if (action.contains("#a_a#")){
-                String[] actionTemp=action.split("#a_a#");
-                for (int i=0;i<actionTemp.length;i++){
+            if (action.contains("#a_a#")) {
+                String[] actionTemp = action.split("#a_a#");
+                for (int i = 0; i < actionTemp.length; i++) {
                     int actionCode = -1;
                     try {
                         actionCode = Integer.valueOf(actionTemp[i].trim());
                     } catch (NumberFormatException e) {
                         throw new Exception("umberFormatException e:" + e.getMessage());
                     }
-                    outActionWithCallback(actionCode,1,1,actionSimpleFrameCallback);
+                    motion(actionCode, actionSimpleFrameCallback);
                 }
-
-            }else {
+            } else {
                 int actionCode = -1;
                 try {
                     actionCode = Integer.valueOf(action);
                 } catch (NumberFormatException e) {
                     throw new Exception("umberFormatException e:" + e.getMessage());
                 }
-                outActionWithCallback(actionCode,1,1,actionSimpleFrameCallback);
+                motion(actionCode, actionSimpleFrameCallback);
             }
         }
         //表情
         String expression = dataMap.get(RESPONSE_EXPRESSION);
         if (expression != null && expression.length() > 0) {
-            FacialWithCallback(expression,expressionCallback);
+            FacialWithCallback(expression, expressionCallback);
         }
+        //灯圈
+//        String earLightCircle = dataMap.get(RESPONSE_EAR_LIGHT_CIRCLE);
+//        if (earLightCircle != null && earLightCircle.length() > 0) {
+//            int earLightCircleCode = -1;
+//            try {
+//                earLightCircleCode = Integer.valueOf(earLightCircle);
+//            } catch (NumberFormatException e) {
+//                throw new Exception("NumberFormatException e:" + e.getMessage());
+//            }
+//            EarWithCallback(earLightCircleCode, 80, 1, earLightCircleCallback);
+//        }
         //灯圈
         String earLightCircle = dataMap.get(RESPONSE_EAR_LIGHT_CIRCLE);
         if (earLightCircle != null && earLightCircle.length() > 0) {
@@ -1119,83 +1181,79 @@ public class BFrame implements IFrame {
             } catch (NumberFormatException e) {
                 throw new Exception("NumberFormatException e:" + e.getMessage());
             }
-            EarWithCallback(earLightCircleCode,80,1,earLightCircleCallback);
+            Ear(earLightCircleCode,earPriorityCode,earLightCircleCallback);
         }
 
     }
 
 
     /**
-     *  初始化配置信息
+     * 初始化配置信息
+     *
      * @param id:配置信息的id
      * @return
      * @throws Exception
      */
-    public static Map<String,String> getString(int id)throws Exception{
+    public static Map<String, String> getString(int id) throws Exception {
         Log.d(TAG, "getString: ");
-        String line=mContent.getResources().getString(id);
-        if (line==null){
+        String line = mContent.getResources().getString(id);
+        if (line == null) {
             throw new Resources.NotFoundException("the given ID does not exist!");
         }
 
-        Log.d(TAG, "line: "+line);
-        Map<String,String>map=new HashMap<>();
+        Log.d(TAG, "line: " + line);
+        Map<String, String> map = new HashMap<>();
         String[] item = line.split("#,#");
-        if (item != null ) {
-            for (int i=0;i<item.length;i++){
-                Log.d(TAG, "item["+i+"]: "+item[i]);
-                String[] parameter=item[i].trim().split(":");
-                if (parameter!=null && parameter.length==2){
-                    map.put(parameter[0].trim(),parameter[1].trim());
-                }else {
+        if (item != null) {
+            for (int i = 0; i < item.length; i++) {
+                Log.d(TAG, "item[" + i + "]: " + item[i]);
+                String[] parameter = item[i].trim().split(":");
+                if (parameter != null && parameter.length == 2) {
+                    map.put(parameter[0].trim(), parameter[1].trim());
+                } else {
                     throw new Exception("the given ID has some errors !");
                 }
             }
-
         } else {
             throw new Exception("the given ID has some errors !");
         }
-
         return map;
-
     }
 
     /**
      * 初始化配置信息
+     *
      * @param line:配置信息
      * @return
      * @throws Exception
      */
-    public static Map<String,String> getString(String line)throws Exception {
-        Log.d(TAG, "getString: ");
+    public static Map<String, String> getString(String line) throws Exception {
+        Log.d(TAG, "BFrame getString(): ");
         if (line == null || line.trim().length() < 1) {
             throw new Resources.NotFoundException("the given ID does not exist!");
         }
 
         Log.d(TAG, "line: " + line);
-        Map<String,String>map=new HashMap<>();
+        Map<String, String> map = new HashMap<>();
         String[] item = line.split("#,#");
-        if (item != null ) {
-            for (int i=0;i<item.length;i++){
-                Log.d(TAG, "item["+i+"]: "+item[i]);
-                String[] parameter=item[i].trim().split(":");
-                if (parameter!=null && parameter.length==2){
-                    map.put(parameter[0].trim(),parameter[1].trim());
-                }else {
+        if (item != null) {
+            for (int i = 0; i < item.length; i++) {
+                Log.d(TAG, "item[" + i + "]: " + item[i]);
+                String[] parameter = item[i].trim().split(":");
+                if (parameter != null && parameter.length == 2) {
+                    map.put(parameter[0].trim(), parameter[1].trim());
+                } else {
                     throw new Exception("the given ID has some errors !");
                 }
             }
-
         } else {
             throw new Exception("the given ID has some errors !");
         }
-
         return map;
-
     }
 
-    public static String getString(int id ,Object... formatAars){
-        String string=mContent.getResources().getString(id,formatAars);
+    public static String getString(int id, Object... formatAars) {
+        String string = mContent.getResources().getString(id, formatAars);
         return string;
     }
 
@@ -1230,6 +1288,6 @@ public class BFrame implements IFrame {
     public static void setEarLightCircleCallback(SimpleFrameCallback earLightCircleCallback) {
         BFrame.earLightCircleCallback = earLightCircleCallback;
     }
-	
-	
+
+
 }

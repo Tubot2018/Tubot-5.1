@@ -1,18 +1,17 @@
 package com.tobot.tobot.utils.socketblock;
 
-import android.content.Context;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
 
 import com.tobot.tobot.MainActivity;
-import com.tobot.tobot.base.Constants;
 import com.tobot.tobot.base.UpdateAnswer;
 import com.tobot.tobot.control.Demand;
 import com.tobot.tobot.control.demand.DemandModel;
-import com.tobot.tobot.db.bean.UserDBManager;
-import com.tobot.tobot.db.model.User;
 import com.tobot.tobot.presenter.BRealize.BFrame;
+import com.tobot.tobot.Listener.SomaModeListener;
+import com.tobot.tobot.presenter.IPort.SomaModeTracking;
+import com.tobot.tobot.utils.TobotUtils;
 import com.tobot.tobot.utils.Transform;
 
 import java.io.IOException;
@@ -27,7 +26,6 @@ import java.util.TimerTask;
 
 import static com.tobot.tobot.utils.socketblock.Const.HEART;
 
-
 /**
  * Created by TAG on 2017/10/9.
  */
@@ -36,15 +34,18 @@ public class SocketConnectCoherence {
     private WeakReference<Socket> mSocket;
     private ReadThread mReadThread;
     private long sendTime = 0L;
-    private static final long HEART_BEAT_RATE = 60 * 1000;
+    private static final long HEART_BEAT_RATE = 5 * 1000;
     public static final String HOST = "39.108.134.20";
     public static final int PORT = 81;
     private static DemandListener mdemandListener;
+    private SomaModeTracking somaModeTracking;
     private DemandModel model = new DemandModel();
     private Timer desenoTimer = new Timer(true);//休眠时间
     private boolean isRegister;
     private Demand mDemand;
     private static SocketConnectCoherence mCoherence;
+    // For heart Beat
+    private Handler mHandler = new Handler();
 
     private SocketConnectCoherence(){
         new InitSocketThread().start();
@@ -54,33 +55,19 @@ public class SocketConnectCoherence {
         if (mCoherence == null) {
             mCoherence = new SocketConnectCoherence();
             Demand.instance(MainActivity.mContext).setDemand(mCoherence);
+            SomaModeListener.instance(MainActivity.mContext).setSomaListener(mCoherence);
         }
         return mCoherence;
     }
 
-    // For heart Beat
-    private Handler mHandler = new Handler();
-    private Runnable heartBeatRunnable = new Runnable() {
-
-        @Override
-        public void run() {
-            if (System.currentTimeMillis() - sendTime >= HEART_BEAT_RATE) {
-                boolean isSuccess = sendMsg(HEART);//就发送一个心跳包过去 如果发送失败，就重新初始化一个socket
-                if (!isSuccess) {
-                    Log.i(TAG,"心跳包发送失败:");
-                    isRegister = false;
-                    mHandler.removeCallbacks(heartBeatRunnable);
-                    mReadThread.release();
-                    releaseLastSocket(mSocket);
-                    new InitSocketThread().start();
-                }else {
-                    isRegister = true;
-                    Log.i(TAG,"心跳包发送成功:");
-                }
+    public void sendData(){
+        if (!isRegister){
+            boolean isSuccess = sendMsg(Joint.setRegister());
+            if (isSuccess){
+                Log.i(TAG,"TCP注册请求发送成功:");
             }
-            mHandler.postDelayed(this, HEART_BEAT_RATE);
         }
-    };
+    }
 
     public boolean sendMsg(String msg) {
         if (null == mSocket || null == mSocket.get()) {
@@ -117,6 +104,7 @@ public class SocketConnectCoherence {
             e.printStackTrace();
         }
     }
+
     private void releaseLastSocket(WeakReference<Socket> mSocket) {
         try {
             if (null != mSocket) {
@@ -139,6 +127,28 @@ public class SocketConnectCoherence {
             initSocket();
         }
     }
+
+    private Runnable heartBeatRunnable = new Runnable() {
+
+        @Override
+        public void run() {
+            if (System.currentTimeMillis() - sendTime >= HEART_BEAT_RATE) {
+                boolean isSuccess = sendMsg(HEART);//就发送一个心跳包过去 如果发送失败，就重新初始化一个socket
+                if (!isSuccess) {
+                    Log.i(TAG,"心跳包发送失败:");
+                    isRegister = false;
+                    mHandler.removeCallbacks(heartBeatRunnable);
+                    mReadThread.release();
+                    releaseLastSocket(mSocket);
+                    new InitSocketThread().start();
+                }else {
+                    isRegister = true;
+//                    Log.i(TAG,"心跳包发送成功:");
+                }
+            }
+            mHandler.postDelayed(this, HEART_BEAT_RATE);
+        }
+    };
 
     // Thread to read content from Socket
     class ReadThread extends Thread {
@@ -166,101 +176,112 @@ public class SocketConnectCoherence {
                     while (!socket.isClosed() && !socket.isInputShutdown() && isStart && ((length = is.read(buffer)) != -1))
                         if (length > 0) {
                             String message = new String(Arrays.copyOf(buffer, length),"GB2312");
-//                            String message = new String(Arrays.copyOf(buffer, length)).trim();
-//                            String message2 = URLEncoder.encode(message, "GB2312");
-//                            String  message3 =  new String(buffer,"GB2312");
-                            Log.i(TAG, "Socket回应消息:"+message);
-                            //收到服务器过来的消息，就通过Broadcast发送出去
-                            if (message.equals("[12]")) {//处理心跳回复
-
-                            } else if (message.equals("[10]")){
-//                                new InitSocketThread().start();
-                            } else if (message.equals("[1100011960B]")) {//注册成功
-
-                            } else if(message.equals("[1100010160E]")){//注册失败
-                                sendMsg(Joint.setRegister());
-                            } else if (message.substring(2,3).equals("3")) {//拍照 31 33 30 30 30 35 30 30 30 30 31 46 42 39 46
-                                sendMsg(Joint.setResponse(Joint.PHOTO,message));
-                                Message Msg = Message.obtain();
-                                Msg.what = 3;
-                                Msg.obj = message;
-                                handler.sendMessage(Msg);
-                            } else if (message.substring(2,3).equals("4")) {//点播
-                                sendMsg(Joint.setDemandResponse(message));
-                                Message Msg = Message.obtain();
-                                Msg.what = 4;
-                                Msg.obj = message;
-                                handler.sendMessage(Msg);
-                            } else if (message.substring(2,3).equals("5")) {//角色定义修改通知
-                                sendMsg(Joint.setRoleResponse());
-                                //还没做
-                            } else if (message.substring(2,3).equals("6")) {//出厂设置
-                                sendMsg(Joint.setResponse(Joint.RESTORE,message));
-                                UserDBManager.getManager().clear();
-                            } else if (message.substring(2,3).equals("8")) {//舞蹈
-                                sendMsg(Joint.setDanceResponse(message));
-                                Message Msg = Message.obtain();
-                                Msg.what = 8;
-                                Msg.obj = message;
-                                handler.sendMessage(Msg);
-                            } else if (message.substring(2,3).equals("9")) {//点播停止
-                                sendMsg(Joint.setDemandResponse(message));
-                                Message Msg = Message.obtain();
-                                Msg.what = 9;
-                                Msg.obj = message;
-                                handler.sendMessage(Msg);
-                            } else if (message.substring(2,3).equals("A")) {//点播停止
-                                sendMsg(Joint.setDemandResponse(message));
-                                Message Msg = Message.obtain();
-                                Msg.what = 10;
-                                Msg.obj = message;
-                                handler.sendMessage(Msg);
+                            if (!message.contains("[12]")) {
+                                Log.i(TAG, "Socket回应消息:" + message);
                             }
+                            //收到服务器过来的消息
+                            resolveMessage(message);
                         }
-                } catch (IOException e) {
+                } catch (Exception e) {//IOException
                     e.printStackTrace();
                 }
             }
         }
     }
 
-    public void sendData(){
-        if (!isRegister){
-            boolean isSuccess = sendMsg(Joint.setRegister());
-            if (isSuccess){
-                Log.i(TAG,"TCP注册请求发送成功:");
-            }
+    private void resolveMessage(String message) throws Exception {
+        if (message.equals("[12]")) {//处理心跳回复
+
+        } else if (message.equals("[10]")) {
+//          new InitSocketThread().start();
+        } else if (message.equals("[1100011960B]")) {//注册成功
+
+        } else if (message.equals("[1100010160E]")) {//注册失败
+            sendMsg(Joint.setRegister());
+        } else {
+            messageDispose(message,message.substring(2, 3));
         }
     }
 
+    private void messageDispose(String message, String function){
+        switch (function){
+            case "3"://拍照
+                sendMsg(Joint.setResponse(Joint.PHOTO, message));
+                dispose(3,message);
+                break;
+            case "4"://点播
+                sendMsg(Joint.setDemandResponse(message));
+                dispose(4,message);
+                break;
+            case "5"://角色自定义
+                sendMsg(Joint.setRoleResponse());
+                //还没做
+                break;
+            case "6"://出厂设置
+                sendMsg(Joint.setResponse(Joint.RESTORE, message));
+                TobotUtils.DBClear();
+                break;
+            case "8"://舞蹈
+                sendMsg(Joint.setDanceResponse(message));
+                dispose(8,message);
+                break;
+            case "9"://点播停止
+                sendMsg(Joint.setResponseSemicolon(Joint.DEMAND_STOP,message));
+                dispose(9,message);
+                break;
+            case "A":
+                sendMsg(Joint.setResponseSemicolon(Joint.ANSWER,message));
+                dispose(10,message);
+                break;
+            case "B"://跟随
+                sendMsg(Joint.setResponseSemicolon(Joint.FOLLOW,message));
+                dispose(11,message);
+                break;
+            case "C"://蓝牙
+                sendMsg(Joint.setResponseSemicolon(Joint.BLE,message));
+                dispose(12,message);
+                break;
+
+            default:
+                break;
+        }
+    }
+
+    private void dispose(int function,String message){
+        Message Msg = Message.obtain();
+        Msg.what = function;
+        Msg.obj = message;
+        handlerDispose.sendMessage(Msg);
+    }
+
     private boolean deseno;
-    Handler handler = new Handler(){
+    private static String last = "";
+    Handler handlerDispose = new Handler(){
         @Override
         public void handleMessage(Message msg) {
             String message = (String)msg.obj;
-            model.setInitialize();
-            desenoTimer.schedule(new DesenoTimerTask(), 10000);
-            if (deseno){
+            if (message.equals(last)){
+                last = message;
                 return;
             }
-            deseno = true;
+            last = message;
+//            desenoTimer.schedule(new DesenoTimerTask(), 2000);
+//            if (deseno){
+//                return;
+//            }
+//            deseno = true;
+            model.setInitialize();
             Log.i(TAG,"执行次数:");
             switch (msg.what){
-                case 0:
-                    break;
-                case 1:
-                    break;
-                case 2:
-                    break;
                 case 3:
-                    BFrame.getmBLocal().carryThrough(Joint.getSpecialRunning(message));
+                    BFrame.getmBPhoto().carryThrough(Joint.getSpecialRunning(message));
                     break;
                 case 4:
                     model.setCategoryId(Integer.parseInt(Joint.getCommaAmong(message,1)));
                     model.setTrack_title(Joint.getCommaAmong(message,2));
                     model.setPlayUrl32(Joint.getPeelVerify(message));
+                    Log.i(TAG,"Joint.getPeelVerify(message)"+model.toString());
                     mdemandListener.setDemandResource(model);
-//                    Demand.instance(MainActivity.mContext).setResource(model);
                     break;
                 case 5:
                     break;
@@ -272,17 +293,52 @@ public class SocketConnectCoherence {
                     model.setTimestamp(Joint.getPeelVerify(message));
                     Log.i(TAG,"点播的舞蹈编号:"+model.getPlayUrl32()+"舞蹈指令:"+model.getCategoryId()+"舞蹈时间戳:"+model.getTimestamp());
                     mdemandListener.setDemandResource(model);
-//                    Demand.instance(MainActivity.mContext).setResource(model);
                     break;
                 case 9:
+                    Log.i(TAG,"进入点播停止");
                     mdemandListener.stopDemand();
                     break;
                 case 10:
                     new UpdateAnswer();
                     break;
+                case 11:
+                    Log.i(TAG,"进入跟随模式");
+//                    followDispose(Joint.getCommaAmong(message,1));
+                    break;
+                case 12:
+                    Log.i(TAG,"进入蓝牙"+Joint.getPeelVerify(message));
+                    try{
+                        bleDispose(Joint.getPeelVerify(message));
+                    }catch (Exception e){}
+                    break;
+
+                default:
+                    break;
             }
         }
     };
+
+    private void followDispose(String status){
+        switch (status){
+            case "1":
+//                somaModeTracking.Enter(1);
+                break;
+            case "0":
+//                somaModeTracking.Quit(1);
+                break;
+        }
+    }
+
+    private void bleDispose(String status){
+        switch (status){
+            case "1":
+                somaModeTracking.Enter(2);
+                break;
+            case "0":
+                somaModeTracking.Quit(2);
+                break;
+        }
+    }
 
     private class DesenoTimerTask extends TimerTask {
         public void run() {
@@ -298,5 +354,11 @@ public class SocketConnectCoherence {
         void setDemandResource(DemandModel demand);
         void stopDemand();
     };
+
+    public void setSomaModeTracking(SomaModeTracking somaModeTracking) {
+        this.somaModeTracking = somaModeTracking;
+    }
+
+
     
 }

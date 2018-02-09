@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 
+import android.net.Uri;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
@@ -44,6 +45,7 @@ public class UpgradeManger {
 	private boolean interceptFlag = false, netWork;
 	private ProgressDialog updateDialog;
 	public static boolean upgrade;
+	private boolean hint;
 
 
 	/* 下载包安装路径 */
@@ -61,6 +63,10 @@ public class UpgradeManger {
 		public void handleMessage(Message msg) {
 			switch (msg.what) {
 				case DOWN_UPDATE:
+					if (progress == 50 && !hint){
+						hint = true;
+						BFrame.TTS(mContext.getResources().getString(R.string.Upgrade_prompt_initiative));
+					}
 					updateDialog.setProgress(progress);
 					if (!AppTools.netWorkAvailable(mContext)) {
 						netWork = false;
@@ -70,7 +76,6 @@ public class UpgradeManger {
 				case DOWN_OVER:
 					upgrade = true;
 					updateDialog.dismiss();
-					BFrame.TTS(mContext.getResources().getString(R.string.Upgrade_prompt_initiative));
 					StartOtherApplications();
 //					installApk();
 					break;
@@ -192,23 +197,23 @@ public class UpgradeManger {
 	}
 
 	private void StartOtherApplications() {
-//		final Intent intent = mContext.getPackageManager().getLaunchIntentForPackage("com.robot.restart");
-//		new Thread(new Runnable() {
-//			@Override
-//			public void run() {
-//				if (intent != null) {
-//					Log.i(TAG, "已启动应用");
-//					mContext.startActivity(intent);
-//				} else {
-		//创建一个意图（装载广播事件）
-		Intent broadcast = new Intent();
-		broadcast.setAction("adb.restart.start");
-		//发送无序广播
-		mContext.sendBroadcast(broadcast);
-		Log.i(TAG, "没有要启动的应用");
-//				}
-//			}
-//		}).start();
+		final Intent intent = mContext.getPackageManager().getLaunchIntentForPackage("com.robot.restart");
+		new Thread(new Runnable() {
+			@Override
+			public void run() {
+				if (intent != null) {
+					Log.i(TAG, "已启动restart应用");
+					mContext.startActivity(intent);
+				} else {
+					//创建一个意图（装载广播事件）
+					Intent broadcast = new Intent();
+					broadcast.setAction("adb.restart.start");
+					//发送无序广播
+					mContext.sendBroadcast(broadcast);
+					Log.i(TAG, "进入adb启动restart应用");
+				}
+			}
+		}).start();
 		installApk();
 	}
 

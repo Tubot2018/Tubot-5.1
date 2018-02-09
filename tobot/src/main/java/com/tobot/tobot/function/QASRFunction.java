@@ -20,7 +20,9 @@ import com.tobot.tobot.base.TobotApplication;
 import com.tobot.tobot.db.bean.AnswerDBManager;
 import com.tobot.tobot.entity.AngleEntity;
 import com.tobot.tobot.entity.QASREntity;
+import com.tobot.tobot.presenter.BRealize.BFollow;
 import com.tobot.tobot.presenter.BRealize.BFrame;
+import com.tobot.tobot.scene.SceneManager;
 import com.tobot.tobot.utils.TobotUtils;
 import com.turing123.robotframe.config.SystemConfig;
 import com.turing123.robotframe.event.AppEvent;
@@ -45,8 +47,7 @@ import static com.turing123.robotframe.multimodal.action.Action.PRMTYPE_ANGLES;
  */
 
 public class QASRFunction implements IASRFunction {
-	
-//    private static final String TAG = "IDormant";
+
     private static final String TAG = "Javen QASRFunction";
     private static final String TAG1 = "QASRFunction";
     private Context mContext;
@@ -54,7 +55,7 @@ public class QASRFunction implements IASRFunction {
     private boolean start;
     private boolean init;
     private boolean asrInit;
-    private List<String> list = new ArrayList<>();
+    private List<String> asrList = new ArrayList<>();
     private IInitialCallback initialCallback;
     private IFrameASRCallback iFrameASRCallback;
     private FunctionState state;
@@ -220,17 +221,16 @@ public class QASRFunction implements IASRFunction {
                     break;
                 case QModule.QVOICE_AEC_WAKED:// 唤醒回调
                     Log.d(TAG, "唤醒回调");
-                    if (BFrame.robotState) {
-                        BFrame.Interrupt();
-                        //mohuaiyuan 20180106 原来的代码
-//                        BFrame.TTS("我在");
-                        //mohuaiyuan 20180106 新的代码 20180106
+                    if (BFollow.follow){
+                        BFollow.quitrFollow();
+                    }else
+                        if (BFrame.robotState) {
+                        BFrame.proceedInterrupt();
                         try {
                             BFrame.response(R.string.wake_up_the_callback);
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
-						
                     }else{
                         BFrame.Wakeup();
                     }
@@ -248,12 +248,12 @@ public class QASRFunction implements IASRFunction {
 //                    Log.d(TAG, "识别结果:" + new String(data));
 //                    ASR = new String(data);
 //                    mQASREntity = gson.fromJson(ASR,QASREntity.class);
-//                    if (!(list.size() > 1)){
-//                        list.clear();
+//                    if (!(asrList.size() > 1)){
+//                        asrList.clear();
 //                    }
-//                    list.add(mQASREntity.getRec().replaceAll("\\s*", ""));
+//                    asrList.add(mQASREntity.getRec().replaceAll("\\s*", ""));
 //                    if (TobotUtils.isNotEmpty(iFrameASRCallback)) {
-//                        iFrameASRCallback.onResults(list);
+//                        iFrameASRCallback.onResults(asrList);
 //                    }
 //                    Log.d(TAG, "识别结果asr result:" +mQASREntity.getRec().replaceAll("\\s*", ""));E
 //                    break;
@@ -267,7 +267,6 @@ public class QASRFunction implements IASRFunction {
 
     private byte[] discern;
     private String discernASR;
-//    private boolean interruptIsFeasible;
     // 识别引擎消息处理handler
     Handler asrHandler = new Handler() {
         @Override
@@ -280,55 +279,64 @@ public class QASRFunction implements IASRFunction {
                     String result = new String(discern);
 //                    Log.d(TAG, "result=======>: " + result);
                     mQASREntity = gson.fromJson(result, QASREntity.class);
-                    if (!(list.size() > 1)) {
-                        list.clear();
+                    if (!(asrList.size() > 1)) {
+                        asrList.clear();
                     }
                     discernASR = mQASREntity.getRec().replaceAll("\\s*", "");
                     Log.d(TAG, "discernASR=======>: " + discernASR);
-                    if (TobotUtils.isAwaken(discernASR)) {
-						
-                        if (BFrame.robotState) {
-                            BFrame.Interrupt();							
-							//mohuaiyuan 20180108 新的代码 20180108
-							try {
-								BFrame.response(R.string.wake_up_the_callback);
-							} catch (Exception e) {
-								Log.e(TAG, "tts 主人，我在！反馈 出现 Exception e: "+e.getMessage());
-								e.printStackTrace();
-							}
-                        }else{
-                            BFrame.Wakeup();
-                        }
-                        Log.i(TAG, "prevent and isInterrupt:" + BFrame.prevent + ":" + BFrame.isInterrupt);
-                    } else {
+//                    if (TobotUtils.isAwaken(discernASR)) {
+//                        if (BFrame.robotState) {
+//                            BFrame.Interrupt();
+//							//mohuaiyuan 20180108 新的代码 20180108
+//							try {
+//								BFrame.response(R.string.wake_up_the_callback);
+//							} catch (Exception e) {
+//								Log.e(TAG, "tts 主人，我在！反馈 出现 Exception e: "+e.getMessage());
+//								e.printStackTrace();
+//							}
+//                        }else{
+//                            BFrame.Wakeup();
+//                        }
+//                        Log.i(TAG, "prevent and isInterrupt:" + BFrame.prevent + ":" + BFrame.isInterrupt);
+//                    } else {
                     Log.i(TAG,"BFrame.prevent:"+BFrame.prevent);
                     if (!BFrame.prevent) {
                         //自定义问答
-//                        try{
-//                            Log.i(TAG,"自定义问答");
-//                            answer = AnswerDBManager.getManager().queryByElement(discernASR.replaceAll("[\\p{P}‘’“”]", "")).getAnswer();
-//                            BFrame.TTS(answer);
-//                            return;
-//                        }catch (Exception e){ }
-                        Log.i(TAG,"图灵语意");
-                        //图灵语意
-                        list.add(discernASR);
-//                        if (TobotUtils.isNotEmpty(iFrameASRCallback)) {
-                            iFrameASRCallback.onResults(list);
-//                        }
+                        try{
+                            Log.i(TAG,"自定义问答");
+                            answer = AnswerDBManager.getManager().queryByElement(discernASR.replaceAll("[\\p{P}‘’“”]", "")).getAnswer();
+                            BFrame.TTS(answer);
+                            return;
+                        }catch (Exception e){ }
+                        Log.i(TAG, "图灵语意");
+                        if (!TobotUtils.isInScenario(SceneManager.SCENE) && !TobotUtils.isInPlay(SceneManager.getPlayStatus())) {
+                            Log.i(TAG, "不在场景中");
+                            submit();
+                        }else if (TobotUtils.isLocalCommand(mContext,discernASR)){
+                            Log.i(TAG, "在场景中的本地命令");
+                            submit();
+                        }
                     }
-                }
+//                }
                     break;
 
                 default:
                     break;
             }
-			
+
             //mohuaiyuan 20180108 原来的代码  录音
 //            deleteFile(new File(Constants.QVOICE_MIC));
             super.handleMessage(msg);
         }
     };
+
+    private void submit(){
+        //图灵语意
+        asrList.add(discernASR);
+        if (TobotUtils.isNotEmpty(iFrameASRCallback)) {
+            iFrameASRCallback.onResults(asrList);
+        }
+    }
 
 
     public void deleteFile(File file) {
@@ -342,12 +350,11 @@ public class QASRFunction implements IASRFunction {
                 }
             }
             file.delete();
-
         }
     }
 
-    private void asrInterrupted(){
-        if (TobotUtils.isNotEmpty(mainActivity)){
+    private void asrInterrupted() {
+        if (TobotUtils.isNotEmpty(mainActivity)) {
             mainActivity.setConductInterrupt(new MainActivity.VoiceInterrupted() {
 //                @Override
 //                public void Voice(Object interrupt) {
@@ -358,12 +365,15 @@ public class QASRFunction implements IASRFunction {
                 @Override
                 public void Music(String music) {
                     Log.i(TAG, "Music===>music:" + music);
-                    if (!(list.size() > 1)) {
-                        list.clear();
+                    if (!(asrList.size() > 1)) {
+                        asrList.clear();
                     }
-                    list.add(music);
-                    if (TobotUtils.isNotEmpty(iFrameASRCallback)) {
-                        iFrameASRCallback.onResults(list);
+                    if (!TobotUtils.isInScenario(SceneManager.SCENE)) {
+                        Log.i(TAG, "不在场景中");
+                        submit();
+                    }else if (TobotUtils.isLocalCommand(mContext,music)) {
+                        Log.i(TAG, "在场景中的本地命令");
+                        submit();
                     }
                 }
             });

@@ -1,7 +1,6 @@
 package com.tobot.tobot.scene;
 
 import android.content.Context;
-import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Handler;
@@ -10,24 +9,22 @@ import android.util.Log;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
-import com.tobot.tobot.Listener.SimpleFrameCallback;
 import com.tobot.tobot.R;
-import com.tobot.tobot.control.Demand;
 import com.tobot.tobot.control.demand.DemandUtils;
 import com.tobot.tobot.entity.DetailsEntity;
 import com.tobot.tobot.entity.SongEntity;
+import com.tobot.tobot.presenter.BRealize.BBattery;
 import com.tobot.tobot.presenter.BRealize.BFrame;
 import com.tobot.tobot.presenter.BRealize.BaseTTSCallback;
 import com.tobot.tobot.presenter.BRealize.InterruptTTSCallback;
 import com.tobot.tobot.presenter.BRealize.VolumeControl;
-import com.tobot.tobot.presenter.ICommon.ISceneV;
+import com.tobot.tobot.presenter.ICommon.ICommonInterface;
 import com.tobot.tobot.utils.AudioUtils;
 import com.tobot.tobot.utils.CommonRequestManager;
 import com.tobot.tobot.utils.TobotUtils;
-import com.turing123.robotframe.function.tts.ITTSCallback;
 import com.turing123.robotframe.function.tts.TTS;
 import com.turing123.robotframe.multimodal.Behavior;
-import com.turing123.robotframe.multimodal.action.Action;
+import com.turing123.robotframe.multimodal.action.EarActionCode;
 import com.turing123.robotframe.scenario.IScenario;
 import com.turing123.robotframe.scenario.ScenarioManager;
 import com.turing123.robotframe.scenario.ScenarioRuntimeConfig;
@@ -73,7 +70,7 @@ public class SongScenario implements IScenario {
     private int successCount;
     private long albumId;
     private MyHandler myHandler;
-    private ISceneV mISceneV;
+    private ICommonInterface mISceneV;
     private static int defaultPageCount=50;
     int position=-1;
     private DemandUtils demandUtils;
@@ -83,7 +80,8 @@ public class SongScenario implements IScenario {
     private AudioUtils audioUtils;
     private static SongScenario mSongScenario;
 
-    private List<String> volumeKeyWords;
+    private List<String> volumeKeyWords;//音量
+    private List<String> batteryKeyWords;//电量
     private VolumeControl volumeControl;
 
 
@@ -96,14 +94,14 @@ public class SongScenario implements IScenario {
 //        initXimalaya();
 //    }
 
-    public static synchronized SongScenario instance(ISceneV mISceneV) {
+    public static synchronized SongScenario instance(ICommonInterface mISceneV) {
         if (mSongScenario == null) {
             mSongScenario = new SongScenario(mISceneV);
         }
         return mSongScenario;
     }
 
-    private SongScenario(ISceneV mISceneV){
+    private SongScenario(ICommonInterface mISceneV){
         Log.d(TAG, "SongScenario: ");
         this.mContext = (Context)mISceneV;
         this.mISceneV = mISceneV;
@@ -128,6 +126,7 @@ public class SongScenario implements IScenario {
         currentTimeSum=0;
         isWithAction=true;
         initVoluemKeyWord();
+        initBatteryKeyWord();
     }
 
     private void initListener() {
@@ -285,6 +284,9 @@ public class SongScenario implements IScenario {
     public boolean onExit() {
 		Log.d(TAG, "onExit: ");
         Log.d(TAG, "退出音乐场景: ");
+
+        SceneManager.setPlayStatus(SceneManager.STATUS_OTHER);
+
         mISceneV.getScenario("os.sys.song_stop");
         if (getMediaPlayer() != null && getMediaPlayer().isPlaying()) {
             getMediaPlayer().stop();
@@ -326,12 +328,14 @@ public class SongScenario implements IScenario {
         if (behavior.results != null) {
             Log.d(TAG, "进入唱歌场景: ");
 
-            if (getMediaPlayer()!=null && getMediaPlayer().isPlaying()){
+            if (SceneManager.getPlayStatus()==SceneManager.STATUS_PLAYING){
                 Log.d(TAG, "正在播放音乐: ");
                 return false;
             }else {
                 Log.d(TAG, "没有在播放音乐: ");
             }
+            SceneManager.setPlayStatus(SceneManager.STATUS_PLAYING);
+
             initData();
             initListener();
             //用于跟踪代码
@@ -490,97 +494,48 @@ public class SongScenario implements IScenario {
 
             if (TobotUtils.isNotEmpty(interrupt) && i == 1) {
                 try {
-                    if (interrupt.contains("暂停")) {
-                        Log.d(TAG, "暂停: ");
-                        mISceneV.getScenario("os.sys.song_stop");
-                        getMediaPlayer().pause();
-                        //mohuaiyuan 线程 中止
-                        isWithAction=false;
-                    }
-                    if (interrupt.contains("不想听了") || interrupt.contains("好了") || interrupt.contains("可以了")) {
-                        Log.d(TAG, "不想听了: 好了:可以了");
-                        mISceneV.getScenario("os.sys.song_stop");
-                        getMediaPlayer().stop();
-                        //退出音乐场景
-                        onExit();
-//                    manager.backMainScenario();
-//                        scenarioManager.quitCurrentScenario();
-                    }
-                    if (interrupt.contains("继续") && !getMediaPlayer().isPlaying()) {
-                        Log.d(TAG, "继续: ");
-                        mISceneV.getScenario("os.sys.song");
-                        getMediaPlayer().start();
-                        //mohuaiyuan 线程
-                        isWithAction=true;
-                        doAction();
-                    }
-                    if (interrupt.contains("你好小图")) {
-                        Log.d(TAG, "图巴 :关键词------这里调用onexit方法了 ");
-                        this.onExit();
-                        mISceneV.getScenario("os.sys.song_stop");
-//                    manager.backMainScenario();
-//                        scenarioManager.quitCurrentScenario();
-                    }
-                    //mohuaiyuan 暂时不用
-                    if (interrupt.contains("退出")) {
-                        Log.d(TAG, "退出 ：关键词------这里调用onexit方法了 ");
-                        onExit();
-//                    manager.backMainScenario();
-//                        scenarioManager.quitCurrentScenario();
-                    }
-                    //mohuaiyuan 什么也不做 20170914
-                    if (interrupt.contains("推出")) {
-                        Log.d(TAG, "推出: ");
-                        onExit();
-                    }
-
-                    //mohuaiyuan 20180104 原来的代码
-//                    if (interrupt.contains("大声点")
-//                            || interrupt.contains("大点声")
-//                            || interrupt.contains("声音大一点")
-//                            || interrupt.contains("音量大一点")){
-//
-//                        int currentVolumeLevel=audioUtils.getCurrentVolume();
-//                        Log.d(TAG, "currentVolumeLevel: "+currentVolumeLevel);
-//                        int result=audioUtils.adjustRaiseMusicVolume();
-//                        if (result<0){
-//                            switch (result){
-//                                case AudioUtils.CURRENT_LEVEL_IS_MAX_VOLUME_LEVEL:
-//                                    tts.speak(manager.getString(R.string.maxMusicVolume), null);
-//                                    break;
-//
-//                                default:
-//                                    break;
-//                            }
-//                        }else {
-//                            tts.speak(manager.getString(R.string.raiseMusicVolume),null);
-//                        }
-//                        currentVolumeLevel=audioUtils.getCurrentVolume();
-//                        Log.d(TAG, "currentVolumeLevel: "+currentVolumeLevel);
-//
+//                    if (interrupt.contains("暂停")) {
+//                        Log.d(TAG, "暂停: ");
+//                        mISceneV.getScenario("os.sys.song_stop");
+//                        getMediaPlayer().pause();
+//                        //mohuaiyuan 线程 中止
+//                        isWithAction=false;
 //                    }
-                    //mohuaiyuan 20180104 原来的代码
-//                    if (interrupt.contains("小声点")
-//                            || interrupt.contains("小点声")
-//                            || interrupt.contains("声音小一点")
-//                            || interrupt.contains("音量小一点")){
-//                        int currentVolumeLevel=audioUtils.getCurrentVolume();
-//                        Log.d(TAG, "currentVolumeLevel: "+currentVolumeLevel);
-//                        int result=audioUtils.adjustLowerMusicVolume();
-//                        if (result<0){
-//                            switch (result){
-//                                case AudioUtils.CURRENT_LEVEL_IS_MIN_VOLUME_LEVEL:
-//                                    tts.speak(manager.getString(R.string.minMusicVolume), null);
-//                                    break;
-//
-//                                default:
-//                                    break;
-//                            }
-//                        }else {
-//                            tts.speak(manager.getString(R.string.lowerMusicVolume), null);
-//                        }
-//                        currentVolumeLevel=audioUtils.getCurrentVolume();
-//                        Log.d(TAG, "currentVolumeLevel: "+currentVolumeLevel);
+//                    if (interrupt.contains("不想听了") || interrupt.contains("好了") || interrupt.contains("可以了")) {
+//                        Log.d(TAG, "不想听了: 好了:可以了");
+//                        mISceneV.getScenario("os.sys.song_stop");
+//                        getMediaPlayer().stop();
+//                        //退出音乐场景
+//                        onExit();
+////                    manager.backMainScenario();
+////                        scenarioManager.quitCurrentScenario();
+//                    }
+//                    if (interrupt.contains("继续") && !getMediaPlayer().isPlaying()) {
+//                        Log.d(TAG, "继续: ");
+//                        mISceneV.getScenario("os.sys.song");
+//                        getMediaPlayer().start();
+//                        //mohuaiyuan 线程
+//                        isWithAction=true;
+//                        doAction();
+//                    }
+//                    if (interrupt.contains("你好小图")) {
+//                        Log.d(TAG, "图巴 :关键词------这里调用onexit方法了 ");
+//                        this.onExit();
+//                        mISceneV.getScenario("os.sys.song_stop");
+////                    manager.backMainScenario();
+////                        scenarioManager.quitCurrentScenario();
+//                    }
+//                    //mohuaiyuan 暂时不用
+//                    if (interrupt.contains("退出")) {
+//                        Log.d(TAG, "退出 ：关键词------这里调用onexit方法了 ");
+//                        onExit();
+////                    manager.backMainScenario();
+////                        scenarioManager.quitCurrentScenario();
+//                    }
+//                    //mohuaiyuan 什么也不做 20170914
+//                    if (interrupt.contains("推出")) {
+//                        Log.d(TAG, "推出: ");
+//                        onExit();
 //                    }
 
                     //mohuaiyuan 20180109 新的代码 20180109
@@ -601,6 +556,19 @@ public class SongScenario implements IScenario {
                         volumeControl.dealWithVolume(interrupt);
                     }
 
+                    //场景中电量查询
+                    boolean isContaintsBatteryKeyWord = false;
+                    for (int size = 0; size < batteryKeyWords.size(); size++) {
+                        String keywork = batteryKeyWords.get(size);
+                        boolean isContains = interrupt.contains(keywork);
+                        if (isContains) {
+                            isContaintsBatteryKeyWord = true;
+                            break;
+                        }
+                    }
+                    if (isContaintsBatteryKeyWord){
+                        BFrame.getBBattery().balance();
+                    }
 
                 } catch (IllegalStateException e) {
 
@@ -631,24 +599,20 @@ public class SongScenario implements IScenario {
         scenarioRuntimeConfig.interruptMatchMode = scenarioRuntimeConfig.INTERRUPT_CMD_MATCH_MODE_FUZZY;
         //为场景添加打断语，asr 识别到打断语时将产生打断事件，回调到场景的onUserInterrupted() 方法。
 
-        //mohuaiyuan 20180108 原来的代码
-//        scenarioRuntimeConfig.addInterruptCmd("大声点");
-//        scenarioRuntimeConfig.addInterruptCmd("小声点");
-//        scenarioRuntimeConfig.addInterruptCmd("大点声");
-//        scenarioRuntimeConfig.addInterruptCmd("小点声");
-//        scenarioRuntimeConfig.addInterruptCmd("声音大一点");
-//        scenarioRuntimeConfig.addInterruptCmd("声音小一点");
-//        scenarioRuntimeConfig.addInterruptCmd("音量大一点");
-//        scenarioRuntimeConfig.addInterruptCmd("音量小一点");
         //mohuaiyuan 20180109 新的代码 20180109
         //音量控制
         for (int i=0;i<volumeKeyWords.size();i++){
             scenarioRuntimeConfig.addInterruptCmd(volumeKeyWords.get(i));
         }
+        //电量控制
+        for (int i=0;i<batteryKeyWords.size();i++){
+            scenarioRuntimeConfig.addInterruptCmd(batteryKeyWords.get(i));
+        }
 
         return scenarioRuntimeConfig;
     }
 
+    //音量
     private void initVoluemKeyWord(){
         Log.d(TAG, "initVoluemKeyWord: ");
         if (volumeControl==null){
@@ -657,6 +621,13 @@ public class SongScenario implements IScenario {
         }
         if (volumeKeyWords==null || volumeKeyWords.isEmpty()){
             volumeKeyWords=volumeControl.getVolumeKeyWords();
+        }
+    }
+
+    //电量
+    private void initBatteryKeyWord(){
+        if (batteryKeyWords == null || batteryKeyWords.isEmpty()) {
+            batteryKeyWords = BBattery.getBatteryKeyWords();
         }
     }
 
@@ -789,6 +760,7 @@ public class SongScenario implements IScenario {
                     @Override
                     public void onCompleted() {
                         //开始播放音乐
+                        BFrame.Ear(EarActionCode.EAR_MOTIONCODE_8);
                         try{
                             getMediaPlayer().start();
                             songDuration=getMediaPlayer().getDuration();
@@ -821,6 +793,9 @@ public class SongScenario implements IScenario {
                 Log.d(TAG, " MediaPlayer.OnCompletionListener onCompletion: ");
                 mISceneV.getScenario("os.sys.song_stop");
                 Log.d(TAG, "退出当前场景: ");
+
+                SceneManager.setPlayStatus(SceneManager.STATUS_OTHER);
+
                 scenarioManager.quitCurrentScenario();
             }
         };
@@ -829,6 +804,9 @@ public class SongScenario implements IScenario {
             @Override
             public boolean onError(MediaPlayer mp, int what, int extra) {
                 Log.d(TAG, "MediaPlayer.OnErrorListener onError: ");
+
+                SceneManager.setPlayStatus(SceneManager.STATUS_OTHER);
+
                 return false;
             }
         };

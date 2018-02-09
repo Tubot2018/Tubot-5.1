@@ -81,7 +81,7 @@
             android:theme="@style/AppTheme.NoActionBar" />-->
 
         <receiver android:name=".broadcast.AutostartReceiver">
-            <intent-filter>
+            <intent-filter android:priority="1024">
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
 
                 <category android:name="android.intent.category.HOME" />

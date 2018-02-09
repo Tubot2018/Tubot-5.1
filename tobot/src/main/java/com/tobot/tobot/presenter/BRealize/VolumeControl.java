@@ -573,7 +573,6 @@ public class VolumeControl implements VolumeControlBehavior {
             keyWords.add(array[i]);
         }
         return keyWords;
-
     }
 
     public static Context getmContext() {

@@ -4,7 +4,7 @@ import android.content.Context;
 import android.util.Log;
 
 import com.tobot.tobot.R;
-import com.tobot.tobot.presenter.ICommon.ISceneV;
+import com.tobot.tobot.presenter.ICommon.ICommonInterface;
 import com.tobot.tobot.presenter.IPort.AwakenBehavior;
 import com.tobot.tobot.presenter.IPort.DormantBehavior;
 import com.tobot.tobot.presenter.IPort.IDormant;
@@ -26,7 +26,7 @@ public class SitDownAndSleep implements IDormant ,DormantBehavior,AwakenBehavior
     private static final String TAG = "IDormant";
 
     private static Context mContext;
-    private ISceneV mISceneV;
+    private ICommonInterface mISceneV;
     private LocalCommandCenter localCommandCenter;
     private LocalCommand sleepCommand;
 //    private RobotFrameManager mRobotFrameManager;//20171211-previous code
@@ -36,7 +36,7 @@ public class SitDownAndSleep implements IDormant ,DormantBehavior,AwakenBehavior
 
     }
 
-    public SitDownAndSleep(ISceneV mISceneV){
+    public SitDownAndSleep(ICommonInterface mISceneV){
         this.mISceneV = mISceneV;
         this.mContext = (Context)mISceneV;
         inDormant();

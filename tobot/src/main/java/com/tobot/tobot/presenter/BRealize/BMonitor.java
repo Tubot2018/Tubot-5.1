@@ -2,24 +2,17 @@ package com.tobot.tobot.presenter.BRealize;
 
 import android.content.Context;
 import android.os.Bundle;
-import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
 
-import com.tobot.tobot.MainActivity;
-import com.tobot.tobot.R;
 import com.tobot.tobot.base.Constants;
-import com.tobot.tobot.presenter.ICommon.ISceneV;
+import com.tobot.tobot.presenter.ICommon.ICommonInterface;
 import com.tobot.tobot.presenter.IPort.IMonitor;
-import com.turing123.robotframe.event.AppEvent;
-import com.turing123.robotframe.function.asr.IASRFunction;
 import com.turing123.robotframe.notification.Notification;
 import com.turing123.robotframe.notification.NotificationActions;
 import com.turing123.robotframe.notification.NotificationFilter;
 import com.turing123.robotframe.notification.NotificationManager;
 import com.turing123.robotframe.notification.Receiver;
-
-import java.util.Timer;
 
 /**
  * Created by Javen on 2017/8/8.
@@ -27,9 +20,9 @@ import java.util.Timer;
 
 public class BMonitor implements IMonitor{
     private Context mContent;
-    private ISceneV mISceneV;
+    private ICommonInterface mISceneV;
 
-    public BMonitor(ISceneV mISceneV){
+    public BMonitor(ICommonInterface mISceneV){
         this.mISceneV = mISceneV;
         this.mContent = (Context)mISceneV;
         inMonitor();

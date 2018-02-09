@@ -59,7 +59,7 @@ public class Frequency {
         try {
             if (BFrame.initiate){
                 Log.i(TAG,"BFrame.initiate:" + BFrame.initiate);
-                BFrame.Interrupt();
+                BFrame.proceedInterrupt();
             }
             executeMP3(url);
         } catch (IOException e) {

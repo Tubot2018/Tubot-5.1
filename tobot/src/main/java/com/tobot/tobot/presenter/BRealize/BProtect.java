@@ -1,14 +1,10 @@
 package com.tobot.tobot.presenter.BRealize;
 
 import android.content.Context;
-import android.util.Log;
 
-import com.tobot.tobot.MainActivity;
-import com.tobot.tobot.presenter.ICommon.ISceneV;
+import com.tobot.tobot.presenter.ICommon.ICommonInterface;
 import com.tobot.tobot.presenter.IPort.IProtect;
 import com.tobot.tobot.scene.BaseScene;
-import com.tobot.tobot.utils.AppTools;
-import com.turing123.robotframe.function.keyin.KeyInputEvent;
 import com.turing123.robotframe.function.selfprotect.ISelfProtectObserver;
 import com.turing123.robotframe.function.selfprotect.SelfProtect;
 import com.turing123.robotframe.function.selfprotect.SelfProtectEvent;
@@ -20,11 +16,11 @@ import com.turing123.robotframe.function.tts.TTS;
 
 public class BProtect implements IProtect{
     private Context mContent;
-    private ISceneV mISceneV;
+    private ICommonInterface mISceneV;
     private SelfProtect mSelfProtect;
     private TTS tts;
 
-    public BProtect(ISceneV mISceneV){
+    public BProtect(ICommonInterface mISceneV){
         this.mISceneV = mISceneV;
         this.mContent = (Context)mISceneV;
         tts = new TTS(mContent,new BaseScene(mContent,"os.sys.chat"));

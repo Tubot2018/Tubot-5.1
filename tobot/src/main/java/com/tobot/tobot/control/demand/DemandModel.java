@@ -59,4 +59,14 @@ public class DemandModel {
         setCategoryId(0);
     }
 
+    @Override
+    public String toString() {
+        return "DemandModel{" +
+                "kind='" + kind + '\'' +
+                ", playUrl32='" + playUrl32 + '\'' +
+                ", track_title='" + track_title + '\'' +
+                ", categoryId=" + categoryId +
+                ", timestamp='" + timestamp + '\'' +
+                '}';
+    }
 }

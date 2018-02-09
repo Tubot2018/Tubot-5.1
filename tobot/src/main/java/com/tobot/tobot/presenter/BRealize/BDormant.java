@@ -2,9 +2,8 @@ package com.tobot.tobot.presenter.BRealize;
 
 import android.content.Context;
 
-import com.tobot.tobot.presenter.ICommon.ISceneV;
+import com.tobot.tobot.presenter.ICommon.ICommonInterface;
 import com.tobot.tobot.presenter.IPort.IDormant;
-import com.turing123.robotframe.RobotFrameManager;
 import com.turing123.robotframe.localcommand.LocalCommand;
 import com.turing123.robotframe.localcommand.LocalCommandCenter;
 
@@ -18,12 +17,12 @@ import java.util.List;
 
 public class BDormant implements IDormant {
     private Context mContent;
-    private ISceneV mISceneV;
+    private ICommonInterface mISceneV;
     private LocalCommandCenter localCommandCenter;
     private LocalCommand sleepCommand;
 //    private RobotFrameManager mRobotFrameManager;//20171211-previous code
 
-    public BDormant(ISceneV mISceneV){
+    public BDormant(ICommonInterface mISceneV){
         this.mISceneV = mISceneV;
         this.mContent = (Context)mISceneV;
         inDormant();

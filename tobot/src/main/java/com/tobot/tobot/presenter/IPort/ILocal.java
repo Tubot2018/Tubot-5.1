@@ -5,7 +5,6 @@ package com.tobot.tobot.presenter.IPort;
  */
 
 public interface  ILocal {
-    void setHotWord();
     void disposeLocal();
     void carryThrough(String var);
     void renderScreen();
