@@ -28,6 +28,7 @@ import com.tobot.tobot.base.UpgradeManger;
 import com.tobot.tobot.control.Demand;
 import com.tobot.tobot.control.SaveAction;
 import com.tobot.tobot.db.bean.UserDBManager;
+import com.tobot.tobot.db.model.MyInitData;
 import com.tobot.tobot.db.model.User;
 import com.tobot.tobot.presenter.BRealize.BConnect;
 import com.tobot.tobot.presenter.BRealize.BFrame;
@@ -64,6 +65,8 @@ import com.turing123.robotframe.multimodal.Behaviors;
 import com.turing123.robotframe.multimodal.action.BodyActionCode;
 import com.turing123.robotframe.multimodal.action.EarActionCode;
 import com.turing123.robotframe.multimodal.expression.EmojNames;
+
+import org.litepal.tablemanager.Connector;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -171,8 +174,14 @@ public class MainActivity extends BaseActivity implements ISceneV {
 //            //首次使用提示语,动作等
 //        }
 
-       //mohuaiyuan 20180123 新的代码 20180123
-//       onBle();
+       //mohuaiyuan 20180131 新的代码 20180131
+       if (TobotUtils.isOpenBluetooth()){
+           onBle();
+       }
+
+        //mohuaiyuan 20180201 新的代码 20180201
+       MyInitData myInitData=new MyInitData(mContext);
+       myInitData.initData();
 
        if (AppTools.netWorkAvailable(this) && !isInitiativeOff && !whence) {//自动联网成功
            mCloud = new Cloud(this, new MainScenarioCallback());
@@ -192,7 +201,9 @@ public class MainActivity extends BaseActivity implements ISceneV {
            BaseTTSCallback baseTTSCallback=new BaseTTSCallback(){
                @Override
                public void onCompleted() {
-//                   TobotUtils.getIPAddress(mContext);
+                   if (TobotUtils.isReportIp()){
+                       TobotUtils.getIPAddress(mContext);
+                   }
                }
            };
            BFrame.setInterruptTTSCallback(new InterruptTTSCallback(this,baseTTSCallback));
@@ -228,7 +239,7 @@ public class MainActivity extends BaseActivity implements ISceneV {
 //                                    }
 //                                    BFrame.isInterrupt = true;//可打断//20171226注释一直停留在打断
                                     //mohuaiyuan 20180111 原来的代码
-                                    mBFrame.Ear(EarActionCode.EAR_MOTIONCODE_2);//发声效果
+//                                    mBFrame.Ear(EarActionCode.EAR_MOTIONCODE_2);//发声效果
                                     activeTimer.cancel();
                                     activeTimer = new Timer();
                                 }
@@ -246,7 +257,7 @@ public class MainActivity extends BaseActivity implements ISceneV {
 //                                BFrame.prevent = false;
 //                                BFrame.isInterrupt = false;//不可打断//20171229考虑到全局tts已自主控制,asr不在暂停
                                 String asrContent = packet.getString("arg2");
-                                mBFrame.Ear(EarActionCode.EAR_MOTIONCODE_3);//录音效果
+//                                mBFrame.Ear(EarActionCode.EAR_MOTIONCODE_3);//录音效果
                                 if(packet.getInt("arg1") == 4){
                                     if(asrContent.contains("没有检查到网络")) {
                                         if (!hintConnect) {
@@ -409,8 +420,10 @@ public class MainActivity extends BaseActivity implements ISceneV {
                             if (l < 4000) {//连续点击
                                 Log("触摸--连续点击");
                                 Log.d("helloworld", "触摸--连续点击: ");
-								
-//                                onBle();
+
+                                if (TobotUtils.isOpenBluetooth()){
+                                    onBle();
+                                }
 																
                                 //mohuaiyuan 20171228 新的代码 新增的代码
                                 exitTime = 0;
@@ -429,7 +442,9 @@ public class MainActivity extends BaseActivity implements ISceneV {
                                     BaseTTSCallback baseTTSCallback=new BaseTTSCallback(){
                                         @Override
                                         public void onCompleted() {
-//                                            TobotUtils.getIPAddress(mContext);//播报ip
+                                            if (TobotUtils.isReportIp()){
+                                                TobotUtils.getIPAddress(mContext);
+                                            }
                                         }
                                     };
                                     BFrame.setInterruptTTSCallback(new InterruptTTSCallback(this,baseTTSCallback));
@@ -462,7 +477,7 @@ public class MainActivity extends BaseActivity implements ISceneV {
                                     MyTouchResponse myTouchResponse=new MyTouchResponse(mContext);
                                     mBFrame.response(myTouchResponse.onceTouchHeadResponse());
 
-                                    Demand.instance(this).stopDemand();//停止点播
+                                    Demand.instance(this).demandStop();//停止点播
 
                                     //mohuaiyuan  20180115 测试 耳朵灯圈颜色
                                /* if (earList==null){
@@ -663,7 +678,18 @@ public class MainActivity extends BaseActivity implements ISceneV {
 
 //        mBFrame.FallAsleep();
 
+//        if (aaa){
+//            BFrame.ttsResume();
+//            aaa = false;
+//        }else {
+//            BFrame.ttsPause();
+//            aaa = true;
+//        }
+
+        BFrame.mBSensor.writePattern((byte)0x01);
+
     }
+    private boolean aaa = false;
 
     @OnClick(R.id.btn_shutdown2)
     public void shutdown2() {
@@ -673,14 +699,17 @@ public class MainActivity extends BaseActivity implements ISceneV {
 //        } catch (Exception e) {
 //
 //        }cd
+
         try{
             mInterrupted.Music(editText.getText().toString());
         }catch (NullPointerException e){
 
         }
+
 //        User memory = new User();
 //        memory.setMotion(15);
 //        UserDBManager.getManager().insert(memory);
+
     }
 
 
@@ -724,7 +753,9 @@ public class MainActivity extends BaseActivity implements ISceneV {
                 BaseTTSCallback baseTTSCallback=new BaseTTSCallback(){
                     @Override
                     public void onCompleted() {
-                        TobotUtils.getIPAddress(mContext);
+                        if (TobotUtils.isReportIp()){
+                            TobotUtils.getIPAddress(mContext);
+                        }
                     }
                 };
                 BFrame.setInterruptTTSCallback(new InterruptTTSCallback(MainActivity.this,baseTTSCallback));

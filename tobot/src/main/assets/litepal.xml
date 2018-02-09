@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<litepal>
+    <!--mohuaiyuan 20180201 新的代码 20180201-->
+    <dbname value="tobotCustom"></dbname>
+    <version value="1"></version>
+    <list>
+        <mapping class="com.tobot.tobot.db.model.CustomRoleQuestion"></mapping>
+        <mapping class="com.tobot.tobot.db.model.CustomRoleProject"></mapping>
+    </list>
+
+</litepal>

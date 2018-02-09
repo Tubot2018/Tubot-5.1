@@ -62,11 +62,15 @@ public class DemandFactory {
 
         switch (categoryId){
             case DEMAND_MUSIC:
+                demandBehavior=new DemandMusic(mContext,demandModel);
+                break;
 
             case DEMAND_STORY:
+                demandBehavior=new DemandStory(mContext,demandModel);
+                break;
 
             case DEMAND_SINOLOGY:
-                demandBehavior=new DemandMusic(mContext,demandModel);
+                demandBehavior=new DemandSinology(mContext,demandModel);
                 break;
 
             case DEMAND_DANCE:

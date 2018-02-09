@@ -192,23 +192,23 @@ public class UpgradeManger {
 	}
 
 	private void StartOtherApplications() {
-//		final Intent intent = mContext.getPackageManager().getLaunchIntentForPackage("com.robot.restart");
-//		new Thread(new Runnable() {
-//			@Override
-//			public void run() {
-//				if (intent != null) {
-//					Log.i(TAG, "已启动应用");
-//					mContext.startActivity(intent);
-//				} else {
-		//创建一个意图（装载广播事件）
-		Intent broadcast = new Intent();
-		broadcast.setAction("adb.restart.start");
-		//发送无序广播
-		mContext.sendBroadcast(broadcast);
-		Log.i(TAG, "没有要启动的应用");
-//				}
-//			}
-//		}).start();
+		final Intent intent = mContext.getPackageManager().getLaunchIntentForPackage("com.robot.restart");
+		new Thread(new Runnable() {
+			@Override
+			public void run() {
+				if (intent != null) {
+					Log.i(TAG, "已启动restart应用");
+					mContext.startActivity(intent);
+				} else {
+					//创建一个意图（装载广播事件）
+					Intent broadcast = new Intent();
+					broadcast.setAction("adb.restart.start");
+					//发送无序广播
+					mContext.sendBroadcast(broadcast);
+					Log.i(TAG, "进入adb启动restart应用");
+				}
+			}
+		}).start();
 		installApk();
 	}
 

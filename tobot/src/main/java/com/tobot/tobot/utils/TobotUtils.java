@@ -9,6 +9,7 @@ import android.util.Log;
 
 
 import com.tobot.tobot.base.Constants;
+import com.tobot.tobot.db.bean.AnswerDBManager;
 import com.tobot.tobot.db.bean.UserDBManager;
 import com.tobot.tobot.presenter.BRealize.BFrame;
 import com.turing123.libs.android.resourcemanager.ResourceManager;
@@ -690,6 +691,31 @@ public class TobotUtils {
         }
 
         return index;
+    }
+
+
+    public static void DBClear(){
+        UserDBManager.getManager().clear();
+        AnswerDBManager.getManager().clear();
+    }
+
+    private static boolean REPORT_IP=true;
+    private static boolean OPEN_BLUETOOTH=true;
+    private static boolean IS_DEBUG=true;
+    /**
+     * 开发模式
+     * @return
+     */
+    public static boolean isDebug(){
+        return IS_DEBUG;
+    }
+
+    public static boolean isOpenBluetooth(){
+        return OPEN_BLUETOOTH;
+    }
+
+    public static boolean isReportIp(){
+        return REPORT_IP;
     }
 
 }

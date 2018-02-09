@@ -41,7 +41,7 @@ import java.util.Random;
 public class CommonRequestManager {
 
 
-    private static  String TAG = "CommonRequestManager";
+    private static  String TAG = "DemandBehavior";
 
     private static CommonRequestManager manager=new CommonRequestManager();
     private CommonRequest commonRequest;
@@ -66,9 +66,6 @@ public class CommonRequestManager {
 
     private String mAppSecret;
     private MediaPlayer mediaPlayer;
-
-
-    private Motor motor;
 
     private CommonRequestManager(){
         commonRequest= CommonRequest.getInstanse();
@@ -783,10 +780,6 @@ public class CommonRequestManager {
      */
     public void doAction(int action, SimpleFrameCallback simpleFrameCallback) {
         Log.d(TAG, "doAction:");
-        if (motor==null){
-            motor = new Motor(mContext, new CustomScenario(mContext));
-        }
-//        motor.doAction(Action.buildBodyAction(action, Action.PRMTYPE_EXECUTION_TIMES, 1), simpleFrameCallback);
         BFrame.motion(action);
     }
 

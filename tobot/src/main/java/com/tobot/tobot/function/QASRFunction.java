@@ -285,31 +285,30 @@ public class QASRFunction implements IASRFunction {
                     }
                     discernASR = mQASREntity.getRec().replaceAll("\\s*", "");
                     Log.d(TAG, "discernASR=======>: " + discernASR);
-                    if (TobotUtils.isAwaken(discernASR)) {
-						
-                        if (BFrame.robotState) {
-                            BFrame.Interrupt();							
-							//mohuaiyuan 20180108 新的代码 20180108
-							try {
-								BFrame.response(R.string.wake_up_the_callback);
-							} catch (Exception e) {
-								Log.e(TAG, "tts 主人，我在！反馈 出现 Exception e: "+e.getMessage());
-								e.printStackTrace();
-							}
-                        }else{
-                            BFrame.Wakeup();
-                        }
-                        Log.i(TAG, "prevent and isInterrupt:" + BFrame.prevent + ":" + BFrame.isInterrupt);
-                    } else {
+//                    if (TobotUtils.isAwaken(discernASR)) {
+//                        if (BFrame.robotState) {
+//                            BFrame.Interrupt();
+//							//mohuaiyuan 20180108 新的代码 20180108
+//							try {
+//								BFrame.response(R.string.wake_up_the_callback);
+//							} catch (Exception e) {
+//								Log.e(TAG, "tts 主人，我在！反馈 出现 Exception e: "+e.getMessage());
+//								e.printStackTrace();
+//							}
+//                        }else{
+//                            BFrame.Wakeup();
+//                        }
+//                        Log.i(TAG, "prevent and isInterrupt:" + BFrame.prevent + ":" + BFrame.isInterrupt);
+//                    } else {
                     Log.i(TAG,"BFrame.prevent:"+BFrame.prevent);
                     if (!BFrame.prevent) {
                         //自定义问答
-//                        try{
-//                            Log.i(TAG,"自定义问答");
-//                            answer = AnswerDBManager.getManager().queryByElement(discernASR.replaceAll("[\\p{P}‘’“”]", "")).getAnswer();
-//                            BFrame.TTS(answer);
-//                            return;
-//                        }catch (Exception e){ }
+                        try{
+                            Log.i(TAG,"自定义问答");
+                            answer = AnswerDBManager.getManager().queryByElement(discernASR.replaceAll("[\\p{P}‘’“”]", "")).getAnswer();
+                            BFrame.TTS(answer);
+                            return;
+                        }catch (Exception e){ }
                         Log.i(TAG,"图灵语意");
                         //图灵语意
                         list.add(discernASR);
@@ -317,7 +316,7 @@ public class QASRFunction implements IASRFunction {
                             iFrameASRCallback.onResults(list);
 //                        }
                     }
-                }
+//                }
                     break;
 
                 default:

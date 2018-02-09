@@ -53,7 +53,7 @@ public class Demand {
 
                 @Override
                 public void stopDemand() {
-                    stopDemand();
+                    demandStop();
                 }
             });
         }
@@ -72,7 +72,7 @@ public class Demand {
 //        }
 //    }
 
-    public void stopDemand(){
+    public void demandStop(){
         DemandFactory demandFactory = DemandFactory.getInstance(context);
         try {
             demandFactory.stopPlayMusic();

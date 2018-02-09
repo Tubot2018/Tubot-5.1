@@ -288,6 +288,9 @@ public class SongScenario implements IScenario {
     public boolean onExit() {
 		Log.d(TAG, "onExit: ");
         Log.d(TAG, "退出音乐场景: ");
+
+        SceneManager.setPlayStatus(SceneManager.STATUS_OTHER);
+
         mISceneV.getScenario("os.sys.song_stop");
         if (getMediaPlayer() != null && getMediaPlayer().isPlaying()) {
             getMediaPlayer().stop();
@@ -329,12 +332,14 @@ public class SongScenario implements IScenario {
         if (behavior.results != null) {
             Log.d(TAG, "进入唱歌场景: ");
 
-            if (getMediaPlayer()!=null && getMediaPlayer().isPlaying()){
+            if (SceneManager.getPlayStatus()==SceneManager.STATUS_PLAYING){
                 Log.d(TAG, "正在播放音乐: ");
                 return false;
             }else {
                 Log.d(TAG, "没有在播放音乐: ");
             }
+            SceneManager.setPlayStatus(SceneManager.STATUS_PLAYING);
+
             initData();
             initListener();
             //用于跟踪代码
@@ -758,6 +763,8 @@ public class SongScenario implements IScenario {
                 BaseTTSCallback baseTTSCallback=new BaseTTSCallback(){
                     @Override
                     public void onCompleted() {
+
+                        BFrame.Ear(8);
                         //开始播放音乐
                         try{
                             getMediaPlayer().start();
@@ -791,6 +798,9 @@ public class SongScenario implements IScenario {
                 Log.d(TAG, " MediaPlayer.OnCompletionListener onCompletion: ");
                 mISceneV.getScenario("os.sys.song_stop");
                 Log.d(TAG, "退出当前场景: ");
+
+                SceneManager.setPlayStatus(SceneManager.STATUS_OTHER);
+
                 scenarioManager.quitCurrentScenario();
             }
         };
@@ -799,6 +809,9 @@ public class SongScenario implements IScenario {
             @Override
             public boolean onError(MediaPlayer mp, int what, int extra) {
                 Log.d(TAG, "MediaPlayer.OnErrorListener onError: ");
+
+                SceneManager.setPlayStatus(SceneManager.STATUS_OTHER);
+
                 return false;
             }
         };

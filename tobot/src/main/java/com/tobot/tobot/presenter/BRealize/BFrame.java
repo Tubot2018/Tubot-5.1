@@ -108,7 +108,7 @@ public class BFrame implements IFrame {
     private static BBattery mBBattery;
     private static BArmtouch mBArmtouch;
     private BProtect mBProtect;
-    private BSensor mBSensor;
+    public static BSensor mBSensor;
 //    private static MotionFunction mMotionFunction;
     public static boolean replace;
     public static boolean prevent;//是否允许asr打断true/允许;false/阻止
@@ -465,6 +465,7 @@ public class BFrame implements IFrame {
 
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
+
     //选择asr
     public void choiceFunctionProcessor(int type) {
         functionManager.choiceFunctionProcessor(AppEvent.FUNC_TYPE_ASR, type);
@@ -475,77 +476,102 @@ public class BFrame implements IFrame {
     }
 
     //下发动作
-    public static void motion(int code) { motion(code, PRMTYPE_EXECUTION_TIMES, 1, false, true); }
+    public static void motion(int code) { motion(code, Action.PRMTYPE_EXECUTION_TIMES, 1, false, false, new SimpleFrameCallback()); }
 
-    public static void motion(int code, int type) {
-        motion(code, type, 1, false, true);
-    }
+    public static void motion(int code, int type) {  motion(code, type, 1, false, false, new SimpleFrameCallback());  }
 
-    public static void motion(int code, int type, int value) { motion(code, type, value, false, true); }
+    public static void motion(int code, int type, int value) { motion(code, type, value, false, false, new SimpleFrameCallback()); }
 
-    public static void motion(int code,boolean scene) { motion(code, PRMTYPE_EXECUTION_TIMES, 1, scene, true); }
+    public static void motion(int code,boolean order) { motion(code, Action.PRMTYPE_EXECUTION_TIMES, 1, order, false, new SimpleFrameCallback()); }
 
-    public static void motion(int code,boolean scene,boolean memory) { motion(code, PRMTYPE_EXECUTION_TIMES, 1, scene, memory); }
+    public static void motion(int code,boolean order,boolean reset) { motion(code, PRMTYPE_EXECUTION_TIMES, 1, order, reset, new SimpleFrameCallback()); }
 
+    public static void motion(int code, SimpleFrameCallback simpleFrameCallback) { motion(code, PRMTYPE_EXECUTION_TIMES, 1, false, false, simpleFrameCallback); }
 
-    private static void motion(int code, int type, int value, boolean scene, boolean memory) {
+    private static void motion(int code, int type, int value, boolean order, boolean reset, SimpleFrameCallback simpleFrameCallback) {
         int must = IsContinue();
-        Log.w(TAG,"连续动做 must:"+must);
-        if (scene){//场景中
-            if (must != 0 && !TobotUtils.isReset(code)){//非正常状态
-                TTS("没看到我现在正"+nowState(must)+"吗?你应该先让我站起来");
-            }else if (TobotUtils.isReset(code)){
-                Log.w(TAG,"场景中重置动作 code:"+code);
-                outAction(resetState(code), type, value);
-                Log.w(TAG,"是否保存动作3 code:"+code);
-                IsMemory(code);
-            }else if (must == 0){
-                Log.w(TAG,"场景中正确动作 code:"+code);
-                outAction(code, type, value);
-                Log.w(TAG,"是否保存动作2 code:"+code);
-                IsMemory(code);
-            }
+        Log.w(TAG, "有连续动作 must:" + must);
+        if (order) {//命令型动作
+            orderMemoryAction(code, type, value, must,order,simpleFrameCallback);
         }else {
-            if (must != 0) {
-                if (code != must) {
-                    Log.w(TAG,"非场景中有记忆复位动作 must:"+must);
-//                    outAction(must, type, value);
-                    try {
-                        Thread.sleep(10);
-                        Log.w(TAG,"非场景中有记忆复位后执行动作 must:"+must);
-//                        outAction(code, type, value);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                }else {
-                    Log.w(TAG,"非场景中有记忆正确动作 code:"+code);
-                    outAction(code, type, value);
-                    Log.w(TAG,"是否保存动作1 code:"+code);
-                    IsMemory(code);
-                }
-            }else {
-                Log.w(TAG,"非场景中无记忆平常动作 code:"+code);
-                outAction(code, type, value);
-                Log.w(TAG,"是否保存动作2 code:"+code);
-                IsMemory(code);
+            if (reset) {//普通动作带复位
+                notOrderMemoryResetAction(code, type, value, must,order,simpleFrameCallback);
+            }else {//普通动作不带复位
+                notOrderMemoryAction(code, type, value, must,order,simpleFrameCallback);
             }
         }
     }
 
-
-
-    private static void outAction(int code, int type, int value) {
-        motor.doAction(Action.buildBodyAction(code, type, value), new SimpleFrameCallback());
+    private static void orderMemoryAction(int code, int type, int value, int must, boolean order, SimpleFrameCallback simpleFrameCallback){
+        if (must != 0 && !TobotUtils.isReset(code)) {//非正常状态
+            TTS("没看到我现在正" + nowState(must) + "吗?你应该先让我站起来");
+        } else if (TobotUtils.isReset(code)) {//命令动作是否为后续动作
+            Log.w(TAG, "命令动作自动重置 code:" + code);
+            outAction(resetState(code), type, value, simpleFrameCallback);
+            Log.w(TAG, "命令动作自动重置是否保存 code:" + code);
+            IsMemory(code,order);
+        } else if (must == 0) {//之前无记忆的命令动作
+            Log.w(TAG, "正常命令动作 code:" + code);
+            outAction(code, type, value, simpleFrameCallback);
+            Log.w(TAG, "正常命令动作是否保存 code:" + code);
+            IsMemory(code,order);
+        }
     }
 
-    /**
-     * 下发动作
-     * @param code
-     */
-    public static void outActionWithCallback(int code,int type,int value, IMotorCallback iMotorCallback){
-//        motor.doAction(Action.buildBodyAction(code,type,value),iMotorCallback);
-        motion(code);
+    private static void notOrderMemoryAction(int code, int type, int value, int must, boolean order, SimpleFrameCallback simpleFrameCallback){
+        if (must != 0) {
+            if (code != must) {
+                Log.w(TAG, "非命令有记忆动作,不执行复位 must:" + must);
+//                    outAction(must, type, value);
+                try {
+                    Thread.sleep(10);
+                    Log.w(TAG, "非命令有记忆动作,不复位也不执行动作 must:" + must);
+//                        outAction(code, type, value);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }else {
+                Log.w(TAG, "非命令有记忆正确动作 code:" + code);
+                if (orderState().contains("00")) {//记忆的动作为非命令型
+                    outAction(code, type, value, simpleFrameCallback);
+                }
+            }
+        }else {
+            Log.w(TAG, "非命令无记忆平常动作 code:" + code);
+            outAction(code, type, value, simpleFrameCallback);
+        }
+        Log.w(TAG, "非命令无复位动作是否保存 code:" + code);
+        IsMemory(code,order);
     }
+
+    private static void notOrderMemoryResetAction(int code, int type, int value, int must, boolean order, SimpleFrameCallback simpleFrameCallback){
+        if (must != 0) {
+            if (code != must) {
+                Log.w(TAG, "非命令有记忆动作,执行复位 must:" + must);
+                    outAction(must, type, value, simpleFrameCallback);
+                try {
+                    Thread.sleep(10);
+                    Log.w(TAG, "非命令有记忆动作,复位后执行动作 must:" + must);
+                        outAction(code, type, value, simpleFrameCallback);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }else {
+                Log.w(TAG, "非命令有记忆正确动作执行 code:" + code);
+                outAction(code, type, value, simpleFrameCallback);
+            }
+        }else {
+            Log.w(TAG, "非命令无记忆平常动作执行 code:" + code);
+            outAction(code, type, value, simpleFrameCallback);
+        }
+        Log.w(TAG, "非命令复位动作是否保存 code:" + code);
+        IsMemory(code, order);
+    }
+
+    private static void outAction(int code, int type, int value, SimpleFrameCallback simpleFrameCallback) {
+        motor.doAction(Action.buildBodyAction(code, type, value), simpleFrameCallback);
+    }
+
 
     //下发耳部灯圈
     public static void Ear(int code) {
@@ -560,7 +586,6 @@ public class BFrame implements IFrame {
         motor.doAction(Action.buildEarAction(code, brightness, pleasantness), new SimpleFrameCallback());
     }
 
-	
     /**
      * 下发耳部灯圈
      * @param code
@@ -570,24 +595,9 @@ public class BFrame implements IFrame {
      */
     public static void EarWithCallback(int code,int brightness,int pleasantness,IMotorCallback iMotorCallback) {
         motor.doAction(Action.buildEarAction(code, brightness, pleasantness), iMotorCallback);
-
-    }
-    //脱离主场景
-    public static void shutChat(){
-        mRobotFrameManager.toLostScenario();
     }
 
-    /**
-     * 回到主场景
-     */
-    public static void disparkChat(){
-        mRobotFrameManager.backMainScenario();
-    }
-
-
-    /**
-     *  下发表情
-     */
+    /** 下发表情*/
     public static void Facial(String facial){
         mFacialExpression.emoj = facial;
         mExpression.showExpression(mFacialExpression, new ExpressionCallback());
@@ -601,8 +611,22 @@ public class BFrame implements IFrame {
     public static void FacialWithCallback(String facial,ExpressionCallback callback){
         mFacialExpression.emoj = facial;
         mExpression.showExpression(mFacialExpression, callback);
-
     }
+
+    //脱离主场景
+    public static void shutChat(){
+        mRobotFrameManager.toLostScenario();
+    }
+
+    /**
+     * 回到主场景
+     */
+    public static void disparkChat(){
+        mRobotFrameManager.backMainScenario();
+    }
+
+
+
 
     /**
      * 执行tts
@@ -729,7 +753,7 @@ public class BFrame implements IFrame {
         }
         prevent = false;
         isInterrupt = false;
-        Demand.instance(mContent).stopDemand();//停止点播
+        Demand.instance(mContent).demandStop();//停止点播
     }
 
     //触摸打断
@@ -775,6 +799,13 @@ public class BFrame implements IFrame {
 
     public interface IFrameThing { void setAssemble(Object dispose); }
 
+    public static void ttsPause(){
+        tts.pause();
+    }
+
+    public static void ttsResume(){
+        tts.resume();
+    }
 
 
 
@@ -844,17 +875,17 @@ public class BFrame implements IFrame {
     }
 
     //是否为命令动作
-//    private static String orderState(){
-//        String order = "00";
-//        try{
-//            memory = MemoryDBManager.getManager().queryById("memory");
-//            order = memory.getOrder();
-//            Log.w("Javen","order:" + memory.getOrder());
-//        }catch (NullPointerException e){ }
-//        return order;
-//    }
+    private static String orderState(){
+        String order = "00";
+        try{
+            memory = MemoryDBManager.getManager().queryById("memory");
+            order = memory.getOrderType();
+            Log.w("Javen","order:" + memory.getOrderType());
+        }catch (NullPointerException e){ }
+        return order;
+    }
 
-    //重置状态
+    //动作重置
     public static int resetState(int action){
         int reset = 0;
         try{
@@ -864,43 +895,97 @@ public class BFrame implements IFrame {
         }catch (Exception e){
             return reset;
         }
-        return reset;
+        return reset != 0 ? reset : 1;
     }
 
     //检索是否记忆
-    public static void IsMemory(int action) {
-        try{
-            if (TobotUtils.isEmpty(memory)){
+    public static void IsMemory(int action,boolean order) {
+        try {
+            if (TobotUtils.isEmpty(memory)) {
+                Log.w("Javen", "memory 为空:");
                 memory = new Memory();
             }
-            Log.w("Javen","动作 action:" + action);
-            if (TobotUtils.isMemory(action)) {
-                memory.setMotion(action+"");
+            Log.w("Javen", "检索该动作是否需要保存 action:" + action);
+            if (memory.getGlobal().equals("1111")) {//1.1.0首先检索该动作之前是否有记忆动作
+                if (memory.getOrderType().contains("11")) {//1.1.1如果有,则检索之前记忆动作是否为命令动作
+                    if (TobotUtils.isReset(action) && order) {//1.1.2如果是,则只检索该动作是否为后续动作且当前命令也是命令动作
+                        memory.setMotion("0");
+                        memory.setGlobal("0000");
+                        Log.w("Javen", "之前有命令动作记忆,的后续动作(执行,不记忆,不保留之前记忆) action:" + action);
+                        setMemory(order);
+                    } else if (TobotUtils.isReset(action)) {//1.1.3.如果不是,则单独检索该动作是否为后续动作
+                        Log.w("Javen", "之前有命令动作记忆,的后续动作,现命令为非命令动作(不记忆,不执行,但保留之前记忆) action:" + action);
+                    } else if (TobotUtils.isMemory(action)) {//1.1.3.如果不是,则检索该动作是否为需记忆动作
+//                    memory.setMotion("0");
+//                    memory.setGlobal("0000");
+                        Log.w("Javen", "之前有命令动作记忆,的需记忆动作(非正常,不记忆,不执行,但保留之前记忆) action:" + action);
+                    } else {//1.1.4.如果该动作为非后续动作,也非需记忆动作的正常动作
+//                    memory.setMotion("0");
+//                    memory.setGlobal("0000");
+                        Log.w("Javen", "之前有命令动作记忆,的普通动作(不记忆,不执行,但保留之前记忆) action:" + action);
+                    }
+                } else {//1.2.1如果不是命令动作
+//                    if (TobotUtils.isReset(action) && !order){//1.2.2则检索是否为后续动作,且现动作为非命令
+//                        memory.setMotion("0");
+//                        memory.setGlobal("0000");
+//                        Log.w("Javen", "之前有非命令动作记忆,的非命令的后续动作执行,不记忆 action:" + action);
+//                    } else
+                    if (TobotUtils.isReset(action)) {//1.2.2则检索是否为后续动作
+                        memory.setMotion("0");
+                        memory.setGlobal("0000");
+                        Log.w("Javen", "之前有非命令动作记忆,的后续动作执行(执行,不记忆,不保留之前记忆) action:" + action);
+                        setMemory(order);
+                    } else if (TobotUtils.isMemory(action)) {//1.2.3如果不是,则检索该动作是否为需记忆动作
+                        Log.w("Javen", "之前有非命令动作记忆,的需记忆动作(非正常,不记忆,不执行,但保留之前记忆) action:" + action);
+                    } else {//1.2.4.如果该动作为非后续动作,也非需记忆动作的正常动作
+                        Log.w("Javen", "之前有非命令动作记忆,的普通动作(不记忆,不执行,但保留之前记忆) action:" + action);
+                    }
+                }
+
+
+//                if (TobotUtils.isReset(action) && !order){////1.1.如果有,则检索该动作是否为后续动作,且为非命令动作
+//                    Log.w("Javen", "为非命令的后续动作不记忆(不执行,保留之前记忆) action:" + action);
+//                }else if (TobotUtils.isReset(action)) {//1.2.如果不是,则只检索该动作是否为后续动作
+//                    memory.setMotion("0");
+//                    memory.setGlobal("0000");
+//                    Log.w("Javen", "后续动作不记忆(执行,不保留之前记忆) action:" + action);
+//                    setMemory(order);
+//                }else if (TobotUtils.isMemory(action)) {//1.3.如果没有,则检索该动作是否为需记忆动作
+////                    memory.setMotion("0");
+////                    memory.setGlobal("0000");
+//                    Log.w("Javen", "之前已经有记忆的需记忆动作(非正常,不记忆,不执行,但保留之前记忆) action:" + action);
+//                }else {//1.4.如果该动作为非后续动作,也非需记忆动作的正常动作
+////                    memory.setMotion("0");
+////                    memory.setGlobal("0000");
+//                    Log.w("Javen", "有记忆后的普通动作(不记忆,不执行,但保留之前记忆) action:" + action);
+//                }
+            }else if (TobotUtils.isMemory(action)) {//2.其次检索该动作是否在记忆序列;注意是否还需要在验证是否为命令动作
+                memory.setMotion(action + "");
                 memory.setGlobal("1111");
-                Log.w("Javen","要记忆动作 action:" + action);
-                MemoryDBManager.getManager().insertOrUpdate(memory);
-            }else if (memory.getGlobal().equals("0000")){
+                Log.w("Javen", "要记忆动作 action:" + action);
+                setMemory(order);
+            }else {//3.该动作之前无记忆动作,也非需要记忆动作(既普通动作)
                 memory.setMotion("0");
                 memory.setGlobal("0000");
-                Log.w("Javen","平常动作不记忆 action:" + action);
-                MemoryDBManager.getManager().insertOrUpdate(memory);
-            }else if (memory.getGlobal().equals("1111")){
-                if (TobotUtils.isReset(action)){
-                    memory.setMotion("0");
-                    memory.setGlobal("0000");
-                    Log.w("Javen","连续动作不记忆 action:" + action);
-                    MemoryDBManager.getManager().insertOrUpdate(memory);
-                }else if (!TobotUtils.isMemory(action)){
-                    memory.setMotion("0");
-                    memory.setGlobal("0000");
-                    Log.w("Javen","重置后平常动作不记忆 action:" + action);
-                    MemoryDBManager.getManager().insertOrUpdate(memory);
-                }
+                Log.w("Javen", "普通动作不记忆 action:" + action);
+                setMemory(order);
             }
-        }catch (Exception e){
-
-        }
+        } catch (Exception e) { }
     }
+
+    private static void setMemory(boolean order){
+        if (order){
+            memory.setOrderType("11");
+        }else {
+            memory.setOrderType("00");
+        }
+        MemoryDBManager.getManager().insertOrUpdate(memory);
+    }
+
+
+
+
+
 
 
 
@@ -1023,7 +1108,7 @@ public class BFrame implements IFrame {
                     } catch (NumberFormatException e) {
                         throw new Exception("umberFormatException e:" + e.getMessage());
                     }
-                    outActionWithCallback(actionCode,1,1,actionSimpleFrameCallback);
+                    motion(actionCode,actionSimpleFrameCallback);
                 }
 
             }else {
@@ -1033,7 +1118,7 @@ public class BFrame implements IFrame {
                 } catch (NumberFormatException e) {
                     throw new Exception("umberFormatException e:" + e.getMessage());
                 }
-                outActionWithCallback(actionCode,1,1,actionSimpleFrameCallback);
+                motion(actionCode,actionSimpleFrameCallback);
             }
         }
         //表情

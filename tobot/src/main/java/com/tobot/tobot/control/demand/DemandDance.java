@@ -8,6 +8,10 @@ import android.util.Log;
 import android.widget.Toast;
 
 import com.tobot.tobot.Listener.SimpleFrameCallback;
+import com.tobot.tobot.R;
+import com.tobot.tobot.presenter.BRealize.BFrame;
+import com.tobot.tobot.presenter.BRealize.BaseTTSCallback;
+import com.tobot.tobot.presenter.BRealize.InterruptTTSCallback;
 import com.tobot.tobot.scene.BaseScene;
 import com.tobot.tobot.scene.CustomScenario;
 import com.tobot.tobot.utils.CommonRequestManager;
@@ -35,9 +39,6 @@ public class DemandDance implements DemandBehavior {
     private CommonRequestManager manager;
     private Context context;
 
-    private TTS tts;
-    private Motor motor;
-
     private MediaPlayer mediaPlayer;
 
     private String playUrl;
@@ -56,9 +57,6 @@ public class DemandDance implements DemandBehavior {
 
         this.manager=CommonRequestManager.getInstanse(context);
         demandUtils =new DemandUtils(context);
-
-        motor = new Motor(context, new CustomScenario(context));
-        tts = new TTS(context,new BaseScene(context,"os.sys.chat"));
 
         //TODO  mohuaiyuan 20171009: 初始化 playUrl 和 bodyActionCode
         try {
@@ -145,22 +143,47 @@ public class DemandDance implements DemandBehavior {
     @Override
     public void executeDemand() {
 
-        //播放背景音乐
+        String songName=demandModel.getTrack_title();
+        String speech=manager.getString(R.string.beforeDemandDance,songName);
+        Map<String,String> map=null;
         try {
-            manager.playMusic(playUrl, new MediaPlayer.OnPreparedListener() {
-                @Override
-                public void onPrepared(MediaPlayer mp) {
-                    mediaPlayer = mp;
-                    //发送舞蹈指令
-
-                    //Javen 20180122注释
-//                    sendBodyAction();
-                    AppointTime();
-                }
-            }, null, null);
+            map= BFrame.getString(speech);
         } catch (Exception e) {
             e.printStackTrace();
         }
+
+        BaseTTSCallback baseTTSCallback=new BaseTTSCallback(){
+            @Override
+            public void onCompleted() {
+
+                //播放背景音乐
+                try {
+                    manager.playMusic(playUrl, new MediaPlayer.OnPreparedListener() {
+                        @Override
+                        public void onPrepared(MediaPlayer mp) {
+                            mediaPlayer = mp;
+                            //发送舞蹈指令
+
+                            //Javen 20180122注释
+//                    sendBodyAction();
+                            AppointTime();
+                        }
+                    }, null, null);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+
+            }
+        };
+        BFrame.setInterruptTTSCallback(new InterruptTTSCallback(BFrame.main,baseTTSCallback));
+
+        try {
+            BFrame.responseWithCallback(map);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+
 
     }
 
@@ -187,29 +210,15 @@ public class DemandDance implements DemandBehavior {
      * 发送舞蹈指令 ，即机器人开始跳舞
      */
     private void sendBodyAction() {
-        motor.doAction(Action.buildBodyAction(bodyActionCode,Action.PRMTYPE_EXECUTION_TIMES,1),new SimpleFrameCallback(){
+        BFrame.motion(bodyActionCode,new SimpleFrameCallback(){
             @Override
             public void onStarted() {
                 super.onStarted();
                 Log.d(TAG, "onStarted: ");
-//                try{
-//                    new Thread(new Runnable() {
-//                        @Override
-//                        public void run() {
-//                            try {
-//                                Thread.sleep(1700);
-//                            } catch (InterruptedException e) {
-//                                e.printStackTrace();
-//                            }
-                            //开始播放背景音乐
-                            mediaPlayer.start();
-//
-//                        }
-//                    }).start();
-//                }catch (Exception e){
-//                    e.printStackTrace();
-//                    Log.e(TAG, "onStarted: "+e.getMessage());
-//                }
+
+                //开始播放背景音乐
+                mediaPlayer.start();
+
             }
 
             @Override
@@ -248,5 +257,6 @@ public class DemandDance implements DemandBehavior {
                 Log.d(TAG, "onError: "+s);
             }
         });
+
     }
 }

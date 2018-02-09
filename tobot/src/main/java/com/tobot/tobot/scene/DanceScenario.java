@@ -98,7 +98,6 @@ public class DanceScenario implements IScenario{
 //        manager.setTAG(TAG);
 //    }
     private TTS tts;
-    private Motor motor;
     private ScenarioManager scenarioManager;
 
     private AudioUtils audioUtils;
@@ -138,7 +137,6 @@ public class DanceScenario implements IScenario{
 
     @Override
     public boolean onStart() {
-        motor = new Motor(mContext, new CustomScenario(mContext));
         tts = new TTS(mContext,new BaseScene(mContext,"os.sys.chat"));
         return true;
     }
@@ -147,6 +145,7 @@ public class DanceScenario implements IScenario{
     public boolean onExit() {
         Log.d(TAG, "onExit: ");
         Log.d(TAG, "退出舞蹈场景 ");
+        SceneManager.setPlayStatus(SceneManager.STATUS_OTHER);
         mISceneV.getScenario("os.sys.dance_stop");
         try {
             if (getMediaPlayer()!=null && getMediaPlayer().isPlaying()){
@@ -173,12 +172,13 @@ public class DanceScenario implements IScenario{
             Log.i("Javen","进入跳舞场景.......");
             Log.d(TAG, "进入跳舞场景.......: ");
 
-            if (getMediaPlayer()!=null && getMediaPlayer().isPlaying()){
+            if (SceneManager.getPlayStatus()==SceneManager.STATUS_PLAYING){
                 Log.d(TAG, "正在播放音乐: ");
                 return false;
             }else {
                 Log.d(TAG, "没有在播放音乐: ");
             }
+            SceneManager.setPlayStatus(SceneManager.STATUS_PLAYING);
 
             initData();
             //用于跟踪代码
@@ -386,7 +386,7 @@ public class DanceScenario implements IScenario{
     private void interruptDance(){
         Log.d(TAG, "interruptDance 中断跳舞: ");
         // 动作打断paramType = 4
-        motor.doAction(Action.buildBodyAction(1, 4, 1), new IMotorCallback() {
+        BFrame.motion(1,new SimpleFrameCallback(){
             @Override
             public void onStarted() {
                 Log.d(TAG, "中断跳舞 motor onStarted: ");
@@ -430,6 +430,7 @@ public class DanceScenario implements IScenario{
 
             }
         });
+
 
     }
     
@@ -763,6 +764,7 @@ public class DanceScenario implements IScenario{
             @Override
             public void onCompletion(MediaPlayer mp) {
                 Log.d(TAG, " MediaPlayer.OnCompletionListener onCompletion: ");
+                SceneManager.setPlayStatus(SceneManager.STATUS_OTHER);
                 mISceneV.getScenario("os.sys.dance");
                 onExit();
 //                scenarioManager.quitCurrentScenario();
@@ -775,6 +777,7 @@ public class DanceScenario implements IScenario{
                 Log.d(TAG, "MediaPlayer.OnErrorListener onError: ");
                 Log.d(TAG, "what: "+what);
                 Log.d(TAG, "extra: "+extra);
+                SceneManager.setPlayStatus(SceneManager.STATUS_OTHER);
                 return false;
             }
         };
@@ -847,7 +850,7 @@ public class DanceScenario implements IScenario{
      */
     private void sendBodyAction(int bodyActionCode ){
         Log.d(TAG, "sendBodyAction: ");
-        motor.doAction(Action.buildBodyAction(bodyActionCode,Action.PRMTYPE_EXECUTION_TIMES,1),new SimpleFrameCallback(){
+        BFrame.motion(bodyActionCode,new SimpleFrameCallback(){
             @Override
             public void onStarted() {
                 super.onStarted();
@@ -893,6 +896,7 @@ public class DanceScenario implements IScenario{
                 Log.d(TAG, "onError: "+s);
             }
         });
+
     }
 
     private int getActionCode(){

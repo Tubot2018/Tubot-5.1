@@ -18,7 +18,7 @@ import com.tobot.tobot.function.QASRFunction;
  * Created by Javen on 2017/7/10.
  */
 
-public class TobotApplication extends Application {
+public class TobotApplication extends org.litepal.LitePalApplication {
 
     private static TobotApplication instance;
     private User currentUser;

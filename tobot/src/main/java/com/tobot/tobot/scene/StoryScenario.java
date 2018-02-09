@@ -226,6 +226,7 @@ public class StoryScenario implements IScenario {
     public boolean onExit() {
         Log.d(TAG, "onExit: ");
         Log.d(TAG, "退出故事场景 ");
+        SceneManager.setPlayStatus(SceneManager.STATUS_OTHER);
         mISceneV.getScenario("os.sys.story_stop");
 //        manager.mediaPlayonExit(getMediaPlayer());//Javen注释
         if (getMediaPlayer() != null && getMediaPlayer().isPlaying()) {
@@ -263,12 +264,13 @@ public class StoryScenario implements IScenario {
         Log.d(TAG, "onTransmitData: ");
         if (behavior.results != null) {
             Log.d(TAG, "进入故事场景:");
-            if (getMediaPlayer() != null && getMediaPlayer().isPlaying()) {
+            if (SceneManager.getPlayStatus()==SceneManager.STATUS_PLAYING) {
                 Log.d(TAG, "正在讲故事: ");
                 return false;
             } else {
                 Log.d(TAG, "没有 在 讲故事: ");
             }
+            SceneManager.setPlayStatus(SceneManager.STATUS_PLAYING);
             initData();
             initListener();
             //用于跟踪代码
@@ -718,6 +720,7 @@ public class StoryScenario implements IScenario {
             @Override
             public void onCompletion(MediaPlayer mp) {
                 Log.d(TAG, "MediaPlayer.OnCompletionListener onCompletion: ");
+                SceneManager.setPlayStatus(SceneManager.STATUS_OTHER);
                 onExit();
             }
         };
@@ -726,6 +729,7 @@ public class StoryScenario implements IScenario {
             @Override
             public boolean onError(MediaPlayer mp, int what, int extra) {
                 Log.d(TAG, "MediaPlayer.OnErrorListener onError: ");
+                SceneManager.setPlayStatus(SceneManager.STATUS_OTHER);
                 return false;
             }
         };

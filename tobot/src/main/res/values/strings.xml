@@ -114,6 +114,13 @@
     <!--<string name="noExistDance">抱歉，我暂时不会这个表演，要不你换一个吧</string>
     <string name="beforePlayDance">即将表演</string>-->
 
+    <!--#########################################   点播    #################################################################################-->
+
+    <string name="beforeDemandMusic">speech:即将播放 %1$s#,#expression:desire#,#earLightCircle:8</string>
+    <string name="beforeDemandStory">speech:即将讲 %1$s 的故事#,#expression:desire#,#earLightCircle:8</string>
+    <string name="beforeDemandSinology">speech:即将朗诵国学%1$s#,#expression:desire#,#earLightCircle:8</string>
+    <string name="beforeDemandDance">speech:即将表演舞蹈 %1$s #,#expression:desire#,#earLightCircle:8 </string>
+
     <!--#########################################   音乐场景   #################################################################################-->
 
     <!-- 音乐场景 提示语句   -->
@@ -248,6 +255,16 @@
         <item>音量调到最小</item>
         <item>声音调到</item>
         <item>音量调到</item>
+
+        //mohuaiyuan 20180202 新的代码 20180202
+        <item>音量调大</item>
+        <item>音量调小</item>
+        <item>声音调大</item>
+        <item>声音调小</item>
+        <item>音量调大一点</item>
+        <item>音量调小一点</item>
+        <item>声音调大一点</item>
+        <item>声音调小一点</item>
 
         //mohuaiyuan  20180108 测试
        <!-- <item>音量</item>
